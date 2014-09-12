@@ -4,7 +4,6 @@ externalproject_add(
 	googlemock
 	PREFIX "gtest-1.7.0"
 	URL "http://googlemock.googlecode.com/files/gmock-1.7.0.zip"
-	URL_HASH SHA1=f9d9dd882a25f4069ed9ee48e70aff1b53e3c5a5
 	CMAKE_ARGS -Dgtest_force_shared_crt=ON
 	INSTALL_COMMAND ""
 	)
