@@ -1,9 +1,5 @@
 language: cpp
 
-os:
-    - linux
-    - osx
-
 compiler:
     - gcc
     - clang
@@ -19,5 +15,5 @@ before_script:
     - cmake ..
 
 script:
-	- make
+    - make
     - make test
