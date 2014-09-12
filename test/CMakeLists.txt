@@ -13,10 +13,16 @@ include_directories("${source_dir}/include")
 include_directories("${source_dir}/gtest/include")
 link_directories("${binary_dir}")
 
+if (UNIX)
+	set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+	find_package(Threads REQUIRED)
+	set(GTEST_THREADS_LIB ${CMAKE_THREAD_LIBS_INIT})
+endif()
+
 function(AddTest test_name)
     add_executable(${test_name} "${test_name}.cpp")
     add_dependencies(${test_name} googlemock)
-    target_link_libraries(${test_name} gmock gmock_main)
+    target_link_libraries(${test_name} ${GTEST_THREADS_LIB} gmock gmock_main)
     add_test(${test_name} ${test_name})
 endfunction(AddTest)
 
