@@ -1,8 +1,9 @@
 #include <curl/curl.h> // TODO: remove this line
 #include <gtest/gtest.h>
-#include <string>
-#include <vector>
+#include <string> // TODO: remove this line
+#include <vector> // TODO: remove this line
 
+// TODO: remove this function
 size_t WriteCallback(void *data, size_t size, size_t nmemb,
                             void* userdata)
 {
@@ -13,6 +14,7 @@ size_t WriteCallback(void *data, size_t size, size_t nmemb,
 	return (size * nmemb);
 }
 
+// TODO: remove this function
 void Get(const std::string& url)
 {
   /** create return struct */
@@ -64,6 +66,7 @@ TEST(Skeleton, CanRunTests) {
 	SUCCEED();
 }
 
+// TODO: remove this test
 TEST(Skeleton, CanUseCurl) {
 	Get("http://localhost:7777/status");
 }
