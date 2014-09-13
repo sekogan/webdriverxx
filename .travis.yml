@@ -13,6 +13,7 @@ before_script:
     - mkdir build
     - cd build
     - cmake ..
+    - phantomjs --webdriver=7777 &
 
 script:
     - cmake --build .
