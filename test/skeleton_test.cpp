@@ -1,20 +1,21 @@
-#include <curl/curl.h> // TODO: remove this line
+// TODO: remove this file
+#include <webdriverxx/webdriver.h>
+#include <curl/curl.h>
 #include <gtest/gtest.h>
-#include <string> // TODO: remove this line
-#include <vector> // TODO: remove this line
+#include <string>
+#include <vector>
+#include <memory>
 
-// TODO: remove this function
 size_t WriteCallback(void *data, size_t size, size_t nmemb,
                             void* userdata)
 {
 	std::vector<char>* body;
 	body = reinterpret_cast<std::vector<char>*>(userdata);
 	const char* begin = reinterpret_cast<char*>(data);
-	body->insert(body->end(), begin, begin+size*nmemb);
+	body->insert(body->end(), begin, begin + size*nmemb);
 	return (size * nmemb);
 }
 
-// TODO: remove this function
 void Get(const std::string& url)
 {
   /** create return struct */
@@ -66,8 +67,16 @@ TEST(Skeleton, CanRunTests) {
 	SUCCEED();
 }
 
-// TODO: remove this test
 TEST(Skeleton, CanUseCurl) {
 	Get("http://localhost:7777/status");
 }
 
+TEST(Skeleton, Cxx11) {
+	std::unique_ptr<int> p(new int(123));
+	[]{
+		SUCCEED();
+	}();
+	auto x = 1;
+	(void)p;
+	(void)x;
+}
