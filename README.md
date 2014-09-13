@@ -7,8 +7,8 @@
     mkdir build
     cd build
     cmake ..
-    make
-    make test
+    cmake --build .
+    ctest
 
 ## Windows ##
 

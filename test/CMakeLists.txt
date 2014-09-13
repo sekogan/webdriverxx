@@ -1,7 +1,10 @@
+set(SOURCE_FILES
+	"skeleton_test.cpp"
+	)
+
 include(ExternalProject)
 
-externalproject_add(
-	googlemock
+externalproject_add(googlemock
 	PREFIX "gtest-1.7.0"
 	URL "http://googlemock.googlecode.com/files/gmock-1.7.0.zip"
 	CMAKE_ARGS -Dgtest_force_shared_crt=ON
@@ -16,14 +19,10 @@ link_directories("${binary_dir}")
 if (UNIX)
 	set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 	find_package(Threads REQUIRED)
-	set(GTEST_THREADS_LIB ${CMAKE_THREAD_LIBS_INIT})
+	set(GTEST_PTHREAD ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-function(AddTest test_name)
-    add_executable(${test_name} "${test_name}.cpp")
-    add_dependencies(${test_name} googlemock)
-    target_link_libraries(${test_name} ${GTEST_THREADS_LIB} gmock gmock_main)
-    add_test(${test_name} ${test_name})
-endfunction(AddTest)
-
-AddTest(skeleton_test)
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_dependencies(${PROJECT_NAME} googlemock)
+target_link_libraries(${PROJECT_NAME} ${GTEST_PTHREAD} gmock gmock_main)
+add_test(${PROJECT_NAME} ${PROJECT_NAME})

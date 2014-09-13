@@ -15,5 +15,5 @@ before_script:
     - cmake ..
 
 script:
-    - make
-    - make test
+    - cmake --build .
+    - ctest --output-on-failure
