@@ -2,6 +2,7 @@
 #define WEBDRIVERXX_WEBDRIVER_H
 
 #include "capabilities.h"
+#include "detail/connection.h"
 #include <rapidjson/document.h>
 #include <string>
 
@@ -21,19 +22,20 @@ public:
 		const Capabilities& required = Capabilities(),
 		const Capabilities& desired = Capabilities()
 		)
+		: connection_(url)
 	{}
 
 	JsonValue GetStatus() const
 	{
-		JsonDocument d;
-		JsonValue v;
-		v.Swap(d);
-		return v;
+		return connection_.Get("status");
 	}
 
 private:
 	WebDriverBase(WebDriverBase&);
 	WebDriverBase& operator=(WebDriverBase&);
+
+private:
+	detail::Connection<JsonDocument> connection_;
 };
 
 typedef WebDriverBase<rapidjson::Document> WebDriver;

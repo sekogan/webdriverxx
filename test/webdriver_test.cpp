@@ -11,5 +11,8 @@ TEST(WebDriver, CanBeCreated) {
 
 TEST(WebDriver, CanGetStatus) {
 	WebDriver driver(kPhantomUrl);
-	driver.GetStatus();
+	auto status = driver.GetStatus();
+	ASSERT_TRUE(status.IsObject());
+	ASSERT_TRUE(status.HasMember("build") && status["build"].IsObject());
+	ASSERT_TRUE(status.HasMember("os") && status["os"].IsObject());
 }
