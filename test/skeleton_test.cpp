@@ -1,66 +1,44 @@
 // TODO: remove this file
-#include <webdriverxx/webdriver.h>
+#include <webdriverxx.h>
 #include <curl/curl.h>
 #include <gtest/gtest.h>
 #include <string>
-#include <vector>
 #include <memory>
 
-size_t WriteCallback(void *data, size_t size, size_t nmemb,
-                            void* userdata)
+size_t CurlWriteCallback(void* buffer, size_t size, size_t nmemb, void* userdata)
 {
-	std::vector<char>* body;
-	body = reinterpret_cast<std::vector<char>*>(userdata);
-	const char* begin = reinterpret_cast<char*>(data);
-	body->insert(body->end(), begin, begin + size*nmemb);
-	return (size * nmemb);
+	std::string* data_received = reinterpret_cast<std::string*>(userdata);
+	const auto buffer_size = size * nmemb;
+	data_received->append(reinterpret_cast<char*>(buffer), buffer_size);
+	return buffer_size;
 }
 
-void Get(const std::string& url)
+void HttpGet(const std::string& url)
 {
-  /** create return struct */
-	std::vector<char> data;
+	std::string data_received;
 
-  // use libcurl
-  CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
+	CURL* curl = curl_easy_init();
+	ASSERT_TRUE(curl);
 
-  curl = curl_easy_init();
-  ASSERT_TRUE(curl);
-  if (curl)
-  {
-    /** set basic authentication if present*/
-    // if(RestClient::user_pass.length()>0){
-    //   curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    //   curl_easy_setopt(curl, CURLOPT_USERPWD, RestClient::user_pass.c_str());
-    // }
-    /** set user agent */
-//	curl_easy_setopt(curl, CURLOPT_USERAGENT, RestClient::user_agent);
-    /** set query URL */
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    /** set callback function */
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-    /** set data object to pass to callback function */
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
-    /** set the header callback function */
-//	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, RestClient::header_callback);
-    /** callback object for headers */
-//	curl_easy_setopt(curl, CURLOPT_HEADERDATA, &ret);
-    /** perform the actual query */
-    res = curl_easy_perform(curl);
-    ASSERT_EQ(CURLE_OK, res);
+	if (!curl)
+		return;
 
-    long http_code = 0;
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWriteCallback);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data_received);
+	const auto result = curl_easy_perform(curl);
 
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
+	long http_code = 0;
+	if (result == CURLE_OK)
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
+	curl_easy_cleanup(curl);
+
+	ASSERT_EQ(CURLE_OK, result);
 	ASSERT_EQ(200, http_code);
-	ASSERT_TRUE(data.size() > 0);
-	ASSERT_TRUE(data[0] == '{');
-	ASSERT_TRUE(data[data.size()-1] == '}');
-  }
+	ASSERT_TRUE(data_received.size() > 0);
+	ASSERT_TRUE(data_received[0] == '{');
+	ASSERT_TRUE(data_received[data_received.length()-1] == '}');
 }
 
 TEST(Skeleton, CanRunTests) {
@@ -68,7 +46,7 @@ TEST(Skeleton, CanRunTests) {
 }
 
 TEST(Skeleton, CanUseCurl) {
-	Get("http://localhost:7777/status");
+	HttpGet("http://localhost:7777/status");
 }
 
 TEST(Skeleton, Cxx11) {

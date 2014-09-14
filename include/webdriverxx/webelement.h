@@ -3,14 +3,6 @@
 
 namespace webdriverxx {
 
-class WebDriver
-{
-
-private:
-	WebDriver(WebDriver&);
-	WebDriver& operator=(WebDriver&);
-};
-
 } // namespace webdriverxx
 
 #endif

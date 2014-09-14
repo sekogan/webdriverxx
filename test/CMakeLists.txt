@@ -1,5 +1,6 @@
 set(SOURCE_FILES
 	skeleton_test.cpp
+	webdriver_test.cpp
 	)
 
 include(ExternalProject)
@@ -23,6 +24,18 @@ else()
 	include_directories(${CURL_INCLUDE_DIR})
 	list(APPEND LIBS ${CURL_LIBRARIES})
 endif()
+
+# RapidJson
+externalproject_add(rapidjson_project
+	PREFIX rapidjson
+	GIT_REPOSITORY http://github.com/miloyip/rapidjson.git
+	CONFIGURE_COMMAND ""
+	BUILD_COMMAND ""
+	INSTALL_COMMAND ""
+	)
+externalproject_get_property(rapidjson_project source_dir)
+include_directories("${source_dir}/include")
+list(APPEND DEPS rapidjson_project)
 
 # GMock
 externalproject_add(gmock_project

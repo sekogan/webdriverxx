@@ -1,6 +1,6 @@
 #ifndef WEBDRIVERXX_H
 #define WEBDRIVERXX_H
 
-#include "webdriver.h"
+#include "webdriverxx/webdriver.h"
 
 #endif
