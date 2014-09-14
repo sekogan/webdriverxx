@@ -2,11 +2,9 @@
 #define WEBDRIVERXX_DETAIL_CONNECTION_H
 
 #include "http_request.h"
+#include "../errors.h"
 #include <curl/curl.h>
-#include <rapidjson/error/en.h>
 #include <string>
-#include <sstream>
-#include <stdexcept>
 
 namespace webdriverxx {
 namespace detail {
@@ -19,9 +17,9 @@ public:
 
 public:
 	explicit Connection(
-		const std::string& url
+		const std::string& base_url
 		)
-		: url_(url)
+		: base_url_(base_url)
 		, http_connection_(InitCurl())
 	{}
 
@@ -47,33 +45,19 @@ private:
 
 	std::string MakeUrl(const std::string& command) const
 	{
-		return url_ + command;
+		return base_url_ + command;
 	}
 
 	JsonValue ProcessResponse(const HttpResponse& http_response) const
 	{
 		if (http_response.http_code != 200)
-		{
-			std::ostringstream formatter;
-			formatter << "Got HTTP code " << http_response.http_code;
-			throw std::runtime_error(formatter.str());
-		}
+			throw InvalidHttpCodeException(http_response.http_code);
 		JsonDocument document;
 		if (document.Parse(http_response.body.c_str()).HasParseError())
-		{
-			std::ostringstream formatter;
-			formatter << "JSON parser error: "
-				<< rapidjson::GetParseError_En(document.GetParseError())
-				<< " at " << document.GetErrorOffset();
-			throw std::runtime_error(formatter.str());
-		}
+			throw JsonParserException(document.GetParseError(), document.GetErrorOffset());
 		const auto& status = GetRequiredMember(document, "status");
 		if (!status.IsInt() || status.GetInt() != 0)
-		{
-			std::ostringstream formatter;
-			formatter << "Got server status " << status.GetString();
-			throw std::runtime_error(formatter.str());
-		}
+			throw WebDriverException(std::string("Got server status ") + status.GetString());
 		auto& value = GetRequiredMember(document, "value");
 		JsonValue result;
 		result.Swap(value);
@@ -86,11 +70,7 @@ private:
 			throw std::runtime_error("Value is not an object");
 		const auto iterator = value.FindMember(name);
 		if (iterator == value.MemberEnd())
-		{
-			std::ostringstream formatter;
-			formatter << "Object has no \"" << name << "\" member";
-			throw std::runtime_error(formatter.str());
-		}
+			throw WebDriverException(std::string("Object has no member \"") + name + "\"");
 		return iterator->value;
 	}
 
@@ -99,7 +79,7 @@ private:
 	Connection& operator=(Connection&);
 
 private:
-	const std::string url_;
+	const std::string base_url_;
 	CURL *const http_connection_;  
 };
 

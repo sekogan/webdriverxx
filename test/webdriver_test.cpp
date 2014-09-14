@@ -1,4 +1,4 @@
-#include <webdriverxx.h>
+#include <webdriverxx/webdriver.h>
 #include <gtest/gtest.h>
 
 const char* const kPhantomUrl = "http://localhost:7777/";

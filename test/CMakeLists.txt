@@ -1,5 +1,5 @@
 set(SOURCE_FILES
-	skeleton_test.cpp
+	connection_test.cpp
 	webdriver_test.cpp
 	)
 
