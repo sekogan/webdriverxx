@@ -47,11 +47,9 @@ struct InvalidRequestException : WebDriverException
 			<< "Invalid request (HTTP code: " << http_code_ << ", message: " << message_ << ")"
 			).Str())
 		, http_code(http_code_)
-		, message(message_)
 	{}
 
 	long http_code;
-	std::string message;
 };
 
 // Server failed to execute valid command with valid parameters
@@ -61,10 +59,7 @@ struct FailedCommandException : WebDriverException
 		: WebDriverException((detail::Formatter()
 			<< "Command failed (message: " << message_ << ")"
 			).Str())
-		, message(message_)
 	{}
-
-	std::string message;
 };
 
 struct UnsupportedHttpCodeException : WebDriverException
