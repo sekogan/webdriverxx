@@ -8,16 +8,6 @@
 namespace webdriverxx {
 namespace detail {
 
-struct HttpResponse
-{
-	long http_code;
-	std::string body;
-
-	HttpResponse()
-		: http_code(0)
-	{}
-};
-
 class HttpRequestImpl
 {
 public:

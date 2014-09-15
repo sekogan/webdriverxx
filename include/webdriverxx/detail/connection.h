@@ -1,10 +1,8 @@
 #ifndef WEBDRIVERXX_DETAIL_CONNECTION_H
 #define WEBDRIVERXX_DETAIL_CONNECTION_H
 
-#include "http_request.h"
+#include "http_client.h"
 #include "../errors.h"
-#include <curl/curl.h>
-#include <string>
 
 namespace webdriverxx {
 namespace detail {
@@ -16,22 +14,17 @@ public:
 	typedef typename JsonDocument::ValueType JsonValue;
 
 public:
-	explicit Connection(
-		const std::string& base_url
+	Connection(
+		const std::string& base_url,
+		IHttpClient& http_client
 		)
 		: base_url_(base_url)
-		, http_connection_(InitCurl())
+		, http_client_(http_client)
 	{}
-
-	~Connection()
-	{
-		curl_easy_cleanup(http_connection_);
-	}
 
 	JsonValue Get(const std::string& command)
 	{
-		HttpGetRequest request(http_connection_, MakeUrl(command));
-		return ProcessResponse(request.DoRequest());
+		return ProcessResponse(http_client_.Get(MakeUrl(command)));
 	}
 
 	const JsonValue& GetLastFailedCommandDetails() const
@@ -40,14 +33,6 @@ public:
 	}
 
 private:
-	static CURL* InitCurl()
-	{
-		CURL *const result = curl_easy_init();
-		if (!result)
-			throw std::runtime_error("Cannot initialize CURL");
-		return result;
-	}
-
 	std::string MakeUrl(const std::string& command) const
 	{
 		return base_url_ + command;
@@ -92,7 +77,7 @@ private:
 
 private:
 	const std::string base_url_;
-	CURL *const http_connection_;
+	IHttpClient& http_client_;
 	typename JsonDocument::AllocatorType allocator_;
 	JsonValue last_failed_command_details_;
 };

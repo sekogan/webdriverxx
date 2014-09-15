@@ -3,6 +3,7 @@
 
 #include "capabilities.h"
 #include "detail/connection.h"
+#include "detail/http_connection.h"
 #include <rapidjson/document.h>
 #include <string>
 
@@ -22,7 +23,7 @@ public:
 		const Capabilities& required = Capabilities(),
 		const Capabilities& desired = Capabilities()
 		)
-		: connection_(url)
+		: connection_(url, http_connection_)
 	{}
 
 	JsonValue GetStatus()
@@ -40,6 +41,7 @@ private:
 	WebDriverBase& operator=(WebDriverBase&);
 
 private:
+	detail::HttpConnection http_connection_;
 	detail::Connection<JsonDocument> connection_;
 };
 

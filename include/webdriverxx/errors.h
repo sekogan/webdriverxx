@@ -76,6 +76,11 @@ struct UnsupportedHttpCodeException : WebDriverException
 
 struct CurlException : WebDriverException
 {
+	explicit CurlException(const std::string& message_)
+		: WebDriverException(message_)
+		, error_code(CURLE_OK)
+	{}
+
 	CurlException(const std::string& prefix_, CURLcode error_code_)
 		: WebDriverException(prefix_ + " (" + curl_easy_strerror(error_code_) + ")")
 		, error_code(error_code_)
