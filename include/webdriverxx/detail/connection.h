@@ -28,10 +28,15 @@ public:
 		curl_easy_cleanup(http_connection_);
 	}
 
-	JsonValue Get(const std::string& command) const
+	JsonValue Get(const std::string& command)
 	{
 		HttpGetRequest request(http_connection_, MakeUrl(command));
 		return ProcessResponse(request.DoRequest());
+	}
+
+	const JsonValue& GetLastFailedCommandDetails() const
+	{
+		return last_failed_command_details_;
 	}
 
 private:
@@ -48,16 +53,23 @@ private:
 		return base_url_ + command;
 	}
 
-	JsonValue ProcessResponse(const HttpResponse& http_response) const
+	JsonValue ProcessResponse(const HttpResponse& http_response)
 	{
-		if (http_response.http_code != 200)
-			throw InvalidHttpCodeException(http_response.http_code);
-		JsonDocument document;
+		if (http_response.http_code % 100 == 4 || http_response.http_code == 501)
+			throw InvalidRequestException(http_response.http_code, http_response.body);
+		JsonDocument document(&allocator_);
 		if (document.Parse(http_response.body.c_str()).HasParseError())
 			throw JsonParserException(document.GetParseError(), document.GetErrorOffset());
+		if (http_response.http_code == 500) // Internal server error
+		{
+			last_failed_command_details_.Swap(GetRequiredMember(document, "value"));
+			throw FailedCommandException(GetRequiredMember(document, "message").GetString());
+		}
+		if (http_response.http_code != 200)
+			throw UnsupportedHttpCodeException(http_response.http_code);
 		const auto& status = GetRequiredMember(document, "status");
 		if (!status.IsInt() || status.GetInt() != 0)
-			throw WebDriverException(std::string("Got server status ") + status.GetString());
+			throw WebDriverException(std::string("Invalid server status ") + status.GetString());
 		auto& value = GetRequiredMember(document, "value");
 		JsonValue result;
 		result.Swap(value);
@@ -80,7 +92,9 @@ private:
 
 private:
 	const std::string base_url_;
-	CURL *const http_connection_;  
+	CURL *const http_connection_;
+	typename JsonDocument::AllocatorType allocator_;
+	JsonValue last_failed_command_details_;
 };
 
 } // namespace detail

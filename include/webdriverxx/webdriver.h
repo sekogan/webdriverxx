@@ -25,9 +25,14 @@ public:
 		: connection_(url)
 	{}
 
-	JsonValue GetStatus() const
+	JsonValue GetStatus()
 	{
 		return connection_.Get("status");
+	}
+
+	const JsonValue& GetLastFailedCommandDetails() const
+	{
+		return connection_.GetLastFailedCommandDetails();
 	}
 
 private:

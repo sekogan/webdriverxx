@@ -34,16 +34,44 @@ private:
 
 struct WebDriverException : std::runtime_error
 {
-	WebDriverException(const std::string& message_)
+	explicit WebDriverException(const std::string& message_)
 		: std::runtime_error(message_)
 	{}
 };
 
-struct InvalidHttpCodeException : WebDriverException
+// Invalid/unimplemented command or invalid parameters
+struct InvalidRequestException : WebDriverException
 {
-	InvalidHttpCodeException(long http_code_)
+	InvalidRequestException(long http_code_, const std::string& message_)
 		: WebDriverException((detail::Formatter()
-			<< "Got invalid HTTP code: " << http_code_
+			<< "Invalid request (HTTP code: " << http_code_ << ", message: " << message_ << ")"
+			).Str())
+		, http_code(http_code_)
+		, message(message_)
+	{}
+
+	long http_code;
+	std::string message;
+};
+
+// Server failed to execute valid command with valid parameters
+struct FailedCommandException : WebDriverException
+{
+	explicit FailedCommandException(const std::string& message_)
+		: WebDriverException((detail::Formatter()
+			<< "Command failed (message: " << message_ << ")"
+			).Str())
+		, message(message_)
+	{}
+
+	std::string message;
+};
+
+struct UnsupportedHttpCodeException : WebDriverException
+{
+	explicit UnsupportedHttpCodeException(long http_code_)
+		: WebDriverException((detail::Formatter()
+			<< "Unsupported HTTP code (" << http_code_ << ")"
 			).Str())
 		, http_code(http_code_)
 	{}
@@ -54,7 +82,7 @@ struct InvalidHttpCodeException : WebDriverException
 struct CurlException : WebDriverException
 {
 	CurlException(const std::string& prefix_, CURLcode error_code_)
-		: WebDriverException(prefix_ + curl_easy_strerror(error_code_))
+		: WebDriverException(prefix_ + " (" + curl_easy_strerror(error_code_) + ")")
 		, error_code(error_code_)
 	{}
 
@@ -65,7 +93,7 @@ struct CurlSetOptionException : CurlException
 {
 	CurlSetOptionException(CURLoption option_, CURLcode error_code_)
 		: CurlException((detail::Formatter()
-			<< "Cannot set option " << option_ << ": "
+			<< "Cannot set option " << option_
 			).Str(), error_code_)
 		, option(option_)
 	{}
@@ -77,8 +105,8 @@ struct JsonParserException : WebDriverException
 {
 	JsonParserException(rapidjson::ParseErrorCode error_code_, size_t error_offset_)
 		: WebDriverException((detail::Formatter()
-			<< "JSON parser error: " << rapidjson::GetParseError_En(error_code_)
-			<< " at " << error_offset_
+			<< "JSON parser error (" << rapidjson::GetParseError_En(error_code_)
+			<< " at " << error_offset_ << ")"
 			).Str())
 		, error_code(error_code_)
 		, error_offset(error_offset_)

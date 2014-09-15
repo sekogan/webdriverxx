@@ -17,5 +17,7 @@ TEST(Connection, ThrowsExceptionWhenPortIsClosed) {
 
 TEST(Connection, ThrowsExceptionIfCommandIsUnknown) {
 	Connection connection("http://127.0.0.1:7777/");
-	ASSERT_THROW(connection.Get("unknown_command"), InvalidHttpCodeException);
+	ASSERT_THROW(connection.Get("unknown_command"), InvalidRequestException);
 }
+
+// TODO: test for server failure
