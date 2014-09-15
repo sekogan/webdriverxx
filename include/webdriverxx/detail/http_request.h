@@ -20,7 +20,7 @@ public:
 		SetOption(CURLOPT_WRITEDATA, &response.body);
 		SetCustomRequestOptions(http_connection_);
 
-		const auto result = curl_easy_perform(http_connection_);
+		const CURLcode result = curl_easy_perform(http_connection_);
 		if (result != CURLE_OK)
 			throw HttpException("Cannot perform HTTP request: ", result);
 
@@ -43,7 +43,7 @@ protected:
 	template<typename T>
 	void SetOption(CURLoption option, const T& value) const
 	{
-		const auto result = curl_easy_setopt(http_connection_, option, value);
+		const CURLcode result = curl_easy_setopt(http_connection_, option, value);
 		if (result != CURLE_OK)
 			throw HttpSetOptionException(option, result);
 	}
@@ -52,7 +52,7 @@ private:
 	long GetHttpCode() const
 	{
 		long http_code = 0;
-		const auto result = curl_easy_getinfo(http_connection_, CURLINFO_RESPONSE_CODE, &http_code);
+		const CURLcode result = curl_easy_getinfo(http_connection_, CURLINFO_RESPONSE_CODE, &http_code);
 		if (result != CURLE_OK)
 			throw HttpException("Cannot get HTTP return code: ", result);
 		return http_code;
@@ -61,7 +61,7 @@ private:
 	static size_t CurlWriteCallback(void* buffer, size_t size, size_t nmemb, void* userdata)
 	{
 		std::string* data_received = reinterpret_cast<std::string*>(userdata);
-		const auto buffer_size = size * nmemb;
+		const size_t buffer_size = size * nmemb;
 		data_received->append(reinterpret_cast<const char*>(buffer), buffer_size);
 		return buffer_size;
 	}

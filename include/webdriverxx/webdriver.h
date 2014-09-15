@@ -26,14 +26,14 @@ public:
 		: protocol_(url, http_connection_)
 	{}
 
-	JsonValue GetStatus()
+	const JsonValue& GetStatus()
 	{
 		return protocol_.Get("status");
 	}
 
-	const JsonValue& GetLastFailedCommandDetails() const
+	const JsonValue& GetLastServerFailInfo() const
 	{
-		return protocol_.GetLastFailedCommandDetails();
+		return protocol_.GetLastServerFailInfo();
 	}
 
 private:
