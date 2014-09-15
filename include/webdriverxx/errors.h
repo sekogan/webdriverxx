@@ -31,7 +31,7 @@ private:
 
 } // namespace detail
 
-
+// Base class for all errors
 struct WebDriverException : std::runtime_error
 {
 	explicit WebDriverException(const std::string& message_)
@@ -62,6 +62,7 @@ struct FailedCommandException : WebDriverException
 	{}
 };
 
+// Server returned unsupported HTTP code
 struct UnsupportedHttpCodeException : WebDriverException
 {
 	explicit UnsupportedHttpCodeException(long http_code_)
@@ -74,14 +75,15 @@ struct UnsupportedHttpCodeException : WebDriverException
 	long http_code;
 };
 
-struct CurlException : WebDriverException
+// HTTP or network failure
+struct HttpException : WebDriverException
 {
-	explicit CurlException(const std::string& message_)
+	explicit HttpException(const std::string& message_)
 		: WebDriverException(message_)
 		, error_code(CURLE_OK)
 	{}
 
-	CurlException(const std::string& prefix_, CURLcode error_code_)
+	HttpException(const std::string& prefix_, CURLcode error_code_)
 		: WebDriverException(prefix_ + " (" + curl_easy_strerror(error_code_) + ")")
 		, error_code(error_code_)
 	{}
@@ -89,10 +91,10 @@ struct CurlException : WebDriverException
 	CURLcode error_code;
 };
 
-struct CurlSetOptionException : CurlException
+struct HttpSetOptionException : HttpException
 {
-	CurlSetOptionException(CURLoption option_, CURLcode error_code_)
-		: CurlException((detail::Formatter()
+	HttpSetOptionException(CURLoption option_, CURLcode error_code_)
+		: HttpException((detail::Formatter()
 			<< "Cannot set option " << option_
 			).Str(), error_code_)
 		, option(option_)
@@ -101,12 +103,13 @@ struct CurlSetOptionException : CurlException
 	CURLoption option;
 };
 
+// Server returned invalid JSON
 struct JsonParserException : WebDriverException
 {
 	JsonParserException(rapidjson::ParseErrorCode error_code_, size_t error_offset_)
 		: WebDriverException((detail::Formatter()
-			<< "JSON parser error (" << rapidjson::GetParseError_En(error_code_)
-			<< " at " << error_offset_ << ")"
+			<< "JSON parser error (message: " << rapidjson::GetParseError_En(error_code_)
+			<< " offset: " << error_offset_ << ")"
 			).Str())
 		, error_code(error_code_)
 		, error_offset(error_offset_)

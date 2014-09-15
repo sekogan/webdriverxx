@@ -21,7 +21,6 @@ public:
 		curl_easy_cleanup(connection_);
 	}
 
-private:
 	HttpResponse Get(const std::string& url)
 	{
 		return HttpGetRequest(connection_, url).DoRequest();
@@ -42,11 +41,12 @@ private:
 		return HttpResponse();
 	}
 
+private:
 	static CURL* InitCurl()
 	{
 		CURL *const result = curl_easy_init();
 		if (!result)
-			throw CurlException("Cannot initialize CURL");
+			throw HttpException("Cannot initialize CURL");
 		return result;
 	}
 

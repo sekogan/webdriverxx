@@ -2,7 +2,7 @@
 #define WEBDRIVERXX_WEBDRIVER_H
 
 #include "capabilities.h"
-#include "detail/connection.h"
+#include "detail/webdriver_protocol.h"
 #include "detail/http_connection.h"
 #include <rapidjson/document.h>
 #include <string>
@@ -23,17 +23,17 @@ public:
 		const Capabilities& required = Capabilities(),
 		const Capabilities& desired = Capabilities()
 		)
-		: connection_(url, http_connection_)
+		: protocol_(url, http_connection_)
 	{}
 
 	JsonValue GetStatus()
 	{
-		return connection_.Get("status");
+		return protocol_.Get("status");
 	}
 
 	const JsonValue& GetLastFailedCommandDetails() const
 	{
-		return connection_.GetLastFailedCommandDetails();
+		return protocol_.GetLastFailedCommandDetails();
 	}
 
 private:
@@ -42,7 +42,7 @@ private:
 
 private:
 	detail::HttpConnection http_connection_;
-	detail::Connection<JsonDocument> connection_;
+	detail::WebDriverProtocolBase<JsonDocument> protocol_;
 };
 
 typedef WebDriverBase<rapidjson::Document> WebDriver;

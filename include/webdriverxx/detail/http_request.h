@@ -22,7 +22,7 @@ public:
 
 		const auto result = curl_easy_perform(http_connection_);
 		if (result != CURLE_OK)
-			throw CurlException("Cannot perform HTTP request: ", result);
+			throw HttpException("Cannot perform HTTP request: ", result);
 
 		response.http_code = GetHttpCode();
 		return response;
@@ -45,7 +45,7 @@ protected:
 	{
 		const auto result = curl_easy_setopt(http_connection_, option, value);
 		if (result != CURLE_OK)
-			throw CurlSetOptionException(option, result);
+			throw HttpSetOptionException(option, result);
 	}
 
 private:
@@ -54,7 +54,7 @@ private:
 		long http_code = 0;
 		const auto result = curl_easy_getinfo(http_connection_, CURLINFO_RESPONSE_CODE, &http_code);
 		if (result != CURLE_OK)
-			throw CurlException("Cannot get HTTP return code: ", result);
+			throw HttpException("Cannot get HTTP return code: ", result);
 		return http_code;
 	}
 

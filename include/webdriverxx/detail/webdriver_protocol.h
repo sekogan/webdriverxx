@@ -1,5 +1,5 @@
-#ifndef WEBDRIVERXX_DETAIL_CONNECTION_H
-#define WEBDRIVERXX_DETAIL_CONNECTION_H
+#ifndef WEBDRIVERXX_DETAIL_WEBDRIVER_PROTOCOL_H
+#define WEBDRIVERXX_DETAIL_WEBDRIVER_PROTOCOL_H
 
 #include "http_client.h"
 #include "../errors.h"
@@ -8,13 +8,13 @@ namespace webdriverxx {
 namespace detail {
 
 template<class JsonDocument>
-class Connection
+class WebDriverProtocolBase
 {
 public:
 	typedef typename JsonDocument::ValueType JsonValue;
 
 public:
-	Connection(
+	WebDriverProtocolBase(
 		const std::string& base_url,
 		IHttpClient& http_client
 		)
@@ -72,8 +72,8 @@ private:
 	}
 
 private:
-	Connection(Connection&);
-	Connection& operator=(Connection&);
+	WebDriverProtocolBase(WebDriverProtocolBase&);
+	WebDriverProtocolBase& operator=(WebDriverProtocolBase&);
 
 private:
 	const std::string base_url_;
