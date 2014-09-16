@@ -1,7 +1,6 @@
+#include "common_test_data.h"
 #include <webdriverxx/webdriver.h>
 #include <gtest/gtest.h>
-
-const char* const kPhantomUrl = "http://localhost:7777/";
 
 using namespace webdriverxx;
 

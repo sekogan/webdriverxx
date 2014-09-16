@@ -8,7 +8,7 @@
 namespace webdriverxx {
 namespace detail {
 
-class HttpRequestImpl
+class HttpRequestBase
 {
 public:
 	HttpResponse DoRequest() const
@@ -29,7 +29,7 @@ public:
 	}
 
 protected:
-	HttpRequestImpl(
+	HttpRequestBase(
 		CURL* http_connection,
 		const std::string& url
 		)
@@ -67,19 +67,19 @@ private:
 	}
 
 private:
-	HttpRequestImpl(HttpRequestImpl&);
-	HttpRequestImpl& operator=(HttpRequestImpl&);
+	HttpRequestBase(HttpRequestBase&);
+	HttpRequestBase& operator=(HttpRequestBase&);
 
 private:
 	CURL *const http_connection_;
 	const std::string url_;
 };
 
-class HttpGetRequest : public HttpRequestImpl
+class HttpGetRequest : public HttpRequestBase
 {
 public:
 	HttpGetRequest(CURL* http_connection, const std::string& url)
-		: HttpRequestImpl(http_connection, url)
+		: HttpRequestBase(http_connection, url)
 	{}
 };
 
