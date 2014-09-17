@@ -2,10 +2,14 @@
 #define WEBDRIVERXX_DETAIL_SESSION_H
 
 #include "http_client.h"
+#include "../capabilities.h"
 #include "../errors.h"
+//#include <rapidjson/stringbuffer.h>
 
 namespace webdriverxx {
 namespace detail {
+
+const char *const kContentTypeJson = "application/json;charset=UTF-8";
 
 template<class JsonDocument>
 class SessionBase
@@ -16,12 +20,15 @@ public:
 
 public:
 	SessionBase(
+		IHttpClient& http_client,
 		const std::string& base_url,
-		IHttpClient& http_client
+		const Capabilities& required = Capabilities(),
+		const Capabilities& desired = Capabilities()
 		)
-		: base_url_(base_url)
-		, http_client_(http_client)
-	{}
+		: http_client_(http_client)
+	{
+		CreateSession(base_url, required, desired, url_, capabilities_);
+	}
 
 	const JsonValue& Get(const std::string& command)
 	{
@@ -34,9 +41,40 @@ public:
 	}
 
 private:
+	void CreateSession(
+		const std::string& base_url,
+		const Capabilities& required,
+		const Capabilities& desired,
+		std::string& sessionUrl,
+		Capabilities& sessionCapabilities
+		) const
+	{
+		sessionUrl = base_url;
+		// TODO
+		// using namespace rapidjson;
+		// JsonDocument document;
+		// document.SetObject();
+		// document.AddMember("aaa", document.GetAllocator()));
+	 //    StringBuffer postBody;
+  //   	Writer<StringBuffer> writer(postBody);
+  //   	document.Accept(writer);    // Accept() traverses the DOM and generates Handler events.
+
+
+		// // make json
+		// const HttpResponse http_response = http_client.Post(
+		// 	ConcatUrl(base_url, "session"), kContentTypeJson, postBody.GetString());
+		// const JsonValue& capabilitiesJson = ProcessResponse(http_response);
+		// CheckResponse(last_json_response_.HasMember("sessionId"), "Server response has no member \"sessionId\"", http_response);
+		// CheckResponse(last_json_response_["sessionId"].IsString(), "Session ID is not a string", http_response);
+		// CheckResponse(capabilitiesJson.IsObject(), "Capabilities is not an object", http_response);
+		// const std::string sessionId = last_json_response_["sessionId"].GetString();
+		// sessionUrl = ConcatUrl(base_url, ConcatUrl("session", sessionId));
+		// sessionCapabilities = ConvertCapabilities(capabilitiesJson, http_response);
+	}
+
 	std::string MakeUrl(const std::string& command) const
 	{
-		return base_url_ + command;
+		return url_ + command;
 	}
 
 	const JsonValue& ProcessResponse(const HttpResponse& http_response)
@@ -93,8 +131,9 @@ private:
 	SessionBase& operator=(SessionBase&);
 
 private:
-	const std::string base_url_;
 	IHttpClient& http_client_;
+	std::string url_;
+	Capabilities capabilities_;
 	typename JsonDocument::AllocatorType allocator_;
 	JsonValue last_json_response_;
 };

@@ -23,7 +23,7 @@ public:
 		const Capabilities& required = Capabilities(),
 		const Capabilities& desired = Capabilities()
 		)
-		: session_(url, http_connection_)
+		: session_(http_connection_, url, required, desired)
 	{}
 
 	const JsonValue& GetStatus()

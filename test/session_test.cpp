@@ -43,12 +43,12 @@ struct TestSession : Test
 // Positive tests
 
 TEST_F(TestSession, CanBeCreated) {
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 }
 
 TEST_F(TestSession, ReturnsScalarValueFromPositiveResponse)
 {
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
 	const Session::JsonValue& value = session.Get("command");
@@ -58,7 +58,7 @@ TEST_F(TestSession, ReturnsScalarValueFromPositiveResponse)
 
 TEST_F(TestSession, ReturnsObjectValueFromPositiveResponse)
 {
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":{\"member\":12345}}";
 	const Session::JsonValue& value = session.Get("command");
@@ -70,14 +70,14 @@ TEST_F(TestSession, ReturnsObjectValueFromPositiveResponse)
 
 TEST_F(TestSession, ReturnsEmptyLastServerResponseByDefault)
 {
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	const Session::JsonValue& response = session.GetLastJsonResponse();
 	ASSERT_TRUE(!response.IsObject());
 }
 
 TEST_F(TestSession, ReturnsEmptyLastServerResponseAfterNonJsonResponse)
 {
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 
 	// Normal response
 	http_response.http_code = 200;
@@ -106,7 +106,7 @@ TEST_F(TestSession, ReturnsEmptyLastServerResponseAfterNonJsonResponse)
 
 TEST_F(TestSession, ReturnsLastServerResponse)
 {
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
 	session.Get("command");
@@ -118,7 +118,7 @@ TEST_F(TestSession, ReturnsLastServerResponse)
 
 TEST_F(TestSession, CanHandleNullSessionId)
 {
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	http_response.body = "{\"sessionId\":null,\"status\":0,\"value\":12345}";
 	ASSERT_NO_THROW(session.Get("command"));
 }
@@ -128,34 +128,34 @@ TEST_F(TestSession, CanHandleNullSessionId)
 TEST_F(TestSession, DoesNotHideHttpExceptions)
 {
 	EXPECT_CALL(http_client, Get(_)).WillOnce(Throw(HttpException("")));
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), HttpException);
 }
 TEST_F(TestSession, ThrowsInvalidRequestOnHttp404)
 {
 	http_response.http_code = 404;
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), InvalidRequestException);
 }
 
 TEST_F(TestSession, ThrowsInvalidRequestOnHttp400)
 {
 	http_response.http_code = 400;
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), InvalidRequestException);
 }
 
 TEST_F(TestSession, ThrowsInvalidRequestOnHttp499)
 {
 	http_response.http_code = 499;
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), InvalidRequestException);
 }
 
 TEST_F(TestSession, ThrowsInvalidRequestOnHttp501)
 {
 	http_response.http_code = 501;
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), InvalidRequestException);
 }
 
@@ -163,7 +163,7 @@ TEST_F(TestSession, InvalidRequestExceptionContainsHttpCodeAndBody)
 {
 	http_response.http_code = 501;
 	http_response.body = "--12345--";
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	try
 	{
 		session.Get("command");
@@ -181,7 +181,7 @@ TEST_F(TestSession, ThrowsFailedCommandExceptionOnHttp500)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":12,\"value\":{\"message\":\"12345\"}}";
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), FailedCommandException);
 }
 
@@ -189,7 +189,7 @@ TEST_F(TestSession, ThrowsInvalidResponseOnHttp500AndMissingStatus)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"value\":{\"message\":\"12345\"}}";
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), InvalidResponseException);
 }
 
@@ -197,7 +197,7 @@ TEST_F(TestSession, ThrowsInvalidResponseOnHttp500AndInvalidStatus)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":\"xxx\",\"value\":{\"message\":\"12345\"}}";
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), InvalidResponseException);
 }
 
@@ -205,7 +205,7 @@ TEST_F(TestSession, ThrowsInvalidResponseOnHttp500AndMissingValue)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":12}";
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), InvalidResponseException);
 }
 
@@ -213,7 +213,7 @@ TEST_F(TestSession, ThrowsInvalidResponseOnHttp500AndInvalidValue)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":\"xxx\",\"value\":\"12345\"}";
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), InvalidResponseException);
 }
 
@@ -221,7 +221,7 @@ TEST_F(TestSession, ThrowsInvalidResponseOnHttp500AndMissingMessage)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":12,\"value\":{\"xxx\":\"12345\"}}";
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), InvalidResponseException);
 }
 
@@ -229,34 +229,34 @@ TEST_F(TestSession, ThrowsInvalidResponseOnHttp500AndInvalidMessage)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":12,\"value\":{\"message\":12345}}";
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), InvalidResponseException);
 }
 
 TEST_F(TestSession, ThrowsInvalidResponseOnHttp399)
 {
 	http_response.http_code = 399;
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), InvalidResponseException);
 }
 
 TEST_F(TestSession, ThrowsInvalidResponseOnHttp502)
 {
 	http_response.http_code = 502;
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), InvalidResponseException);
 }
 
 TEST_F(TestSession, ThrowsInvalidResponseOnEmptyResponse)
 {
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	http_response.body = "";
 	ASSERT_THROW(session.Get("command"), InvalidResponseException);
 }
 
 TEST_F(TestSession, ThrowsInvalidResponseOnMalformedResponse)
 {
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	http_response.body = "Blah blah blah";
 	ASSERT_THROW(session.Get("command"), InvalidResponseException);
 }
@@ -264,20 +264,20 @@ TEST_F(TestSession, ThrowsInvalidResponseOnMalformedResponse)
 TEST_F(TestSession, ThrowsInvalidResponseOnMissingStatus)
 {
 	http_response.body = "{\"sessionId\":\"123\",\"value\":12345}";
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), InvalidResponseException);
 }
 
 TEST_F(TestSession, ThrowsInvalidResponseOnInvalidStatus)
 {
 	http_response.body = "{\"sessionId\":\"123\",\"status\":\"5\",\"value\":12345}";
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), InvalidResponseException);
 }
 
 TEST_F(TestSession, ThrowsInvalidResponseOnNonZeroStatus)
 {
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	http_response.body = "{\"sessionId\":\"123\",\"status\":5,\"value\":12345}";
 	ASSERT_THROW(session.Get("command"), InvalidResponseException);
 }
@@ -285,7 +285,7 @@ TEST_F(TestSession, ThrowsInvalidResponseOnNonZeroStatus)
 TEST_F(TestSession, ThrowsInvalidResponseOnMissingValue)
 {
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0}";
-	Session session(kPhantomUrl, http_client);
+	Session session(http_client, kPhantomUrl);
 	ASSERT_THROW(session.Get("command"), InvalidResponseException);
 }
 
