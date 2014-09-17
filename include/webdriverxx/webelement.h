@@ -3,6 +3,8 @@
 
 namespace webdriverxx {
 
+// Copyable
+
 } // namespace webdriverxx
 
 #endif

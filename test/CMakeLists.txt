@@ -1,6 +1,6 @@
 set(SOURCE_FILES
 	http_connection_test.cpp
-	webdriver_protocol_test.cpp
+	session_test.cpp
 	webdriver_test.cpp
 	)
 
