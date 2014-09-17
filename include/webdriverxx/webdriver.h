@@ -4,7 +4,6 @@
 #include "capabilities.h"
 #include "detail/session.h"
 #include "detail/http_connection.h"
-#include <rapidjson/document.h>
 #include <string>
 
 namespace webdriverxx {

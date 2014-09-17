@@ -4,6 +4,7 @@
 #include "http_client.h"
 #include "../capabilities.h"
 #include "../errors.h"
+#include <rapidjson/document.h>
 //#include <rapidjson/stringbuffer.h>
 
 namespace webdriverxx {

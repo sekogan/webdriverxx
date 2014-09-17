@@ -38,6 +38,18 @@ externalproject_get_property(rapidjson_project source_dir)
 include_directories("${source_dir}/include")
 list(APPEND DEPS rapidjson_project)
 
+# picojson
+externalproject_add(picojson_project
+	PREFIX picojson
+	GIT_REPOSITORY https://github.com/kazuho/picojson
+	CONFIGURE_COMMAND ""
+	BUILD_COMMAND ""
+	INSTALL_COMMAND ""
+	)
+externalproject_get_property(picojson_project source_dir)
+include_directories("${source_dir}")
+list(APPEND DEPS picojson_project)
+
 # GMock
 externalproject_add(gmock_project
 	PREFIX gmock
