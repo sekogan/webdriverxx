@@ -18,10 +18,14 @@ struct HttpResponse
 
 struct IHttpClient
 {
-	virtual HttpResponse Get(const std::string& url) = 0;
-	virtual HttpResponse Put(const std::string& url) = 0;
-	virtual HttpResponse Delete(const std::string& url) = 0;
-	virtual HttpResponse Post(const std::string& url) = 0;
+	virtual HttpResponse Get(const std::string& url) const = 0;
+	virtual HttpResponse Put(const std::string& url) const = 0;
+	virtual HttpResponse Delete(const std::string& url) const = 0;
+	virtual HttpResponse Post(
+		const std::string& url,
+		const std::string& contentType,
+		const std::string& postData
+		) const = 0;
 	virtual ~IHttpClient() {}
 };
 

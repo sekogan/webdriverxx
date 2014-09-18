@@ -1,6 +1,6 @@
 set(SOURCE_FILES
 	http_connection_test.cpp
-	session_test.cpp
+	webdriver_protocol_test.cpp
 	webdriver_test.cpp
 	)
 
@@ -25,18 +25,6 @@ else()
 	include_directories(${CURL_INCLUDE_DIR})
 	list(APPEND LIBS ${CURL_LIBRARIES})
 endif()
-
-# RapidJson
-externalproject_add(rapidjson_project
-	PREFIX rapidjson
-	GIT_REPOSITORY http://github.com/miloyip/rapidjson.git
-	CONFIGURE_COMMAND ""
-	BUILD_COMMAND ""
-	INSTALL_COMMAND ""
-	)
-externalproject_get_property(rapidjson_project source_dir)
-include_directories("${source_dir}/include")
-list(APPEND DEPS rapidjson_project)
 
 # picojson
 externalproject_add(picojson_project

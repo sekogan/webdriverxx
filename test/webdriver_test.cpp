@@ -10,8 +10,8 @@ TEST(WebDriver, CanBeCreated) {
 
 TEST(WebDriver, CanGetStatus) {
 	WebDriver driver(kPhantomUrl);
-	const WebDriver::JsonValue& status = driver.GetStatus();
-	ASSERT_TRUE(status.IsObject());
-	ASSERT_TRUE(status.HasMember("build") && status["build"].IsObject());
-	ASSERT_TRUE(status.HasMember("os") && status["os"].IsObject());
+	picojson::value status = driver.GetStatus();
+	ASSERT_TRUE(status.is<picojson::object>());
+	ASSERT_TRUE(status.contains("build") && status.get("build").is<picojson::object>());
+	ASSERT_TRUE(status.contains("os") && status.get("os").is<picojson::object>());
 }

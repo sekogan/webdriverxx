@@ -2,7 +2,7 @@
 #define WEBDRIVERXX_WEBDRIVER_H
 
 #include "capabilities.h"
-#include "detail/session.h"
+#include "detail/webdriver_protocol.h"
 #include "detail/http_connection.h"
 #include <string>
 
@@ -10,41 +10,26 @@ namespace webdriverxx {
 
 const char *const kDefaultUrl = "http://localhost:4444/wd/hub/";
 
-template<class JsonDocument>
-class WebDriverBase
+class WebDriver
 {
 public:
-	typedef typename JsonDocument::ValueType JsonValue;
-
-public:
-	explicit WebDriverBase(
-		const std::string& url = kDefaultUrl,
-		const Capabilities& required = Capabilities(),
-		const Capabilities& desired = Capabilities()
-		)
-		: session_(http_connection_, url, required, desired)
+	explicit WebDriver(const std::string& url = kDefaultUrl)
+		: root_(&http_connection_, url)
 	{}
 
-	const JsonValue& GetStatus()
+	picojson::value GetStatus() const
 	{
-		return session_.Get("status");
-	}
-
-	const JsonValue& GetLastJsonResponse() const
-	{
-		return session_.GetLastJsonResponse();
+		return root_.Get("status").get("value");
 	}
 
 private:
-	WebDriverBase(WebDriverBase&);
-	WebDriverBase& operator=(WebDriverBase&);
+	WebDriver(WebDriver&);
+	WebDriver& operator=(WebDriver&);
 
 private:
-	detail::HttpConnection http_connection_;
-	detail::SessionBase<JsonDocument> session_;
+	const detail::HttpConnection http_connection_;
+	const detail::WebDriverProtocol root_;
 };
-
-typedef WebDriverBase<rapidjson::Document> WebDriver;
 
 } // namespace webdriverxx
 

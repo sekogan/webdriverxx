@@ -21,28 +21,33 @@ public:
 		curl_easy_cleanup(connection_);
 	}
 
-	HttpResponse Get(const std::string& url)
+	HttpResponse Get(const std::string& url) const
 	{
 		return HttpGetRequest(connection_, url).DoRequest();
 	}
 	
-	HttpResponse Put(const std::string& /*url*/)
+	HttpResponse Put(const std::string& /*url*/) const
 	{
 		return HttpResponse();
 	}
 	
-	HttpResponse Delete(const std::string& /*url*/)
+	HttpResponse Delete(const std::string& /*url*/) const
 	{
 		return HttpResponse();
 	}
 	
-	HttpResponse Post(const std::string& /*url*/)
+	HttpResponse Post(
+		const std::string& url,
+		const std::string& contentType,
+		const std::string& postData
+		) const
 	{
-		return HttpResponse();
+		return HttpPostRequest(connection_, url, contentType, postData).DoRequest();
 	}
 
 private:
-	static CURL* InitCurl()
+	static
+	CURL* InitCurl()
 	{
 		CURL *const result = curl_easy_init();
 		if (!result)
