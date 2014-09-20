@@ -24,7 +24,7 @@ public:
 		return url_;
 	}
 
-	Resource GetSubResource(const char* name) const
+	Resource GetSubResource(const std::string& name) const
 	{
 		return Resource(http_client_, ConcatUrl(url_, name));
 	}
