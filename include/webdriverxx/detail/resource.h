@@ -9,8 +9,6 @@
 namespace webdriverxx {
 namespace detail {
 
-const char *const kContentTypeJson = "application/json;charset=UTF-8";
-
 class Resource // copyable
 {
 public:
@@ -55,7 +53,6 @@ public:
 		{
 			return ProcessResponse(http_client_->Post(
 				ConcatUrl(url_, command),
-				kContentTypeJson,
 				post_data.serialize()
 				));
 		}

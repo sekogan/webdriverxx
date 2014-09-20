@@ -9,6 +9,8 @@
 namespace webdriverxx {
 namespace detail {
 
+const char *const kContentTypeJson = "application/json;charset=UTF-8";
+
 class HttpHeaders
 {
 public:
@@ -49,6 +51,7 @@ public:
 		SetOption(CURLOPT_WRITEDATA, &response.body);
 		char error_message[CURL_ERROR_SIZE];
   		SetOption(CURLOPT_ERRORBUFFER, &error_message);
+		AddHeader("Accept", kContentTypeJson);
 		
 		SetCustomRequestOptions();
 		
@@ -144,11 +147,9 @@ public:
 	HttpPostRequest(
 		CURL* http_connection,
 		const std::string& url,
-		const char* content_type,
 		const std::string& post_data
 		)
 		: HttpRequest(http_connection, url)
-		, content_type_(content_type)
 		, post_data_(post_data)
 		, unsent_ptr_(post_data.c_str())
 		, unsent_length_(post_data.size())
@@ -159,7 +160,7 @@ protected:
 	{
 		SetOption(CURLOPT_POST, 1L);
 		SetOption(CURLOPT_POSTFIELDSIZE, post_data_.length());
-		AddHeader("Content-Type", content_type_);
+		AddHeader("Content-Type", kContentTypeJson);
 		SetOption(CURLOPT_READFUNCTION, ReadCallback);
 		SetOption(CURLOPT_READDATA, this);
 	}
@@ -179,7 +180,6 @@ private:
 	}
 
 private:
-	const char* content_type_;
 	const std::string& post_data_;
 	const char* unsent_ptr_;
 	size_t unsent_length_;
@@ -191,10 +191,9 @@ public:
 	HttpPutRequest(
 		CURL* http_connection,
 		const std::string& url,
-		const char* content_type,
 		const std::string& post_data
 		)
-		: HttpPostRequest(http_connection, url, content_type, post_data)
+		: HttpPostRequest(http_connection, url, post_data)
 	{}
 
 protected:

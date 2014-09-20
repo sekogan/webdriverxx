@@ -33,20 +33,18 @@ public:
 	
 	HttpResponse Post(
 		const std::string& url,
-		const char* content_type,
 		const std::string& post_data
 		) const
 	{
-		return HttpPostRequest(connection_, url, content_type, post_data).Execute();
+		return HttpPostRequest(connection_, url, post_data).Execute();
 	}
 
 	HttpResponse Put(
 		const std::string& url,
-		const char* content_type,
 		const std::string& post_data
 		) const
 	{
-		return HttpPutRequest(connection_, url, content_type, post_data).Execute();
+		return HttpPutRequest(connection_, url, post_data).Execute();
 	}	
 
 private:

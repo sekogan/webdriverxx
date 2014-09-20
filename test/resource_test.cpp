@@ -12,14 +12,12 @@ const char *const kTestUrl = "http://test/";
 struct MockHttpClient : IHttpClient
 {
 	MOCK_CONST_METHOD1(Get, HttpResponse(const std::string& url));
-	MOCK_CONST_METHOD3(Post, HttpResponse(
+	MOCK_CONST_METHOD2(Post, HttpResponse(
 		const std::string& url,
-		const char* content_type,
 		const std::string& post_data
 		));
-	MOCK_CONST_METHOD3(Put, HttpResponse(
+	MOCK_CONST_METHOD2(Put, HttpResponse(
 		const std::string& url,
-		const char* content_type,
 		const std::string& post_data
 		));
 	MOCK_CONST_METHOD1(Delete, HttpResponse(const std::string& url));
@@ -35,12 +33,12 @@ struct TestResource : Test
 		http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
 	
 		ON_CALL(http_client, Get(_)).WillByDefault(ReturnPointee(&http_response));
-		ON_CALL(http_client, Put(_,_,_)).WillByDefault(ReturnPointee(&http_response));
-		ON_CALL(http_client, Post(_,_,_)).WillByDefault(ReturnPointee(&http_response));
+		ON_CALL(http_client, Put(_,_)).WillByDefault(ReturnPointee(&http_response));
+		ON_CALL(http_client, Post(_,_)).WillByDefault(ReturnPointee(&http_response));
 		ON_CALL(http_client, Delete(_)).WillByDefault(ReturnPointee(&http_response));
 		EXPECT_CALL(http_client, Get(_)).Times(AnyNumber());
-		EXPECT_CALL(http_client, Put(_,_,_)).Times(AnyNumber());
-		EXPECT_CALL(http_client, Post(_,_,_)).Times(AnyNumber());
+		EXPECT_CALL(http_client, Put(_,_)).Times(AnyNumber());
+		EXPECT_CALL(http_client, Post(_,_)).Times(AnyNumber());
 		EXPECT_CALL(http_client, Delete(_)).Times(AnyNumber());
 	}
 
