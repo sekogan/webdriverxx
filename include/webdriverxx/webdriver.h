@@ -4,6 +4,7 @@
 #include "capabilities.h"
 #include "detail/resource.h"
 #include "detail/http_connection.h"
+#include "detail/error_handling.h"
 #include <string>
 #include <algorithm>
 
@@ -25,7 +26,14 @@ public:
 
 	picojson::value GetStatus() const
 	{
-		return server_root_.Get("status").get("value");
+		try
+		{
+			return server_root_.Get("status").get("value");
+		}
+		catch (std::exception&)
+		{
+			return detail::Rethrow("Cannot get status", picojson::value());
+		}
 	}
 
 private:
@@ -34,9 +42,9 @@ private:
 		detail::Resource resource;
 		Capabilities capabilities;
 
-		Session(
+		explicit Session(
 			const detail::Resource& resource,
-			const Capabilities& capabilities
+			const Capabilities& capabilities = Capabilities()
 			)
 			: resource(resource)
 			, capabilities(capabilities)
@@ -48,25 +56,31 @@ private:
 		const Capabilities& desired
 		) const
 	{
-		using namespace picojson;
-		value requestJson = value(object());
-		value& requiredJson = requestJson.get<object>()["requiredCapabilities"] = value(object());
-		value& desiredJson = requestJson.get<object>()["desiredCapabilities"] = value(object());
-		ToJson(required, requiredJson);
-		ToJson(desired, desiredJson);
+		try
+		{
+			using namespace picojson;
+			value requestJson = value(object());
+			value& requiredJson = requestJson.get<object>()["requiredCapabilities"] = value(object());
+			value& desiredJson = requestJson.get<object>()["desiredCapabilities"] = value(object());
+			ToJson(required, requiredJson);
+			ToJson(desired, desiredJson);
 
-		const value& response = server_root_.Post("session", requestJson);
+			const value& response = server_root_.Post("session", requestJson);
 
-		Check(response.get("sessionId").is<std::string>(), "Cannot create session: ID is not a string");
-		Check(response.get("value").is<object>(), "Cannot create session: capabilities is not an object");
-		const std::string sessionId = response.get("sessionId").get<std::string>();
-		
-		Session session(
-			server_root_.GetSubResource("session").GetSubResource(sessionId.c_str()),
-			Capabilities()
-			);
-		FromJson(response.get("value"), session.capabilities);
-		return session;
+			detail::Check(response.get("sessionId").is<std::string>(), "Session ID is not a string");
+			detail::Check(response.get("value").is<object>(), "Capabilities is not an object");
+			const std::string& sessionId = response.get("sessionId").to_str();
+			
+			Session session(
+				server_root_.GetSubResource("session").GetSubResource(sessionId.c_str())
+				);
+			FromJson(response.get("value"), session.capabilities);
+			return session;
+		}
+		catch (const std::exception&)
+		{
+			return detail::Rethrow("Cannot create session", Session(server_root_));
+		}
 	}
 
 	static
@@ -93,13 +107,6 @@ private:
 	std::pair<std::string, std::string> FromJsonStringPair(const picojson::object::value_type& pair)
 	{
 		return std::make_pair(pair.first, pair.second.to_str());
-	}
-
-	static
-	void Check(bool condition, const char* error_message)
-	{
-		if (!condition)
-			throw WebDriverException(error_message);
 	}
 
 private:

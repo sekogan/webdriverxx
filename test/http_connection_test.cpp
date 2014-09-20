@@ -19,5 +19,5 @@ TEST(HttpConnection, CanGetPage) {
 
 TEST(HttpConnection, ThrowsExceptionIfPortIsClosed) {
 	HttpConnection connection;
-	ASSERT_THROW(connection.Get("http://127.0.0.1:7778/"), HttpException);
+	ASSERT_THROW(connection.Get("http://127.0.0.1:7778/"), WebDriverException);
 }

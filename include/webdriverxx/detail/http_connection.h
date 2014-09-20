@@ -3,7 +3,7 @@
 
 #include "http_client.h"
 #include "http_request.h"
-#include "../errors.h"
+#include "error_handling.h"
 #include <curl/curl.h>
 
 namespace webdriverxx {
@@ -33,20 +33,20 @@ public:
 	
 	HttpResponse Post(
 		const std::string& url,
-		const char* contentType,
-		const std::string& postData
+		const char* content_type,
+		const std::string& post_data
 		) const
 	{
-		return HttpPostRequest(connection_, url, contentType, postData).Execute();
+		return HttpPostRequest(connection_, url, content_type, post_data).Execute();
 	}
 
 	HttpResponse Put(
 		const std::string& url,
-		const char* contentType,
-		const std::string& postData
+		const char* content_type,
+		const std::string& post_data
 		) const
 	{
-		return HttpPutRequest(connection_, url, contentType, postData).Execute();
+		return HttpPutRequest(connection_, url, content_type, post_data).Execute();
 	}	
 
 private:
@@ -55,7 +55,7 @@ private:
 	{
 		CURL *const result = curl_easy_init();
 		if (!result)
-			throw HttpException("Cannot initialize CURL");
+			throw WebDriverException("Cannot initialize CURL");
 		return result;
 	}
 

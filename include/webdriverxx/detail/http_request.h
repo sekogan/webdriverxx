@@ -1,7 +1,7 @@
 #ifndef WEBDRIVERXX_DETAIL_HTTP_REQUEST_H
 #define WEBDRIVERXX_DETAIL_HTTP_REQUEST_H
 
-#include "../errors.h"
+#include "error_handling.h"
 #include <curl/curl.h>
 #include <string>
 #include <algorithm>
@@ -25,7 +25,7 @@ public:
 	{
 		head_ = curl_slist_append(head_, (name + ": " + value).c_str());
 		if (!head_)
-			throw HttpException("Cannot add HTTP header");
+			throw WebDriverException("Cannot add HTTP header");
 	}
 
 	curl_slist* Get() const
@@ -56,9 +56,12 @@ public:
 
 		const CURLcode result = curl_easy_perform(http_connection_);
 		if (result != CURLE_OK)
-			throw HttpException(detail::Fmt()
-				<< "Cannot perform HTTP request (" << result << "): "
-				<< error_message);
+			throw WebDriverException(Fmt()
+				<< "Cannot perform HTTP request ("
+				<< "result: " << result
+				<< ", message: " << error_message
+				<< ")"
+				);
 
 		response.http_code = GetHttpCode();
 		return response;
@@ -81,7 +84,14 @@ protected:
 	{
 		const CURLcode result = curl_easy_setopt(http_connection_, option, value);
 		if (result != CURLE_OK)
-			throw HttpSetOptionException(option, result);
+		{
+			throw WebDriverException(Fmt()
+				<< "Cannot set HTTP session option ("
+				<< "option: " << option
+				<< ", message: \"" << curl_easy_strerror(result) << "\""
+				<< ")"
+				);
+		}
 	}
 
 	void AddHeader(const std::string& name, const std::string& value)
@@ -95,7 +105,9 @@ private:
 		long http_code = 0;
 		const CURLcode result = curl_easy_getinfo(http_connection_, CURLINFO_RESPONSE_CODE, &http_code);
 		if (result != CURLE_OK)
-			throw HttpException("Cannot get HTTP return code: ", result);
+			throw WebDriverException(Fmt()
+				<< "Cannot get HTTP code (" << curl_easy_strerror(result) << ")"
+				);
 		return http_code;
 	}
 

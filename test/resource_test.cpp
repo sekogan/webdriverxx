@@ -1,5 +1,6 @@
 #include <webdriverxx/detail/resource.h>
 #include <webdriverxx/detail/http_client.h>
+#include <webdriverxx/response_status_code.h>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
@@ -13,13 +14,13 @@ struct MockHttpClient : IHttpClient
 	MOCK_CONST_METHOD1(Get, HttpResponse(const std::string& url));
 	MOCK_CONST_METHOD3(Post, HttpResponse(
 		const std::string& url,
-		const char* contentType,
-		const std::string& postData
+		const char* content_type,
+		const std::string& post_data
 		));
 	MOCK_CONST_METHOD3(Put, HttpResponse(
 		const std::string& url,
-		const char* contentType,
-		const std::string& postData
+		const char* content_type,
+		const std::string& post_data
 		));
 	MOCK_CONST_METHOD1(Delete, HttpResponse(const std::string& url));
 };
@@ -88,7 +89,7 @@ TEST_F(TestResource, ReturnsSessionId)
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
 	ASSERT_TRUE(resource.Get("command").contains("sessionId"));
-	ASSERT_EQ("123", resource.Get("command").get("sessionId").get<std::string>());
+	ASSERT_EQ("123", resource.Get("command").get("sessionId").to_str());
 }
 
 TEST_F(TestResource, ReturnsNullSessionId)
@@ -123,45 +124,37 @@ TEST_F(TestResource, ReturnsObjectValueFromPositiveResponse)
 
 // Negative tests
 
-TEST_F(TestResource, DoesNotHideHttpExceptions)
-{
-	EXPECT_CALL(http_client, Get(_)).WillOnce(Throw(HttpException("")));
-	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), HttpException);
-}
-
-TEST_F(TestResource, ThrowsInvalidRequestOnHttp404)
+TEST_F(TestResource, ThrowsOnHttp404)
 {
 	http_response.http_code = 404;
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), InvalidRequestException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidRequestOnHttp400)
+TEST_F(TestResource, ThrowsOnHttp400)
 {
 	http_response.http_code = 400;
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), InvalidRequestException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidRequestOnHttp499)
+TEST_F(TestResource, ThrowsOnHttp499)
 {
 	http_response.http_code = 499;
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), InvalidRequestException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidRequestOnHttp501)
+TEST_F(TestResource, ThrowsOnHttp501)
 {
 	http_response.http_code = 501;
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), InvalidRequestException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, InvalidRequestExceptionContainsHttpCodeAndBody)
+TEST_F(TestResource, DoesNotHideHttpExceptions)
 {
-	http_response.http_code = 501;
-	http_response.body = "--12345--";
+	EXPECT_CALL(http_client, Get(_)).WillOnce(Throw(WebDriverException("HTTP failed")));
 	Resource resource(&http_client, kTestUrl);
 	try
 	{
@@ -171,126 +164,180 @@ TEST_F(TestResource, InvalidRequestExceptionContainsHttpCodeAndBody)
 	catch (const std::exception& e)
 	{
 		const std::string message = e.what();
-		ASSERT_NE(std::string::npos, message.find("--12345--"));
+		ASSERT_NE(std::string::npos, message.find("HTTP failed"));
+	}
+}
+
+TEST_F(TestResource, AddsContextToExceptions)
+{
+	EXPECT_CALL(http_client, Get(_)).WillOnce(Throw(WebDriverException("HTTP failed")));
+	Resource resource(&http_client, kTestUrl);
+	try
+	{
+		resource.Get("pinky");
+		FAIL(); // Shouldn't get here
+	}
+	catch (const std::exception& e)
+	{
+		const std::string message = e.what();
+		ASSERT_NE(std::string::npos, message.find("pinky"));
+	}
+}
+
+TEST_F(TestResource, WebDriverExceptionContainsCommandAndHttpCodeAndBody)
+{
+	http_response.http_code = 501;
+	http_response.body = "--oops--";
+	Resource resource(&http_client, kTestUrl);
+	try
+	{
+		resource.Get("pinky");
+		FAIL(); // Shouldn't get here
+	}
+	catch (const std::exception& e)
+	{
+		const std::string message = e.what();
+		ASSERT_NE(std::string::npos, message.find("pinky"));
+		ASSERT_NE(std::string::npos, message.find("--oops--"));
 		ASSERT_NE(std::string::npos, message.find("501"));
 	}
 }
 
-TEST_F(TestResource, ThrowsFailedCommandExceptionOnHttp500)
+TEST_F(TestResource, WebDriverExceptionContainsStatusAndStatusDescription)
+{
+	http_response.http_code = 500;
+	http_response.body = Fmt() << "{\"status\":"
+		<< response_status_code::kNoSuchWindow
+		<< ",\"value\":{\"message\":\"12345\"}}";
+	Resource resource(&http_client, kTestUrl);
+	try
+	{
+		resource.Get("pinky");
+		FAIL(); // Shouldn't get here
+	}
+	catch (const std::exception& e)
+	{
+		const std::string message = e.what();
+		ASSERT_NE(std::string::npos, message.find(Fmt() << response_status_code::kNoSuchWindow));
+		ASSERT_NE(std::string::npos, message.find(response_status_code::ToString(response_status_code::kNoSuchWindow)));
+	}
+}
+
+TEST_F(TestResource, ThrowsOnHttp500)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":12,\"value\":{\"message\":\"12345\"}}";
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), FailedCommandException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidResponseOnHttp500AndMissingStatus)
+TEST_F(TestResource, ThrowsOnHttp500AndMissingStatus)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"value\":{\"message\":\"12345\"}}";
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), InvalidResponseException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidResponseOnHttp500AndInvalidStatus)
+TEST_F(TestResource, ThrowsOnHttp500AndInvalidStatus)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":\"xxx\",\"value\":{\"message\":\"12345\"}}";
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), InvalidResponseException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidResponseOnHttp500AndMissingValue)
+TEST_F(TestResource, ThrowsOnHttp500AndMissingValue)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":12}";
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), InvalidResponseException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidResponseOnHttp500AndInvalidValue)
+TEST_F(TestResource, ThrowsOnHttp500AndInvalidValue)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":\"xxx\",\"value\":\"12345\"}";
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), InvalidResponseException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidResponseOnHttp500AndMissingMessage)
+TEST_F(TestResource, ThrowsOnHttp500AndMissingMessage)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":12,\"value\":{\"xxx\":\"12345\"}}";
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), InvalidResponseException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidResponseOnHttp500AndInvalidMessage)
+TEST_F(TestResource, ThrowsOnHttp500AndInvalidMessage)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":12,\"value\":{\"message\":12345}}";
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), InvalidResponseException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidResponseOnHttp399)
+TEST_F(TestResource, ThrowsOnHttp399)
 {
 	http_response.http_code = 399;
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), InvalidResponseException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidResponseOnHttp502)
+TEST_F(TestResource, ThrowsOnHttp502)
 {
 	http_response.http_code = 502;
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), InvalidResponseException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidResponseOnEmptyResponse)
+TEST_F(TestResource, ThrowsOnEmptyResponse)
 {
 	Resource resource(&http_client, kTestUrl);
 	http_response.body = "";
-	ASSERT_THROW(resource.Get("command"), InvalidResponseException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidResponseOnMalformedResponse)
+TEST_F(TestResource, ThrowsOnMalformedResponse)
 {
 	Resource resource(&http_client, kTestUrl);
 	http_response.body = "Blah blah blah";
-	ASSERT_THROW(resource.Get("command"), InvalidResponseException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidResponseIfResponseIsNotAnObject)
+TEST_F(TestResource, ThrowsIfResponseIsNotAnObject)
 {
 	Resource resource(&http_client, kTestUrl);
 	http_response.body = "\"value\":123";
-	ASSERT_THROW(resource.Get("command"), InvalidResponseException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidResponseOnMissingStatus)
+TEST_F(TestResource, ThrowsOnMissingStatus)
 {
 	http_response.body = "{\"sessionId\":\"123\",\"value\":12345}";
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), InvalidResponseException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidResponseOnInvalidStatus)
+TEST_F(TestResource, ThrowsOnInvalidStatus)
 {
 	http_response.body = "{\"sessionId\":\"123\",\"status\":\"5\",\"value\":12345}";
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), InvalidResponseException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidResponseOnNonZeroStatus)
+TEST_F(TestResource, ThrowsOnNonZeroStatus)
 {
 	Resource resource(&http_client, kTestUrl);
 	http_response.body = "{\"sessionId\":\"123\",\"status\":5,\"value\":12345}";
-	ASSERT_THROW(resource.Get("command"), InvalidResponseException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
-TEST_F(TestResource, ThrowsInvalidResponseOnMissingValue)
+TEST_F(TestResource, ThrowsOnMissingValue)
 {
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0}";
 	Resource resource(&http_client, kTestUrl);
-	ASSERT_THROW(resource.Get("command"), InvalidResponseException);
+	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
