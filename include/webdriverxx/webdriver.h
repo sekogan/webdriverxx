@@ -22,17 +22,20 @@ public:
 		)
 		: server_root_(&http_connection_, url)
 		, session_(CreateSession(required, desired))
+		, session_deleter_(session_.resource)
 	{}
 
-	picojson::value GetStatus() const
+	picojson::object GetStatus() const
 	{
 		try
 		{
-			return server_root_.Get("status").get("value");
+			const picojson::value& value = server_root_.Get("status").get("value");
+			detail::Check(value.is<picojson::object>(), "Value is not an object");
+			return server_root_.Get("status").get("value").get<picojson::object>();
 		}
 		catch (std::exception&)
 		{
-			return detail::Rethrow("Cannot get status", picojson::value());
+			return detail::Rethrow("Cannot get status", picojson::object());
 		}
 	}
 
@@ -89,6 +92,7 @@ private:
 	const detail::HttpConnection http_connection_;
 	const detail::Resource server_root_;
 	const Session session_;
+	const detail::AutoResourceDeleter session_deleter_;
 };
 
 } // namespace webdriverxx

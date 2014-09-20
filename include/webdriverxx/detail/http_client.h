@@ -22,11 +22,11 @@ struct IHttpClient
 	virtual HttpResponse Delete(const std::string& url) const = 0;
 	virtual HttpResponse Post(
 		const std::string& url,
-		const std::string& post_data
+		const std::string& upload_data
 		) const = 0;
 	virtual HttpResponse Put(
 		const std::string& url,
-		const std::string& post_data
+		const std::string& upload_data
 		) const = 0;
 	virtual ~IHttpClient() {}
 };

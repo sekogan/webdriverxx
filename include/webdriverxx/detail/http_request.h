@@ -42,6 +42,16 @@ private:
 class HttpRequest
 {
 public:
+	HttpRequest(
+		CURL* http_connection,
+		const std::string& url
+		)
+		: http_connection_(http_connection)
+		, url_(url)
+	{}
+
+	virtual ~HttpRequest() {}
+
 	HttpResponse Execute()
 	{
 		curl_easy_reset(http_connection_);
@@ -71,14 +81,6 @@ public:
 	}
 
 protected:
-	HttpRequest(
-		CURL* http_connection,
-		const std::string& url
-		)
-		: http_connection_(http_connection)
-		, url_(url)
-	{}
-
 	virtual void SetCustomRequestOptions()
 	{}
 
@@ -133,33 +135,41 @@ private:
 	HttpHeaders headers_;
 };
 
-class HttpGetRequest : public HttpRequest
+typedef HttpRequest HttpGetRequest;
+
+class HttpDeleteRequest : public HttpRequest
 {
 public:
-	HttpGetRequest(CURL* http_connection, const std::string& url)
+	HttpDeleteRequest(CURL* http_connection, const std::string& url)
 		: HttpRequest(http_connection, url)
 	{}
+
+private:
+	void SetCustomRequestOptions()
+	{
+		SetOption(CURLOPT_CUSTOMREQUEST, "DELETE");
+	}
 };
 
-class HttpPostRequest : public HttpRequest
+class HttpUploadRequest : public HttpRequest
 {
 public:
-	HttpPostRequest(
+	HttpUploadRequest(
 		CURL* http_connection,
 		const std::string& url,
-		const std::string& post_data
+		const std::string& upload_data
 		)
 		: HttpRequest(http_connection, url)
-		, post_data_(post_data)
-		, unsent_ptr_(post_data.c_str())
-		, unsent_length_(post_data.size())
+		, upload_data_(upload_data)
+		, unsent_ptr_(upload_data.c_str())
+		, unsent_length_(upload_data.size())
 	{}
 
 protected:
 	void SetCustomRequestOptions()
 	{
 		SetOption(CURLOPT_POST, 1L);
-		SetOption(CURLOPT_POSTFIELDSIZE, post_data_.length());
+		SetOption(CURLOPT_POSTFIELDSIZE, upload_data_.length());
 		AddHeader("Content-Type", kContentTypeJson);
 		SetOption(CURLOPT_READFUNCTION, ReadCallback);
 		SetOption(CURLOPT_READDATA, this);
@@ -169,7 +179,7 @@ private:
 	static
 	size_t ReadCallback(void* buffer, size_t size, size_t nmemb, void* userdata)
 	{
-		HttpPostRequest* that = reinterpret_cast<HttpPostRequest*>(userdata);
+		HttpUploadRequest* that = reinterpret_cast<HttpUploadRequest*>(userdata);
 		size_t buffer_size = size * nmemb;
 		size_t copy_size = that->unsent_length_ < buffer_size ? that->unsent_length_ : buffer_size;
 		std::copy(that->unsent_ptr_, that->unsent_ptr_ + copy_size,
@@ -180,26 +190,28 @@ private:
 	}
 
 private:
-	const std::string& post_data_;
+	const std::string& upload_data_;
 	const char* unsent_ptr_;
 	size_t unsent_length_;
 };
 
-class HttpPutRequest : public HttpPostRequest
+typedef HttpUploadRequest HttpPostRequest;
+
+class HttpPutRequest : public HttpUploadRequest
 {
 public:
 	HttpPutRequest(
 		CURL* http_connection,
 		const std::string& url,
-		const std::string& post_data
+		const std::string& upload_data
 		)
-		: HttpPostRequest(http_connection, url, post_data)
+		: HttpUploadRequest(http_connection, url, upload_data)
 	{}
 
-protected:
+private:
 	void SetCustomRequestOptions()
 	{
-		HttpPostRequest::SetCustomRequestOptions();
+		HttpUploadRequest::SetCustomRequestOptions();
 		SetOption(CURLOPT_CUSTOMREQUEST, "PUT");
 	}
 };

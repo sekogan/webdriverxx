@@ -27,46 +27,78 @@ public:
 		return Resource(http_client_, ConcatUrl(url_, name));
 	}
 
-	picojson::value Get(const char* command) const
+	picojson::value Get(const std::string& command = std::string()) const
+	{
+		return Download(command, &IHttpClient::Get, "GET");
+	}
+
+	picojson::value Delete(const std::string& command = std::string()) const
+	{
+		return Download(command, &IHttpClient::Delete, "DELETE");
+	}
+
+	picojson::value Post(
+		const std::string& command,
+		const picojson::value& upload_data
+		) const
+	{
+		return Upload(command, upload_data, &IHttpClient::Post, "POST");
+	}
+
+	picojson::value Put(
+		const std::string& command,
+		const picojson::value& upload_data
+		) const
+	{
+		return Upload(command, upload_data, &IHttpClient::Put, "PUT");
+	}
+
+private:
+	picojson::value Download(
+		const std::string& command, 
+		HttpResponse (IHttpClient::* member)(const std::string& url) const,
+		const char* request_type
+		) const
 	{
 		try
 		{
-			return ProcessResponse(http_client_->Get(
+			return ProcessResponse((http_client_->*member)(
 				ConcatUrl(url_, command)
 				));
 		}
 		catch (const std::exception& e)
 		{
-			return Rethrow(Fmt() << "Cannot GET \"" << command << "\" ("
+			return Rethrow(Fmt() << "Cannot " << request_type << " \"" << command << "\" ("
 				<< "resource: " << url_
 				<< ")"
 				, picojson::value());
 		}
 	}
 
-	picojson::value Post(
-		const char* command,
-		const picojson::value& post_data
+	picojson::value Upload(
+		const std::string& command, 
+		const picojson::value& upload_data,
+		HttpResponse (IHttpClient::* member)(const std::string& url, const std::string& upload_data) const,
+		const char* request_type
 		) const
 	{
 		try
 		{
-			return ProcessResponse(http_client_->Post(
+			return ProcessResponse((http_client_->*member)(
 				ConcatUrl(url_, command),
-				post_data.serialize()
+				upload_data.serialize()
 				));
 		}
 		catch (const std::exception& e)
 		{
-			return Rethrow(Fmt() << "Cannot POST \"" << command << "\" ("
+			return Rethrow(Fmt() << "Cannot " << request_type << " \"" << command << "\" ("
 				<< "resource: " << url_
-				<< ", post_data: " << post_data.serialize()
+				<< ", " << request_type << " data: " << upload_data.serialize()
 				<< ")"
 				, picojson::value());
 		}
 	}
 
-private:
 	picojson::value ProcessResponse(const HttpResponse& http_response) const
 	{
 		try
@@ -139,6 +171,26 @@ private:
 private:
 	const IHttpClient* http_client_;
 	std::string url_;
+};
+
+struct AutoResourceDeleter
+{
+	explicit AutoResourceDeleter(const Resource& resource)
+		: resource_(resource)
+	{}
+
+	~AutoResourceDeleter()
+	{
+		try
+		{
+			resource_.Delete();
+		}
+		catch(const std::exception&)
+		{}
+	}
+
+private:
+	const Resource& resource_;
 };
 
 } // namespace detail

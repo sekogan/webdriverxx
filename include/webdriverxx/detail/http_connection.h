@@ -26,25 +26,25 @@ public:
 		return HttpGetRequest(connection_, url).Execute();
 	}
 	
-	HttpResponse Delete(const std::string& /*url*/) const
+	HttpResponse Delete(const std::string& url) const
 	{
-		return HttpResponse();
+		return HttpDeleteRequest(connection_, url).Execute();
 	}
 	
 	HttpResponse Post(
 		const std::string& url,
-		const std::string& post_data
+		const std::string& upload_data
 		) const
 	{
-		return HttpPostRequest(connection_, url, post_data).Execute();
+		return HttpPostRequest(connection_, url, upload_data).Execute();
 	}
 
 	HttpResponse Put(
 		const std::string& url,
-		const std::string& post_data
+		const std::string& upload_data
 		) const
 	{
-		return HttpPutRequest(connection_, url, post_data).Execute();
+		return HttpPutRequest(connection_, url, upload_data).Execute();
 	}	
 
 private:

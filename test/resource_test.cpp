@@ -14,11 +14,11 @@ struct MockHttpClient : IHttpClient
 	MOCK_CONST_METHOD1(Get, HttpResponse(const std::string& url));
 	MOCK_CONST_METHOD2(Post, HttpResponse(
 		const std::string& url,
-		const std::string& post_data
+		const std::string& upload_data
 		));
 	MOCK_CONST_METHOD2(Put, HttpResponse(
 		const std::string& url,
-		const std::string& post_data
+		const std::string& upload_data
 		));
 	MOCK_CONST_METHOD1(Delete, HttpResponse(const std::string& url));
 };
