@@ -2,6 +2,7 @@
 #define WEBDRIVERXX_TEST_HELPERS_H
 
 #include <string>
+#include <stdexcept>
 #include <stdio.h>
 #ifdef WIN32
     #include <direct.h>
