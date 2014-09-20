@@ -31,14 +31,14 @@ public:
 private:
 	struct Session
 	{
-		detail::Resource session;
+		detail::Resource resource;
 		Capabilities capabilities;
 
 		Session(
-			const detail::Resource& session,
+			const detail::Resource& resource,
 			const Capabilities& capabilities
 			)
-			: session(session)
+			: resource(resource)
 			, capabilities(capabilities)
 		{}
 	};
