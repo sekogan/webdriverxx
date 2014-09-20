@@ -2,6 +2,8 @@ set(SOURCE_FILES
 	http_connection_test.cpp
 	resource_test.cpp
 	webdriver_test.cpp
+	test_helpers.h
+	test_data.h
 	)
 
 file(COPY pages DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

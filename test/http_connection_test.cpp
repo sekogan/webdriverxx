@@ -1,4 +1,4 @@
-#include "common_test_data.h"
+#include "test_data.h"
 #include <webdriverxx/detail/http_connection.h>
 #include <gtest/gtest.h>
 #include <string>

@@ -55,7 +55,7 @@ private:
 			return ProcessResponse((http_client_->*member)(
 				ConcatUrl(url_, command)
 				));
-		} catch (const std::exception& e) {
+		} catch (const std::exception&) {
 			return Rethrow(Fmt() << "Cannot " << request_type << " \"" << command << "\" ("
 				<< "resource: " << url_
 				<< ")"
@@ -74,7 +74,7 @@ private:
 				ConcatUrl(url_, command),
 				upload_data.serialize()
 				));
-		} catch (const std::exception& e) {
+		} catch (const std::exception&) {
 			return Rethrow(Fmt() << "Cannot " << request_type << " \"" << command << "\" ("
 				<< "resource: " << url_
 				<< ", " << request_type << " data: " << upload_data.serialize()
@@ -86,7 +86,7 @@ private:
 	picojson::value ProcessResponse(const HttpResponse& http_response) const {
 		try {
 			return ProcessResponseImpl(http_response);
-		} catch (const std::exception& e) {
+		} catch (const std::exception&) {
 			return Rethrow(Fmt() << "Error while processing response ("
 				<< "HTTP code: " << http_response.http_code
 				<< ", body: " << http_response.body
@@ -112,7 +112,7 @@ private:
 		Check(response.contains("status"), "Server response has no member \"status\"");
 		Check(response.get("status").is<double>(), "Response status code is not a number");
 		const response_status_code::Value status =
-			static_cast<response_status_code::Value>(response.get("status").get<double>());
+			static_cast<response_status_code::Value>(static_cast<int>(response.get("status").get<double>()));
 		Check(response.contains("value"), "Server response has no member \"value\"");
 		const picojson::value& value = response.get("value");
 
