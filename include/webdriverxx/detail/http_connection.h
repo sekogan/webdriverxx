@@ -9,48 +9,40 @@
 namespace webdriverxx {
 namespace detail {
 
-class HttpConnection : public IHttpClient
-{
+class HttpConnection : public IHttpClient {
 public:
 	HttpConnection()
-		: connection_(InitCurl())
-	{}
+		: connection_(InitCurl()) {}
 
-	~HttpConnection()
-	{
+	~HttpConnection() {
 		curl_easy_cleanup(connection_);
 	}
 
-	HttpResponse Get(const std::string& url) const
-	{
+	HttpResponse Get(const std::string& url) const {
 		return HttpGetRequest(connection_, url).Execute();
 	}
 	
-	HttpResponse Delete(const std::string& url) const
-	{
+	HttpResponse Delete(const std::string& url) const {
 		return HttpDeleteRequest(connection_, url).Execute();
 	}
 	
 	HttpResponse Post(
 		const std::string& url,
 		const std::string& upload_data
-		) const
-	{
+		) const {
 		return HttpPostRequest(connection_, url, upload_data).Execute();
 	}
 
 	HttpResponse Put(
 		const std::string& url,
 		const std::string& upload_data
-		) const
-	{
+		) const {
 		return HttpPutRequest(connection_, url, upload_data).Execute();
 	}	
 
 private:
 	static
-	CURL* InitCurl()
-	{
+	CURL* InitCurl() {
 		CURL *const result = curl_easy_init();
 		if (!result)
 			throw WebDriverException("Cannot initialize CURL");

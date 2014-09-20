@@ -4,8 +4,7 @@
 namespace webdriverxx {
 namespace response_status_code { 
 
-enum Value
-{
+enum Value {
 	kSuccess = 0,
 	kNoSuchDriver = 6,
 	kNoSuchElement = 7,
@@ -34,10 +33,8 @@ enum Value
 }; 
 
 inline
-const char* ToString(Value code)
-{
-	switch(code)
-	{
+const char* ToString(Value code) {
+	switch(code) {
 	case kSuccess: return "The command executed successfully.";
 	case kNoSuchDriver: return "A session is either terminated or not started"; 
 	case kNoSuchElement: return "An element could not be located on the page using the given search parameters."; 

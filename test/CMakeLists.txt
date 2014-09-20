@@ -4,6 +4,8 @@ set(SOURCE_FILES
 	webdriver_test.cpp
 	)
 
+file(COPY pages DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 include(ExternalProject)
 
 # CURL

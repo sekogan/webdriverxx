@@ -8,18 +8,15 @@
 namespace webdriverxx {
 namespace detail {
 
-class Fmt
-{
+class Fmt {
 public:
 	template<typename T>
-	Fmt& operator << (const T& value)
-	{
+	Fmt& operator << (const T& value) {
 		stream_ << value;
 		return *this;
 	}
 
-	operator std::string() const
-	{
+	operator std::string() const {
 		return stream_.str();
 	}
 
@@ -28,21 +25,16 @@ private:
 };
 
 inline
-void Check(bool invariant, const char* error_message)
-{
+void Check(bool invariant, const char* error_message) {
 	if (!invariant)
 		throw WebDriverException(error_message);
 }
 
 inline
-void Rethrow(const std::string& context)
-{
-	try
-	{
+void Rethrow(const std::string& context) {
+	try {
 		throw;
-	}
-	catch (const std::exception& e)
-	{
+	} catch (const std::exception& e) {
 		throw WebDriverException(context + " -> " + e.what());
 	}
 }
@@ -50,8 +42,7 @@ void Rethrow(const std::string& context)
 // For functions that return something to suppress compiler warning
 template<typename ReturnType>
 inline
-ReturnType Rethrow(const std::string& context, const ReturnType& return_value)
-{
+ReturnType Rethrow(const std::string& context, const ReturnType& return_value) {
 	Rethrow(context);
 	return return_value;
 }

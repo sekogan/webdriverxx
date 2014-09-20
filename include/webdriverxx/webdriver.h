@@ -1,6 +1,7 @@
 #ifndef WEBDRIVERXX_WEBDRIVER_H
 #define WEBDRIVERXX_WEBDRIVER_H
 
+#include "window.h"
 #include "capabilities.h"
 #include "types.h"
 #include "detail/resource.h"
@@ -13,8 +14,27 @@ namespace webdriverxx {
 
 const char *const kDefaultUrl = "http://localhost:4444/wd/hub/";
 
-class WebDriver
-{
+// TODO: move this class to some other place
+class ObjectBuilder { // copyable
+public:
+	ObjectBuilder()
+		: value_(picojson::object()) {}
+
+	template<typename T>
+	ObjectBuilder& Add(const std::string& name, const T& value) {
+		value_.get<picojson::object>()[name] = picojson::value(value);
+		return *this;
+	}
+
+	const picojson::value& Build() const {
+		return value_;
+	}
+
+private:
+	picojson::value value_;
+};
+
+class WebDriver {
 public:
 	explicit WebDriver(
 		const std::string& url = kDefaultUrl,
@@ -23,45 +43,68 @@ public:
 		)
 		: server_root_(&http_connection_, url)
 		, session_(CreateSession(required, desired))
-		, session_deleter_(session_.resource)
-	{}
+		, session_deleter_(session_.resource) {}
 
-	picojson::object GetStatus() const
-	{
-		try
-		{
+	picojson::object GetStatus() const {
+		try {
 			const picojson::value value = server_root_.Get("status").get("value");
 			detail::Check(value.is<picojson::object>(), "Value is not an object");
 			return server_root_.Get("status").get("value").get<picojson::object>();
-		}
-		catch (std::exception&)
-		{
+		} catch (std::exception&) {
 			return detail::Rethrow("Cannot get status", picojson::object());
 		}
 	}
 
-	std::vector<SessionInformation> GetSessions() const
-	{
-		try
-		{
-			return detail::FromJson<SessionsInformation>(
+	SessionsInformation GetSessions() const {
+		try {
+			return detail::FromJsonArray<SessionInformation>(
 				server_root_.Get("sessions").get("value")
 				);
-		}
-		catch (std::exception&)
-		{
-			return detail::Rethrow("Cannot get sessions", std::vector<SessionInformation>());
+		} catch (std::exception&) {
+			return detail::Rethrow("Cannot get sessions", SessionsInformation());
 		}
 	}
 
-	const Capabilities& GetCapabilities() const
-	{
+	const Capabilities& GetCapabilities() const {
 		return session_.capabilities;
 	}
 
-private:
-	struct Session
+	std::vector<Window> GetWindows() const {
+		try {
+			const std::vector<std::string> handles =
+				detail::FromJsonArray<std::string>(
+					session_.resource.Get("window_handles").get("value")
+					);
+			std::vector<Window> result;
+			for (std::vector<std::string>::const_iterator it = handles.begin();
+				it != handles.end(); ++it)
+				result.push_back(MakeWindow(*it));
+			return result;
+		} catch (std::exception&) {
+			return detail::Rethrow("Cannot get window handles", std::vector<Window>());
+		}
+	}
+
+	std::string GetUrl() const
 	{
+		try {
+			return session_.resource.Get("url").get("value").to_str();
+		} catch (std::exception&) {
+			return detail::Rethrow("Cannot get URL", std::string());
+		}		
+	}
+
+	void Navigate(const std::string& url) const
+	{
+		try {
+			session_.resource.Post("url", ObjectBuilder().Add("url", url).Build());
+		} catch (std::exception&) {
+			detail::Rethrow("Cannot navigate");
+		}		
+	}
+
+private:
+	struct Session {
 		detail::Resource resource;
 		Capabilities capabilities;
 
@@ -70,17 +113,14 @@ private:
 			const Capabilities& capabilities = Capabilities()
 			)
 			: resource(resource)
-			, capabilities(capabilities)
-		{}
+			, capabilities(capabilities) {}
 	};
 
 	Session CreateSession(
 		const Capabilities& required,
 		const Capabilities& desired
-		) const
-	{
-		try
-		{
+		) const {
+		try {
 			using namespace picojson;
 			value requestJson = value(object());
 			requestJson.get<object>()["requiredCapabilities"] = value(required.Get());
@@ -97,12 +137,15 @@ private:
 				server_root_.GetSubResource("session").GetSubResource(sessionId),
 				Capabilities(response.get("value").get<object>())
 				);
-		}
-		catch (const std::exception&)
-		{
+		} catch (const std::exception&) {
 			return detail::Rethrow("Cannot create session", Session(server_root_));
 		}
 	}
+
+	Window MakeWindow(const std::string& handle) const
+	{
+		return Window(session_.resource.GetSubResource("window").GetSubResource(handle));
+	}	
 
 private:
 	WebDriver(WebDriver&);

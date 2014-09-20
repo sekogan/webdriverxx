@@ -7,12 +7,10 @@
 
 namespace webdriverxx {
 
-struct SessionInformation
-{
+struct SessionInformation {
 	std::string id;
 	Capabilities capabilities;
 };
-
 typedef std::vector<SessionInformation> SessionsInformation;
 
 } // namespace webdriverxx

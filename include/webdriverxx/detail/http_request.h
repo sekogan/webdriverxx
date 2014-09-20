@@ -11,27 +11,22 @@ namespace detail {
 
 const char *const kContentTypeJson = "application/json;charset=UTF-8";
 
-class HttpHeaders
-{
+class HttpHeaders {
 public:
 	HttpHeaders()
-		: head_(0)
-	{}
+		: head_(0) {}
 
-	~HttpHeaders()
-	{
+	~HttpHeaders() {
 		curl_slist_free_all(head_);
 	}
 
-	void Add(const std::string& name, const std::string& value)
-	{
+	void Add(const std::string& name, const std::string& value) {
 		head_ = curl_slist_append(head_, (name + ": " + value).c_str());
 		if (!head_)
 			throw WebDriverException("Cannot add HTTP header");
 	}
 
-	curl_slist* Get() const
-	{
+	curl_slist* Get() const {
 		return head_;
 	}
 
@@ -39,21 +34,18 @@ private:
 	curl_slist* head_;
 };
 
-class HttpRequest
-{
+class HttpRequest {
 public:
 	HttpRequest(
 		CURL* http_connection,
 		const std::string& url
 		)
 		: http_connection_(http_connection)
-		, url_(url)
-	{}
+		, url_(url) {}
 
 	virtual ~HttpRequest() {}
 
-	HttpResponse Execute()
-	{
+	HttpResponse Execute() {
 		curl_easy_reset(http_connection_);
 		SetOption(CURLOPT_URL, url_.c_str());
 		HttpResponse response;
@@ -81,15 +73,12 @@ public:
 	}
 
 protected:
-	virtual void SetCustomRequestOptions()
-	{}
+	virtual void SetCustomRequestOptions() {}
 
 	template<typename T>
-	void SetOption(CURLoption option, const T& value) const
-	{
+	void SetOption(CURLoption option, const T& value) const {
 		const CURLcode result = curl_easy_setopt(http_connection_, option, value);
-		if (result != CURLE_OK)
-		{
+		if (result != CURLE_OK) {
 			throw WebDriverException(Fmt()
 				<< "Cannot set HTTP session option ("
 				<< "option: " << option
@@ -99,14 +88,12 @@ protected:
 		}
 	}
 
-	void AddHeader(const std::string& name, const std::string& value)
-	{
+	void AddHeader(const std::string& name, const std::string& value) {
 		headers_.Add(name, value);
 	}
 
 private:
-	long GetHttpCode() const
-	{
+	long GetHttpCode() const {
 		long http_code = 0;
 		const CURLcode result = curl_easy_getinfo(http_connection_, CURLINFO_RESPONSE_CODE, &http_code);
 		if (result != CURLE_OK)
@@ -117,8 +104,7 @@ private:
 	}
 
 	static
-	size_t WriteCallback(void* buffer, size_t size, size_t nmemb, void* userdata)
-	{
+	size_t WriteCallback(void* buffer, size_t size, size_t nmemb, void* userdata) {
 		std::string* data_received = reinterpret_cast<std::string*>(userdata);
 		const size_t buffer_size = size * nmemb;
 		data_received->append(reinterpret_cast<const char*>(buffer), buffer_size);
@@ -137,22 +123,18 @@ private:
 
 typedef HttpRequest HttpGetRequest;
 
-class HttpDeleteRequest : public HttpRequest
-{
+class HttpDeleteRequest : public HttpRequest {
 public:
 	HttpDeleteRequest(CURL* http_connection, const std::string& url)
-		: HttpRequest(http_connection, url)
-	{}
+		: HttpRequest(http_connection, url) {}
 
 private:
-	void SetCustomRequestOptions()
-	{
+	void SetCustomRequestOptions() {
 		SetOption(CURLOPT_CUSTOMREQUEST, "DELETE");
 	}
 };
 
-class HttpUploadRequest : public HttpRequest
-{
+class HttpUploadRequest : public HttpRequest {
 public:
 	HttpUploadRequest(
 		CURL* http_connection,
@@ -162,12 +144,10 @@ public:
 		: HttpRequest(http_connection, url)
 		, upload_data_(upload_data)
 		, unsent_ptr_(upload_data.c_str())
-		, unsent_length_(upload_data.size())
-	{}
+		, unsent_length_(upload_data.size()) {}
 
 protected:
-	void SetCustomRequestOptions()
-	{
+	void SetCustomRequestOptions() {
 		SetOption(CURLOPT_POST, 1L);
 		SetOption(CURLOPT_POSTFIELDSIZE, upload_data_.length());
 		AddHeader("Content-Type", kContentTypeJson);
@@ -177,8 +157,7 @@ protected:
 
 private:
 	static
-	size_t ReadCallback(void* buffer, size_t size, size_t nmemb, void* userdata)
-	{
+	size_t ReadCallback(void* buffer, size_t size, size_t nmemb, void* userdata) {
 		HttpUploadRequest* that = reinterpret_cast<HttpUploadRequest*>(userdata);
 		size_t buffer_size = size * nmemb;
 		size_t copy_size = that->unsent_length_ < buffer_size ? that->unsent_length_ : buffer_size;
@@ -197,20 +176,17 @@ private:
 
 typedef HttpUploadRequest HttpPostRequest;
 
-class HttpPutRequest : public HttpUploadRequest
-{
+class HttpPutRequest : public HttpUploadRequest {
 public:
 	HttpPutRequest(
 		CURL* http_connection,
 		const std::string& url,
 		const std::string& upload_data
 		)
-		: HttpUploadRequest(http_connection, url, upload_data)
-	{}
+		: HttpUploadRequest(http_connection, url, upload_data) {}
 
 private:
-	void SetCustomRequestOptions()
-	{
+	void SetCustomRequestOptions() {
 		HttpUploadRequest::SetCustomRequestOptions();
 		SetOption(CURLOPT_CUSTOMREQUEST, "PUT");
 	}

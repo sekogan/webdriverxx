@@ -9,26 +9,17 @@ using namespace webdriverxx::detail;
 
 const char *const kTestUrl = "http://test/";
 
-struct MockHttpClient : IHttpClient
-{
+struct MockHttpClient : IHttpClient {
 	MOCK_CONST_METHOD1(Get, HttpResponse(const std::string& url));
-	MOCK_CONST_METHOD2(Post, HttpResponse(
-		const std::string& url,
-		const std::string& upload_data
-		));
-	MOCK_CONST_METHOD2(Put, HttpResponse(
-		const std::string& url,
-		const std::string& upload_data
-		));
+	MOCK_CONST_METHOD2(Post, HttpResponse(const std::string& url, const std::string& data));
+	MOCK_CONST_METHOD2(Put, HttpResponse(const std::string& url, const std::string& data));
 	MOCK_CONST_METHOD1(Delete, HttpResponse(const std::string& url));
 };
 
 using namespace ::testing;
 
-struct TestResource : Test
-{
-	void SetUp()
-	{
+struct TestResource : Test {
+	void SetUp() {
 		http_response.http_code = 200;
 		http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
 	
@@ -154,13 +145,10 @@ TEST_F(TestResource, DoesNotHideHttpExceptions)
 {
 	EXPECT_CALL(http_client, Get(_)).WillOnce(Throw(WebDriverException("HTTP failed")));
 	Resource resource(&http_client, kTestUrl);
-	try
-	{
+	try {
 		resource.Get("command");
 		FAIL(); // Shouldn't get here
-	}
-	catch (const std::exception& e)
-	{
+	} catch (const std::exception& e) {
 		const std::string message = e.what();
 		ASSERT_NE(std::string::npos, message.find("HTTP failed"));
 	}
@@ -170,13 +158,10 @@ TEST_F(TestResource, AddsContextToExceptions)
 {
 	EXPECT_CALL(http_client, Get(_)).WillOnce(Throw(WebDriverException("HTTP failed")));
 	Resource resource(&http_client, kTestUrl);
-	try
-	{
+	try {
 		resource.Get("pinky");
 		FAIL(); // Shouldn't get here
-	}
-	catch (const std::exception& e)
-	{
+	} catch (const std::exception& e) {
 		const std::string message = e.what();
 		ASSERT_NE(std::string::npos, message.find("pinky"));
 	}
@@ -187,13 +172,10 @@ TEST_F(TestResource, WebDriverExceptionContainsCommandAndHttpCodeAndBody)
 	http_response.http_code = 501;
 	http_response.body = "--oops--";
 	Resource resource(&http_client, kTestUrl);
-	try
-	{
+	try {
 		resource.Get("pinky");
 		FAIL(); // Shouldn't get here
-	}
-	catch (const std::exception& e)
-	{
+	} catch (const std::exception& e) {
 		const std::string message = e.what();
 		ASSERT_NE(std::string::npos, message.find("pinky"));
 		ASSERT_NE(std::string::npos, message.find("--oops--"));
@@ -208,13 +190,10 @@ TEST_F(TestResource, WebDriverExceptionContainsStatusAndStatusDescription)
 		<< response_status_code::kNoSuchWindow
 		<< ",\"value\":{\"message\":\"12345\"}}";
 	Resource resource(&http_client, kTestUrl);
-	try
-	{
+	try {
 		resource.Get("pinky");
 		FAIL(); // Shouldn't get here
-	}
-	catch (const std::exception& e)
-	{
+	} catch (const std::exception& e) {
 		const std::string message = e.what();
 		ASSERT_NE(std::string::npos, message.find(Fmt() << response_status_code::kNoSuchWindow));
 		ASSERT_NE(std::string::npos, message.find(response_status_code::ToString(response_status_code::kNoSuchWindow)));

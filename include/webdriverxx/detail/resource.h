@@ -9,47 +9,39 @@
 namespace webdriverxx {
 namespace detail {
 
-class Resource // copyable
-{
+class Resource { // copyable
 public:
 	Resource(const IHttpClient* http_client, const std::string& url)
 		: http_client_(http_client)
-		, url_(url)
-	{}
+		, url_(url) {}
 
-	const std::string& GetUrl() const
-	{
+	const std::string& GetUrl() const {
 		return url_;
 	}
 
-	Resource GetSubResource(const std::string& name) const
-	{
+	Resource GetSubResource(const std::string& name) const {
 		return Resource(http_client_, ConcatUrl(url_, name));
 	}
 
-	picojson::value Get(const std::string& command = std::string()) const
-	{
+	picojson::value Get(const std::string& command = std::string()) const {
 		return Download(command, &IHttpClient::Get, "GET");
 	}
 
-	picojson::value Delete(const std::string& command = std::string()) const
-	{
+	picojson::value Delete(const std::string& command = std::string()) const {
 		return Download(command, &IHttpClient::Delete, "DELETE");
 	}
 
 	picojson::value Post(
-		const std::string& command,
-		const picojson::value& upload_data
-		) const
-	{
+		const std::string& command = std::string(),
+		const picojson::value& upload_data = picojson::value()
+		) const {
 		return Upload(command, upload_data, &IHttpClient::Post, "POST");
 	}
 
 	picojson::value Put(
-		const std::string& command,
-		const picojson::value& upload_data
-		) const
-	{
+		const std::string& command = std::string(),
+		const picojson::value& upload_data = picojson::value()
+		) const {
 		return Upload(command, upload_data, &IHttpClient::Put, "PUT");
 	}
 
@@ -58,16 +50,12 @@ private:
 		const std::string& command, 
 		HttpResponse (IHttpClient::* member)(const std::string& url) const,
 		const char* request_type
-		) const
-	{
-		try
-		{
+		) const {
+		try {
 			return ProcessResponse((http_client_->*member)(
 				ConcatUrl(url_, command)
 				));
-		}
-		catch (const std::exception& e)
-		{
+		} catch (const std::exception& e) {
 			return Rethrow(Fmt() << "Cannot " << request_type << " \"" << command << "\" ("
 				<< "resource: " << url_
 				<< ")"
@@ -80,17 +68,13 @@ private:
 		const picojson::value& upload_data,
 		HttpResponse (IHttpClient::* member)(const std::string& url, const std::string& upload_data) const,
 		const char* request_type
-		) const
-	{
-		try
-		{
+		) const {
+		try {
 			return ProcessResponse((http_client_->*member)(
 				ConcatUrl(url_, command),
 				upload_data.serialize()
 				));
-		}
-		catch (const std::exception& e)
-		{
+		} catch (const std::exception& e) {
 			return Rethrow(Fmt() << "Cannot " << request_type << " \"" << command << "\" ("
 				<< "resource: " << url_
 				<< ", " << request_type << " data: " << upload_data.serialize()
@@ -99,14 +83,10 @@ private:
 		}
 	}
 
-	picojson::value ProcessResponse(const HttpResponse& http_response) const
-	{
-		try
-		{
+	picojson::value ProcessResponse(const HttpResponse& http_response) const {
+		try {
 			return ProcessResponseImpl(http_response);
-		}
-		catch (const std::exception& e)
-		{
+		} catch (const std::exception& e) {
 			return Rethrow(Fmt() << "Error while processing response ("
 				<< "HTTP code: " << http_response.http_code
 				<< ", body: " << http_response.body
@@ -115,8 +95,7 @@ private:
 		}
 	}
 
-	picojson::value ProcessResponseImpl(const HttpResponse& http_response) const
-	{
+	picojson::value ProcessResponseImpl(const HttpResponse& http_response) const {
 		if (http_response.http_code / 100 == 4 || http_response.http_code == 501)
 			throw WebDriverException("Invalid request");
 
@@ -137,8 +116,7 @@ private:
 		Check(response.contains("value"), "Server response has no member \"value\"");
 		const picojson::value& value = response.get("value");
 
-		if (http_response.http_code == 500) // Internal server error
-		{
+		if (http_response.http_code == 500) { // Internal server error
 			Check(value.is<picojson::object>(), "Server returned HTTP code 500 and \"response.value\" is not an object");
 			Check(value.contains("message"), "Server response has no member \"value.message\"");
 			Check(value.get("message").is<std::string>(), "\"value.message\" is not a string");
@@ -156,11 +134,9 @@ private:
 	}
 
 	static
-	std::string ConcatUrl(const std::string& a, const std::string& b, const char delim = '/')
-	{
+	std::string ConcatUrl(const std::string& a, const std::string& b, const char delim = '/') {
 		std::string result = a.empty() ? b : a;
-		if (!a.empty() && !b.empty())
-		{
+		if (!a.empty() && !b.empty()) {
 			if (result[result.length()-1] != delim)
 				result += delim;
 			result.append(b[0] == delim ? b.begin() + 1 : b.begin(), b.end());
@@ -173,20 +149,14 @@ private:
 	std::string url_;
 };
 
-struct AutoResourceDeleter
-{
+struct AutoResourceDeleter {
 	explicit AutoResourceDeleter(const Resource& resource)
-		: resource_(resource)
-	{}
+		: resource_(resource) {}
 
-	~AutoResourceDeleter()
-	{
-		try
-		{
+	~AutoResourceDeleter() {
+		try {
 			resource_.Delete();
-		}
-		catch(const std::exception&)
-		{}
+		} catch(const std::exception&) {}
 	}
 
 private:

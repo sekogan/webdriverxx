@@ -6,8 +6,7 @@
 namespace webdriverxx {
 namespace detail {
 
-struct HttpResponse
-{
+struct HttpResponse {
 	long http_code;
 	std::string body;
 
@@ -16,18 +15,11 @@ struct HttpResponse
 	{}
 };
 
-struct IHttpClient
-{
+struct IHttpClient {
 	virtual HttpResponse Get(const std::string& url) const = 0;
 	virtual HttpResponse Delete(const std::string& url) const = 0;
-	virtual HttpResponse Post(
-		const std::string& url,
-		const std::string& upload_data
-		) const = 0;
-	virtual HttpResponse Put(
-		const std::string& url,
-		const std::string& upload_data
-		) const = 0;
+	virtual HttpResponse Post(const std::string& url, const std::string& data) const = 0;
+	virtual HttpResponse Put(const std::string& url, const std::string& data) const = 0;
 	virtual ~IHttpClient() {}
 };
 

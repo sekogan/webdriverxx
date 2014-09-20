@@ -15,8 +15,7 @@ T FromJson(const picojson::value& value);
 
 template<>
 inline
-SessionInformation FromJson<SessionInformation>(const picojson::value& value)
-{
+SessionInformation FromJson<SessionInformation>(const picojson::value& value) {
 	detail::Check(value.is<picojson::object>(), "Session information is not an object");
 	SessionInformation result;
 	result.id = value.get("sessionId").to_str();
@@ -27,14 +26,18 @@ SessionInformation FromJson<SessionInformation>(const picojson::value& value)
 
 template<>
 inline
-SessionsInformation FromJson<SessionsInformation>(const picojson::value& value)
-{
-	detail::Check(value.is<picojson::array>(), "Sessions information is not an array");
+std::string FromJson<std::string>(const picojson::value& value) {
+	return value.to_str();
+}
+
+template<typename T>
+inline
+std::vector<T> FromJsonArray(const picojson::value& value) {
+	detail::Check(value.is<picojson::array>(), "Value is not an array");
 	const picojson::array& array = value.get<picojson::array>();
-	SessionsInformation result;
+	std::vector<T> result;
 	result.reserve(array.size());
-	std::transform(array.begin(), array.end(), std::back_inserter(result),
-		FromJson<SessionInformation>);
+	std::transform(array.begin(), array.end(), std::back_inserter(result), FromJson<T>);
 	return result;
 }
 

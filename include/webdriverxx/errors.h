@@ -6,11 +6,9 @@
 
 namespace webdriverxx {
 
-struct WebDriverException : std::runtime_error
-{
+struct WebDriverException : std::runtime_error {
 	explicit WebDriverException(const std::string& message)
-		: std::runtime_error(message)
-	{}
+		: std::runtime_error(message) {}
 };
 
 } // namespace webdriverxx
