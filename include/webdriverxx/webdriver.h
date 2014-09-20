@@ -2,11 +2,12 @@
 #define WEBDRIVERXX_WEBDRIVER_H
 
 #include "capabilities.h"
+#include "types.h"
 #include "detail/resource.h"
 #include "detail/http_connection.h"
 #include "detail/error_handling.h"
+#include "detail/conversions.h"
 #include <string>
-#include <algorithm>
 
 namespace webdriverxx {
 
@@ -29,7 +30,7 @@ public:
 	{
 		try
 		{
-			const picojson::value& value = server_root_.Get("status").get("value");
+			const picojson::value value = server_root_.Get("status").get("value");
 			detail::Check(value.is<picojson::object>(), "Value is not an object");
 			return server_root_.Get("status").get("value").get<picojson::object>();
 		}
@@ -37,6 +38,25 @@ public:
 		{
 			return detail::Rethrow("Cannot get status", picojson::object());
 		}
+	}
+
+	std::vector<SessionInformation> GetSessions() const
+	{
+		try
+		{
+			return detail::FromJson<SessionsInformation>(
+				server_root_.Get("sessions").get("value")
+				);
+		}
+		catch (std::exception&)
+		{
+			return detail::Rethrow("Cannot get sessions", std::vector<SessionInformation>());
+		}
+	}
+
+	const Capabilities& GetCapabilities() const
+	{
+		return session_.capabilities;
 	}
 
 private:
