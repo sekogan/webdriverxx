@@ -23,12 +23,7 @@ public:
 
 	HttpResponse Get(const std::string& url) const
 	{
-		return HttpGetRequest(connection_, url).DoRequest();
-	}
-	
-	HttpResponse Put(const std::string& /*url*/) const
-	{
-		return HttpResponse();
+		return HttpGetRequest(connection_, url).Execute();
 	}
 	
 	HttpResponse Delete(const std::string& /*url*/) const
@@ -38,12 +33,21 @@ public:
 	
 	HttpResponse Post(
 		const std::string& url,
-		const std::string& contentType,
+		const char* contentType,
 		const std::string& postData
 		) const
 	{
-		return HttpPostRequest(connection_, url, contentType, postData).DoRequest();
+		return HttpPostRequest(connection_, url, contentType, postData).Execute();
 	}
+
+	HttpResponse Put(
+		const std::string& url,
+		const char* contentType,
+		const std::string& postData
+		) const
+	{
+		return HttpPutRequest(connection_, url, contentType, postData).Execute();
+	}	
 
 private:
 	static

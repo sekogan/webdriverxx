@@ -37,15 +37,15 @@ private:
 	curl_slist* head_;
 };
 
-class HttpRequestBase
+class HttpRequest
 {
 public:
-	HttpResponse DoRequest()
+	HttpResponse Execute()
 	{
 		curl_easy_reset(http_connection_);
 		SetOption(CURLOPT_URL, url_.c_str());
-		SetOption(CURLOPT_WRITEFUNCTION, &WriteCallback);
 		HttpResponse response;
+		SetOption(CURLOPT_WRITEFUNCTION, &WriteCallback);
 		SetOption(CURLOPT_WRITEDATA, &response.body);
 		char error_message[CURL_ERROR_SIZE];
   		SetOption(CURLOPT_ERRORBUFFER, &error_message);
@@ -65,7 +65,7 @@ public:
 	}
 
 protected:
-	HttpRequestBase(
+	HttpRequest(
 		CURL* http_connection,
 		const std::string& url
 		)
@@ -109,8 +109,8 @@ private:
 	}
 
 private:
-	HttpRequestBase(HttpRequestBase&);
-	HttpRequestBase& operator=(HttpRequestBase&);
+	HttpRequest(HttpRequest&);
+	HttpRequest& operator=(HttpRequest&);
 
 private:
 	CURL *const http_connection_;
@@ -118,40 +118,41 @@ private:
 	HttpHeaders headers_;
 };
 
-class HttpGetRequest : public HttpRequestBase
+class HttpGetRequest : public HttpRequest
 {
 public:
 	HttpGetRequest(CURL* http_connection, const std::string& url)
-		: HttpRequestBase(http_connection, url)
+		: HttpRequest(http_connection, url)
 	{}
 };
 
-class HttpPostRequest : public HttpRequestBase
+class HttpPostRequest : public HttpRequest
 {
 public:
 	HttpPostRequest(
 		CURL* http_connection,
 		const std::string& url,
-		const std::string& content_type,
+		const char* content_type,
 		const std::string& post_data
 		)
-		: HttpRequestBase(http_connection, url)
+		: HttpRequest(http_connection, url)
 		, content_type_(content_type)
 		, post_data_(post_data)
 		, unsent_ptr_(post_data.c_str())
 		, unsent_length_(post_data.size())
 	{}
 
-private:
+protected:
 	void SetCustomRequestOptions()
 	{
 		SetOption(CURLOPT_POST, 1L);
 		SetOption(CURLOPT_POSTFIELDSIZE, post_data_.length());
 		AddHeader("Content-Type", content_type_);
 		SetOption(CURLOPT_READFUNCTION, ReadCallback);
-		SetOption(CURLOPT_READDATA, &post_data_);
+		SetOption(CURLOPT_READDATA, this);
 	}
 
+private:
 	static
 	size_t ReadCallback(void* buffer, size_t size, size_t nmemb, void* userdata)
 	{
@@ -166,10 +167,30 @@ private:
 	}
 
 private:
-	const std::string& content_type_;
+	const char* content_type_;
 	const std::string& post_data_;
 	const char* unsent_ptr_;
 	size_t unsent_length_;
+};
+
+class HttpPutRequest : public HttpPostRequest
+{
+public:
+	HttpPutRequest(
+		CURL* http_connection,
+		const std::string& url,
+		const char* content_type,
+		const std::string& post_data
+		)
+		: HttpPostRequest(http_connection, url, content_type, post_data)
+	{}
+
+protected:
+	void SetCustomRequestOptions()
+	{
+		HttpPostRequest::SetCustomRequestOptions();
+		SetOption(CURLOPT_CUSTOMREQUEST, "PUT");
+	}
 };
 
 } // namespace detail

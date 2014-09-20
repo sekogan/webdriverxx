@@ -5,7 +5,7 @@
 using namespace webdriverxx;
 
 TEST(WebDriver, CanBeCreated) {
-	WebDriver driver;
+	WebDriver driver(kPhantomUrl);
 }
 
 TEST(WebDriver, CanGetStatus) {

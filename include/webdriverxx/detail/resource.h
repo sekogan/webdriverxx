@@ -1,5 +1,5 @@
-#ifndef WEBDRIVERXX_DETAIL_WEBDRIVER_PROTOCOL_H
-#define WEBDRIVERXX_DETAIL_WEBDRIVER_PROTOCOL_H
+#ifndef WEBDRIVERXX_DETAIL_RESOURCE_H
+#define WEBDRIVERXX_DETAIL_RESOURCE_H
 
 #include "http_client.h"
 #include "../errors.h"
@@ -8,25 +8,43 @@
 namespace webdriverxx {
 namespace detail {
 
-class WebDriverProtocol
+const char *const kContentTypeJson = "application/json;charset=UTF-8";
+
+class Resource
 {
 public:
-	WebDriverProtocol(
-		const IHttpClient* http_client,
-		const std::string& url
-		)
+	Resource(const IHttpClient* http_client, const std::string& url)
 		: http_client_(http_client)
 		, url_(url)
 	{}
 
-	std::string GetUrl() const
+	const std::string& GetUrl() const
 	{
 		return url_;
 	}
 
-	picojson::value Get(const std::string& command) const
+	Resource GetSubResource(const char* name) const
 	{
-		return ProcessResponse(http_client_->Get(ConcatUrl(url_, command)));
+		return Resource(http_client_, ConcatUrl(url_, name));
+	}
+
+	picojson::value Get(const char* command) const
+	{
+		return ProcessResponse(http_client_->Get(
+			ConcatUrl(url_, command)
+			));
+	}
+
+	picojson::value Post(
+		const char* command,
+		const picojson::value& data
+		) const
+	{
+		return ProcessResponse(http_client_->Post(
+			ConcatUrl(url_, command),
+			kContentTypeJson,
+			data.serialize()
+			));
 	}
 
 private:
@@ -72,8 +90,7 @@ private:
 	}
 
 	static
-	void CheckResponse(bool condition, const char* reason,
-		const HttpResponse& http_response)
+	void CheckResponse(bool condition, const char* reason, const HttpResponse& http_response)
 	{
 		if (!condition)
 		{
