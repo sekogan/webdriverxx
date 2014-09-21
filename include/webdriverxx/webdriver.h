@@ -27,23 +27,19 @@ public:
 		, session_deleter_(session_.resource) {}
 
 	picojson::object GetStatus() const {
-		try {
-			const picojson::value value = server_root_.Get("status").get("value");
-			detail::Check(value.is<picojson::object>(), "Value is not an object");
-			return server_root_.Get("status").get("value").get<picojson::object>();
-		} catch (std::exception&) {
-			return detail::Rethrow("while getting status", picojson::object());
-		}
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		const picojson::value value = server_root_.Get("status").get("value");
+		WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Value is not an object");
+		return value.get<picojson::object>();
+		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
-
+	
 	SessionsInformation GetSessions() const {
-		try {
-			return detail::FromJsonArray<SessionInformation>(
-				server_root_.Get("sessions").get("value")
-				);
-		} catch (std::exception&) {
-			return detail::Rethrow("while getting sessions", SessionsInformation());
-		}
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		return detail::FromJsonArray<SessionInformation>(
+			server_root_.Get("sessions").get("value")
+			);
+		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
 	const Capabilities& GetCapabilities() const {
@@ -51,37 +47,29 @@ public:
 	}
 
 	std::vector<Window> GetWindows() const {
-		try {
-			const std::vector<std::string> handles =
-				detail::FromJsonArray<std::string>(
-					session_.resource.Get("window_handles").get("value")
-					);
-			std::vector<Window> result;
-			for (std::vector<std::string>::const_iterator it = handles.begin();
-				it != handles.end(); ++it)
-				result.push_back(MakeWindow(*it));
-			return result;
-		} catch (std::exception&) {
-			return detail::Rethrow("while getting window handles", std::vector<Window>());
-		}
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		const std::vector<std::string> handles =
+			detail::FromJsonArray<std::string>(
+				session_.resource.Get("window_handles").get("value")
+				);
+		std::vector<Window> result;
+		for (std::vector<std::string>::const_iterator it = handles.begin();
+			it != handles.end(); ++it)
+			result.push_back(MakeWindow(*it));
+		return result;
+		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
-	std::string GetUrl() const
-	{
-		try {
-			return session_.resource.Get("url").get("value").to_str();
-		} catch (std::exception&) {
-			return detail::Rethrow("while getting URL", std::string());
-		}		
+	std::string GetUrl() const {
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		return session_.resource.Get("url").get("value").to_str();
+		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
-	void Navigate(const std::string& url) const
-	{
-		try {
-			session_.resource.Post("url", detail::JsonObject().With("url", url).Build());
-		} catch (std::exception&) {
-			detail::Rethrow("while navigating");
-		}		
+	void Navigate(const std::string& url) const {
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		session_.resource.Post("url", detail::JsonObject().With("url", url).Build());
+		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
 private:
@@ -101,25 +89,23 @@ private:
 		const Capabilities& required,
 		const Capabilities& desired
 		) const {
-		try {
-			const picojson::value& response = server_root_.Post("session",
-				detail::JsonObject()
-					.With("requiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(required))
-					.With("desiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(desired))
-					.Build());
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		const picojson::value& response = server_root_.Post("session",
+			detail::JsonObject()
+				.With("requiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(required))
+				.With("desiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(desired))
+				.Build());
 
-			detail::Check(response.get("sessionId").is<std::string>(), "Session ID is not a string");
-			detail::Check(response.get("value").is<picojson::object>(), "Capabilities is not an object");
-			
-			const std::string& sessionId = response.get("sessionId").to_str();
-			
-			return Session(
-				server_root_.GetSubResource("session").GetSubResource(sessionId),
-				detail::CapabilitiesAccess::Construct(response.get("value").get<picojson::object>())
-				);
-		} catch (const std::exception&) {
-			return detail::Rethrow("while creating session", Session(server_root_));
-		}
+		WEBDRIVERXX_CHECK(response.get("sessionId").is<std::string>(), "Session ID is not a string");
+		WEBDRIVERXX_CHECK(response.get("value").is<picojson::object>(), "Capabilities is not an object");
+		
+		const std::string& sessionId = response.get("sessionId").to_str();
+		
+		return Session(
+			server_root_.GetSubResource("session").GetSubResource(sessionId),
+			detail::CapabilitiesAccess::Construct(response.get("value").get<picojson::object>())
+			);
+		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
 	Window MakeWindow(const std::string& handle) const

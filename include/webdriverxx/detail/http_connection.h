@@ -44,8 +44,7 @@ private:
 	static
 	CURL* InitCurl() {
 		CURL *const result = curl_easy_init();
-		if (!result)
-			throw WebDriverException("Cannot initialize CURL");
+		WEBDRIVERXX_CHECK(result, "Cannot initialize CURL");
 		return result;
 	}
 

@@ -24,30 +24,42 @@ private:
 	std::ostringstream stream_;
 };
 
-inline
-void Check(bool invariant, const char* error_message) {
-	if (!invariant)
-		throw WebDriverException(error_message);
-}
-
-inline
-void Rethrow(const std::string& context) {
-	try {
-		throw;
-	} catch (const std::exception& e) {
-		throw WebDriverException(std::string(e.what()) + " " + context);
-	}
-}
-
-// For functions that return something to suppress compiler warning
-template<typename ReturnType>
-inline
-ReturnType Rethrow(const std::string& context, const ReturnType& return_value) {
-	Rethrow(context);
-	return return_value;
-}
-
 } // namespace detail
 } // namespace webdriverxx
+
+#if __cplusplus >= 201103L
+	#define WEBDRIVERXX_CURRENT_FUNCTION __func__
+#else
+	#define WEBDRIVERXX_CURRENT_FUNCTION __FUNCTION__
+#endif
+
+#define WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN() \
+	try {
+
+#define WEBDRIVERXX_FUNCTION_CONTEXT_END() \
+	} catch (const std::exception& e) { \
+		throw ::webdriverxx::WebDriverException(std::string(e.what()) \
+			+ " called from " + WEBDRIVERXX_CURRENT_FUNCTION); \
+	}
+
+#define WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(details) \
+	} catch (const std::exception& e) { \
+		throw ::webdriverxx::WebDriverException(std::string(e.what()) \
+			+ " called from " + WEBDRIVERXX_CURRENT_FUNCTION \
+			+ " (" + std::string(details) + ")"); \
+	}
+
+#define WEBDRIVERXX_THROW(message) \
+	throw ::webdriverxx::WebDriverException(::webdriverxx::detail::Fmt() \
+		<< std::string(message) \
+		<< " at line " << __LINE__ \
+		<< ", file " << __FILE__ \
+		)
+
+#define WEBDRIVERXX_CHECK(pred, message) \
+	do { \
+		if (!(pred)) \
+			WEBDRIVERXX_THROW(message); \
+	} while(0)
 
 #endif

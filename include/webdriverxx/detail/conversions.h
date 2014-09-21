@@ -28,7 +28,7 @@ T FromJson(const picojson::value& value);
 template<>
 inline
 SessionInformation FromJson<SessionInformation>(const picojson::value& value) {
-	detail::Check(value.is<picojson::object>(), "Session information is not an object");
+	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Session information is not an object");
 	SessionInformation result;
 	result.id = value.get("sessionId").to_str();
 	if (value.get("capabilities").is<picojson::object>())
@@ -45,7 +45,7 @@ std::string FromJson<std::string>(const picojson::value& value) {
 template<typename T>
 inline
 std::vector<T> FromJsonArray(const picojson::value& value) {
-	detail::Check(value.is<picojson::array>(), "Value is not an array");
+	WEBDRIVERXX_CHECK(value.is<picojson::array>(), "Value is not an array");
 	const picojson::array& array = value.get<picojson::array>();
 	std::vector<T> result;
 	result.reserve(array.size());

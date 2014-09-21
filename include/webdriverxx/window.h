@@ -16,20 +16,16 @@ public:
 		: resource_(resource) {}
 
 	Size GetSize() const {
-		try {
-			resource_.Get("size"); // TODO
-			return Size();
-		} catch (const std::exception&) {
-			return detail::Rethrow("while getting window size", Size());
-		}
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		resource_.Get("size"); // TODO
+		return Size();
+		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
 	void Maximize() const {
-		try {
-			resource_.Post("maximize");
-		} catch (const std::exception&) {
-			detail::Rethrow("while maximizing window");
-		}
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		resource_.Post("maximize");
+		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
 private:
