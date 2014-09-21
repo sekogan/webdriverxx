@@ -51,7 +51,7 @@ public:
 			detail::Check(value.is<picojson::object>(), "Value is not an object");
 			return server_root_.Get("status").get("value").get<picojson::object>();
 		} catch (std::exception&) {
-			return detail::Rethrow("Cannot get status", picojson::object());
+			return detail::Rethrow("while getting status", picojson::object());
 		}
 	}
 
@@ -61,7 +61,7 @@ public:
 				server_root_.Get("sessions").get("value")
 				);
 		} catch (std::exception&) {
-			return detail::Rethrow("Cannot get sessions", SessionsInformation());
+			return detail::Rethrow("while getting sessions", SessionsInformation());
 		}
 	}
 
@@ -81,7 +81,7 @@ public:
 				result.push_back(MakeWindow(*it));
 			return result;
 		} catch (std::exception&) {
-			return detail::Rethrow("Cannot get window handles", std::vector<Window>());
+			return detail::Rethrow("while getting window handles", std::vector<Window>());
 		}
 	}
 
@@ -90,7 +90,7 @@ public:
 		try {
 			return session_.resource.Get("url").get("value").to_str();
 		} catch (std::exception&) {
-			return detail::Rethrow("Cannot get URL", std::string());
+			return detail::Rethrow("while getting URL", std::string());
 		}		
 	}
 
@@ -99,7 +99,7 @@ public:
 		try {
 			session_.resource.Post("url", ObjectBuilder().Add("url", url).Build());
 		} catch (std::exception&) {
-			detail::Rethrow("Cannot navigate");
+			detail::Rethrow("while navigating");
 		}		
 	}
 
@@ -138,7 +138,7 @@ private:
 				Capabilities(response.get("value").get<object>())
 				);
 		} catch (const std::exception&) {
-			return detail::Rethrow("Cannot create session", Session(server_root_));
+			return detail::Rethrow("while creating session", Session(server_root_));
 		}
 	}
 

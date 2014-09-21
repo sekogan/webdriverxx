@@ -20,7 +20,7 @@ public:
 			resource_.Get("size"); // TODO
 			return Size();
 		} catch (const std::exception&) {
-			return detail::Rethrow("Cannot maximize window", Size());
+			return detail::Rethrow("while getting window size", Size());
 		}
 	}
 
@@ -28,7 +28,7 @@ public:
 		try {
 			resource_.Post("maximize");
 		} catch (const std::exception&) {
-			detail::Rethrow("Cannot maximize window");
+			detail::Rethrow("while maximizing window");
 		}
 	}
 

@@ -35,7 +35,7 @@ void Rethrow(const std::string& context) {
 	try {
 		throw;
 	} catch (const std::exception& e) {
-		throw WebDriverException(context + " -> " + e.what());
+		throw WebDriverException(std::string(e.what()) + " " + context);
 	}
 }
 

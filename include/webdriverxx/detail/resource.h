@@ -56,7 +56,7 @@ private:
 				ConcatUrl(url_, command)
 				));
 		} catch (const std::exception&) {
-			return Rethrow(Fmt() << "Cannot " << request_type << " \"" << command << "\" ("
+			return Rethrow(Fmt() << "while performing " << request_type << " \"" << command << "\" ("
 				<< "resource: " << url_
 				<< ")"
 				, picojson::value());
@@ -75,7 +75,7 @@ private:
 				upload_data.serialize()
 				));
 		} catch (const std::exception&) {
-			return Rethrow(Fmt() << "Cannot " << request_type << " \"" << command << "\" ("
+			return Rethrow(Fmt() << "while performing " << request_type << " \"" << command << "\" ("
 				<< "resource: " << url_
 				<< ", " << request_type << " data: " << upload_data.serialize()
 				<< ")"
@@ -87,7 +87,7 @@ private:
 		try {
 			return ProcessResponseImpl(http_response);
 		} catch (const std::exception&) {
-			return Rethrow(Fmt() << "Error while processing response ("
+			return Rethrow(Fmt() << ", server response ("
 				<< "HTTP code: " << http_response.http_code
 				<< ", body: " << http_response.body
 				<< ")"
