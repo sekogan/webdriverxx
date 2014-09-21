@@ -88,6 +88,7 @@ Size FromJson<Size>(const picojson::value& value) {
 	return result;
 }
 
+inline
 picojson::value ToJson(const Size& size)
 {
 	return JsonObject()
@@ -106,6 +107,7 @@ Position FromJson<Position>(const picojson::value& value) {
 	return result;
 }
 
+inline
 picojson::value ToJson(const Position& position)
 {
 	return JsonObject()

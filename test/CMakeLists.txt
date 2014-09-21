@@ -1,9 +1,10 @@
 set(SOURCE_FILES
 	http_connection_test.cpp
+	main.cpp
 	resource_test.cpp
-	webdriver_test.cpp
-	test_helpers.h
 	test_data.h
+	test_helpers.h
+	webdriver_test.cpp
 	)
 
 file(COPY pages DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -57,7 +58,7 @@ externalproject_get_property(gmock_project source_dir binary_dir)
 include_directories("${source_dir}/include")
 include_directories("${source_dir}/gtest/include")
 link_directories("${binary_dir}")
-list(APPEND LIBS gmock gmock_main)
+list(APPEND LIBS gmock)
 list(APPEND DEPS gmock_project)
 
 # pthread

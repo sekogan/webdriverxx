@@ -27,13 +27,18 @@ public:
 
 	Capabilities() {}
 
-	Capabilities& With(const std::string& name, const std::string& value)
+	Capabilities& Add(const std::string& name, const std::string& value)
 	{
 		object_[name] = picojson::value(value);
 		return *this;
 	}
 
-	Capabilities& With(const std::string& name, bool value)
+	Capabilities& Add(const std::string& name, const char* value)
+	{
+		return Add(name, std::string(value));
+	}
+
+	Capabilities& Add(const std::string& name, bool value)
 	{
 		object_[name] = picojson::value(value);
 		return *this;
