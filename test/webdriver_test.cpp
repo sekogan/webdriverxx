@@ -55,6 +55,71 @@ TEST(WebDriver, CanGetCapabilities)
 	ASSERT_NE("", c.GetString("browserName"));
 }
 
+TEST(WebDriver, CanGetCurrentWindow) {
+	WebDriver driver(kPhantomUrl);
+	driver.GetCurrentWindow();
+}
+
+TEST(WebDriver, CanGetWindowHandle) {
+	WebDriver driver(kPhantomUrl);
+	ASSERT_NE("", driver.GetCurrentWindow().GetHandle());
+}
+
+TEST(WebDriver, CanCloseCurrentWindow) {
+	WebDriver driver(kPhantomUrl);
+	driver.CloseCurrentWindow();
+}
+
+TEST(WebDriver, CanSetFocusToWindow) {
+	WebDriver driver(kPhantomUrl);
+	driver.SetFocusToWindow(driver.GetCurrentWindow().GetHandle());
+}
+
+TEST(WebDriver, CanGetWindowSize) {
+	WebDriver driver(kPhantomUrl);
+	Window window = driver.GetCurrentWindow();
+	window.GetSize();
+}
+
+TEST(WebDriver, CanSetWindowSize) {
+	WebDriver driver(kPhantomUrl);
+	Window window = driver.GetCurrentWindow();
+	Size size1;
+	size1.width = 101;
+	size1.height = 102;
+	window.SetSize(size1);
+	Size size2 = window.GetSize();
+	ASSERT_EQ(101, size2.width);
+	ASSERT_EQ(102, size2.height);
+}
+
+TEST(WebDriver, CanGetWindowPosition) {
+	WebDriver driver(kPhantomUrl);
+	Window window = driver.GetCurrentWindow();
+	window.GetPosition();
+}
+
+TEST(WebDriver, CanSetWindowPosition) {
+	WebDriver driver(kPhantomUrl);
+	Window window = driver.GetCurrentWindow();
+	Position position1;
+	position1.x = 101;
+	position1.y = 102;
+	window.SetPosition(position1);
+	if (driver.GetCapabilities().GetString("browserName") != "phantomjs")
+	{
+		Position position2 = window.GetPosition();
+		ASSERT_EQ(101, position2.x);
+		ASSERT_EQ(102, position2.y);
+	}
+}
+
+TEST(WebDriver, CanMaximizeWindow) {
+	WebDriver driver(kPhantomUrl);
+	Window window = driver.GetCurrentWindow();
+	window.Maximize();
+}
+
 TEST(WebDriver, CanGetWindows) {
 	WebDriver driver(kPhantomUrl);
 	driver.GetWindows();

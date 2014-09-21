@@ -13,6 +13,18 @@ struct SessionInformation {
 };
 typedef std::vector<SessionInformation> SessionsInformation;
 
+struct Size {
+	int width;
+	int height;
+	Size() : width(0), height(0) {}
+};
+
+struct Position {
+	int x;
+	int y;
+	Position() : x(0), y(0) {}
+};
+
 } // namespace webdriverxx
 
 #endif

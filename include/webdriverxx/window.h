@@ -1,24 +1,44 @@
 #ifndef WEBDRIVERXX_WINDOW_H
 #define WEBDRIVERXX_WINDOW_H
 
+#include "types.h"
 #include "detail/resource.h"
+#include "detail/conversions.h"
+#include <string>
 
 namespace webdriverxx {
 
-struct Size {
-	int width;
-	int height;
-};
-
 class Window { // copyable
 public:
-	explicit Window(const detail::Resource& resource)
-		: resource_(resource) {}
+	Window(const std::string& handle, const detail::Resource& resource)
+		: handle_(handle)
+		, resource_(resource) {}
+
+	std::string GetHandle() const {
+		return handle_;
+	}
 
 	Size GetSize() const {
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-		resource_.Get("size"); // TODO
-		return Size();
+		return detail::FromJson<Size>(resource_.Get("size").get("value"));
+		WEBDRIVERXX_FUNCTION_CONTEXT_END()
+	}
+
+	void SetSize(const Size& size) const {
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		resource_.Post("size", detail::ToJson(size));
+		WEBDRIVERXX_FUNCTION_CONTEXT_END()
+	}
+
+	Position GetPosition() const {
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		return detail::FromJson<Position>(resource_.Get("position").get("value"));
+		WEBDRIVERXX_FUNCTION_CONTEXT_END()
+	}
+
+	void SetPosition(const Position& position) const {
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		resource_.Post("position", detail::ToJson(position));
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
@@ -29,6 +49,7 @@ public:
 	}
 
 private:
+	std::string handle_;
 	detail::Resource resource_;
 };
 

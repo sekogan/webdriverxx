@@ -8,7 +8,6 @@
 #include "detail/http_connection.h"
 #include "detail/error_handling.h"
 #include "detail/conversions.h"
-#include "detail/builders.h"
 #include <string>
 
 namespace webdriverxx {
@@ -44,6 +43,28 @@ public:
 
 	const Capabilities& GetCapabilities() const {
 		return session_.capabilities;
+	}
+
+	Window GetCurrentWindow() const {
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		return MakeWindow(detail::FromJson<std::string>(
+			session_.resource.Get("window_handle").get("value")
+			));
+		WEBDRIVERXX_FUNCTION_CONTEXT_END()
+	}
+
+	void CloseCurrentWindow() const {
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		session_.resource.Delete("window");
+		WEBDRIVERXX_FUNCTION_CONTEXT_END()
+	}
+
+	void SetFocusToWindow(const std::string& name_or_handle) const {
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		session_.resource.Post("window",
+			detail::JsonObject().With("name", name_or_handle).Build()
+			);
+		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
 	std::vector<Window> GetWindows() const {
@@ -110,7 +131,9 @@ private:
 
 	Window MakeWindow(const std::string& handle) const
 	{
-		return Window(session_.resource.GetSubResource("window").GetSubResource(handle));
+		return Window(handle,
+			session_.resource.GetSubResource("window").GetSubResource(handle)
+			);
 	}	
 
 private:
