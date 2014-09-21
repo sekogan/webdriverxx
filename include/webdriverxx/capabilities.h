@@ -5,20 +5,12 @@
 #include <string>
 
 namespace webdriverxx {
+namespace detail {
+struct CapabilitiesAccess;
+} // namespace detail
 
 class Capabilities { // copyable
 public:
-	Capabilities() {}
-
-	explicit Capabilities(const picojson::object& object)
-		: object_(object) {}
-
-	template<typename T>
-	Capabilities& Set(const std::string& name, const T& value) {
-		object_[name] = picojson::value(value);
-		return *this;
-	}
-
 	bool Contains(const std::string& name) const {
 		return object_.find(name) != object_.end();
 	}
@@ -33,7 +25,27 @@ public:
 		return it == object_.end() ? std::string() : it->second.to_str();
 	}
 
-	const picojson::object& Get() const {
+	Capabilities() {}
+
+	Capabilities& With(const std::string& name, const std::string& value)
+	{
+		object_[name] = picojson::value(value);
+		return *this;
+	}
+
+	Capabilities& With(const std::string& name, bool value)
+	{
+		object_[name] = picojson::value(value);
+		return *this;
+	}
+
+private:
+	friend struct detail::CapabilitiesAccess;
+
+	explicit Capabilities(const picojson::object& object)
+		: object_(object) {}
+
+	const picojson::object& GetJsonObject() const {
 		return object_;
 	}
 

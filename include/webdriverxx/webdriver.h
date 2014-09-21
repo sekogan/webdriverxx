@@ -8,31 +8,12 @@
 #include "detail/http_connection.h"
 #include "detail/error_handling.h"
 #include "detail/conversions.h"
+#include "detail/builders.h"
 #include <string>
 
 namespace webdriverxx {
 
 const char *const kDefaultUrl = "http://localhost:4444/wd/hub/";
-
-// TODO: move this class to some other place
-class ObjectBuilder { // copyable
-public:
-	ObjectBuilder()
-		: value_(picojson::object()) {}
-
-	template<typename T>
-	ObjectBuilder& Add(const std::string& name, const T& value) {
-		value_.get<picojson::object>()[name] = picojson::value(value);
-		return *this;
-	}
-
-	const picojson::value& Build() const {
-		return value_;
-	}
-
-private:
-	picojson::value value_;
-};
 
 class WebDriver {
 public:
@@ -97,7 +78,7 @@ public:
 	void Navigate(const std::string& url) const
 	{
 		try {
-			session_.resource.Post("url", ObjectBuilder().Add("url", url).Build());
+			session_.resource.Post("url", detail::JsonObject().With("url", url).Build());
 		} catch (std::exception&) {
 			detail::Rethrow("while navigating");
 		}		
@@ -121,21 +102,20 @@ private:
 		const Capabilities& desired
 		) const {
 		try {
-			using namespace picojson;
-			value requestJson = value(object());
-			requestJson.get<object>()["requiredCapabilities"] = value(required.Get());
-			requestJson.get<object>()["desiredCapabilities"] = value(desired.Get());
-
-			const value& response = server_root_.Post("session", requestJson);
+			const picojson::value& response = server_root_.Post("session",
+				detail::JsonObject()
+					.With("requiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(required))
+					.With("desiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(desired))
+					.Build());
 
 			detail::Check(response.get("sessionId").is<std::string>(), "Session ID is not a string");
-			detail::Check(response.get("value").is<object>(), "Capabilities is not an object");
+			detail::Check(response.get("value").is<picojson::object>(), "Capabilities is not an object");
 			
 			const std::string& sessionId = response.get("sessionId").to_str();
 			
 			return Session(
 				server_root_.GetSubResource("session").GetSubResource(sessionId),
-				Capabilities(response.get("value").get<object>())
+				detail::CapabilitiesAccess::Construct(response.get("value").get<picojson::object>())
 				);
 		} catch (const std::exception&) {
 			return detail::Rethrow("while creating session", Session(server_root_));

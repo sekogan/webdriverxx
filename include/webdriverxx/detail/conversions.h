@@ -9,6 +9,18 @@
 namespace webdriverxx {
 namespace detail {
 
+struct CapabilitiesAccess {
+	static
+	Capabilities Construct(const picojson::object& object) {
+		return Capabilities(object);
+	}
+
+	static
+	const picojson::object& GetJsonObject(const Capabilities& capabilities) {
+		return capabilities.GetJsonObject();
+	}
+};
+
 template<typename T>
 inline
 T FromJson(const picojson::value& value);
@@ -20,7 +32,7 @@ SessionInformation FromJson<SessionInformation>(const picojson::value& value) {
 	SessionInformation result;
 	result.id = value.get("sessionId").to_str();
 	if (value.get("capabilities").is<picojson::object>())
-		result.capabilities = Capabilities(value.get("capabilities").get<picojson::object>());
+		result.capabilities = CapabilitiesAccess::Construct(value.get("capabilities").get<picojson::object>());
 	return result;
 }
 
