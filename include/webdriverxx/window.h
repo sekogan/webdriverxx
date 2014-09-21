@@ -20,7 +20,7 @@ public:
 
 	Size GetSize() const {
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-		return detail::FromJson<Size>(resource_.Get("size").get("value"));
+		return detail::FromJson<Size>(resource_.Get("size"));
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
@@ -32,7 +32,7 @@ public:
 
 	Position GetPosition() const {
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-		return detail::FromJson<Position>(resource_.Get("position").get("value"));
+		return detail::FromJson<Position>(resource_.Get("position"));
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 

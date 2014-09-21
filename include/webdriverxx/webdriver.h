@@ -48,7 +48,7 @@ public:
 	Window GetCurrentWindow() const {
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 		return MakeWindow(detail::FromJson<std::string>(
-			session_.resource.Get("window_handle").get("value")
+			session_.resource.Get("window_handle")
 			));
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
@@ -71,7 +71,7 @@ public:
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 		const std::vector<std::string> handles =
 			detail::FromJsonArray<std::string>(
-				session_.resource.Get("window_handles").get("value")
+				session_.resource.Get("window_handles")
 				);
 		std::vector<Window> result;
 		for (std::vector<std::string>::const_iterator it = handles.begin();
@@ -83,7 +83,7 @@ public:
 
 	std::string GetUrl() const {
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-		return session_.resource.Get("url").get("value").to_str();
+		return session_.resource.Get("url").to_str();
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
@@ -123,7 +123,9 @@ private:
 		const std::string& sessionId = response.get("sessionId").to_str();
 		
 		return Session(
-			server_root_.GetSubResource("session").GetSubResource(sessionId),
+			server_root_
+				.GetSubResource<detail::Resource>("session")
+				.GetSubResource(sessionId),
 			detail::CapabilitiesAccess::Construct(response.get("value").get<picojson::object>())
 			);
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()
@@ -142,7 +144,7 @@ private:
 
 private:
 	const detail::HttpConnection http_connection_;
-	const detail::Resource server_root_;
+	const detail::ServerRoot server_root_;
 	const Session session_;
 	const detail::AutoResourceDeleter session_deleter_;
 };

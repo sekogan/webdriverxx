@@ -9,9 +9,10 @@
 namespace webdriverxx {
 namespace detail {
 
-class Resource { // copyable
+template<class ResponseReturnPolicy>
+class ResourceBase { // copyable
 public:
-	Resource(const IHttpClient* http_client, const std::string& url)
+	ResourceBase(const IHttpClient* http_client, const std::string& url)
 		: http_client_(http_client)
 		, url_(url) {}
 
@@ -19,8 +20,13 @@ public:
 		return url_;
 	}
 
-	Resource GetSubResource(const std::string& name) const {
-		return Resource(http_client_, ConcatUrl(url_, name));
+	template<class SubResource>
+	SubResource GetSubResource(const std::string& name) const {
+		return SubResource(http_client_, ConcatUrl(url_, name));
+	}
+
+	ResourceBase<ResponseReturnPolicy> GetSubResource(const std::string& name) const {
+		return GetSubResource< ResourceBase<ResponseReturnPolicy> >(name);
 	}
 
 	picojson::value Get(const std::string& command = std::string()) const {
@@ -120,7 +126,7 @@ private:
 		WEBDRIVERXX_CHECK(status == response_status_code::kSuccess, "Non-zero response status code");
 		WEBDRIVERXX_CHECK(http_response.http_code == 200, "Unsupported HTTP code");
 
-		return response;
+		return ResponseReturnPolicy::ReturnResponse(response);
 		WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(Fmt()
 			<< "HTTP code: " << http_response.http_code
 			<< ", body: " << http_response.body
@@ -142,6 +148,29 @@ private:
 	const IHttpClient* http_client_;
 	std::string url_;
 };
+
+struct ReturnFullResponse {
+	static
+	picojson::value ReturnResponse(picojson::value& response)
+	{
+		picojson::value result;
+		response.swap(result);
+		return result;
+	}
+};
+
+struct ReturnValue {
+	static
+	picojson::value ReturnResponse(picojson::value& response)
+	{
+		picojson::value result;
+		response.get("value").swap(result);
+		return result;
+	}
+};
+
+typedef ResourceBase<ReturnFullResponse> ServerRoot;
+typedef ResourceBase<ReturnValue> Resource;
 
 struct AutoResourceDeleter {
 	explicit AutoResourceDeleter(const Resource& resource)

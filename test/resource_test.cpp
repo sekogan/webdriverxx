@@ -64,29 +64,51 @@ TEST_F(TestResource, IsCopyable) {
 	ASSERT_EQ("456", a.GetUrl());
 }
 
-TEST_F(TestResource, ReturnsJsonObject)
+TEST_F(TestResource, ServerRootReturnsJsonObject)
 {
-	Resource resource(&http_client, kTestUrl);
+	ServerRoot resource(&http_client, kTestUrl);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
 	ASSERT_TRUE(resource.Get("command").is<picojson::object>());
 }
 
-TEST_F(TestResource, ReturnsSessionId)
+TEST_F(TestResource, ServerRootReturnsSessionId)
 {
-	Resource resource(&http_client, kTestUrl);
+	ServerRoot resource(&http_client, kTestUrl);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
 	ASSERT_TRUE(resource.Get("command").contains("sessionId"));
 	ASSERT_EQ("123", resource.Get("command").get("sessionId").to_str());
 }
 
-TEST_F(TestResource, ReturnsNullSessionId)
+TEST_F(TestResource, ServerRootReturnsNullSessionId)
 {
-	Resource resource(&http_client, kTestUrl);
+	ServerRoot resource(&http_client, kTestUrl);
 	http_response.body = "{\"sessionId\":null,\"status\":0,\"value\":12345}";
 	ASSERT_TRUE(resource.Get("command").contains("sessionId"));
 	ASSERT_TRUE(resource.Get("command").get("sessionId").is<picojson::null>());
+}
+
+TEST_F(TestResource, ServerRootReturnsScalarValueFromPositiveResponse)
+{
+	ServerRoot resource(&http_client, kTestUrl);
+	http_response.http_code = 200;
+	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
+	picojson::value value = resource.Get("command").get("value");
+	ASSERT_TRUE(value.is<double>());
+	ASSERT_EQ(12345, value.get<double>());
+}
+
+TEST_F(TestResource, ServerRootReturnsObjectValueFromPositiveResponse)
+{
+	ServerRoot resource(&http_client, kTestUrl);
+	http_response.http_code = 200;
+	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":{\"member\":12345}}";
+	picojson::value value = resource.Get("command").get("value");
+	ASSERT_TRUE(value.is<picojson::object>());
+	ASSERT_TRUE(value.contains("member"));
+	ASSERT_TRUE(value.get("member").is<double>());
+	ASSERT_EQ(12345, value.get("member").get<double>());
 }
 
 TEST_F(TestResource, ReturnsScalarValueFromPositiveResponse)
@@ -94,7 +116,7 @@ TEST_F(TestResource, ReturnsScalarValueFromPositiveResponse)
 	Resource resource(&http_client, kTestUrl);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
-	picojson::value value = resource.Get("command").get("value");
+	picojson::value value = resource.Get("command");
 	ASSERT_TRUE(value.is<double>());
 	ASSERT_EQ(12345, value.get<double>());
 }
@@ -104,7 +126,7 @@ TEST_F(TestResource, ReturnsObjectValueFromPositiveResponse)
 	Resource resource(&http_client, kTestUrl);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":{\"member\":12345}}";
-	picojson::value value = resource.Get("command").get("value");
+	picojson::value value = resource.Get("command");
 	ASSERT_TRUE(value.is<picojson::object>());
 	ASSERT_TRUE(value.contains("member"));
 	ASSERT_TRUE(value.get("member").is<double>());

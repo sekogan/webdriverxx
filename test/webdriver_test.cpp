@@ -137,4 +137,3 @@ TEST(WebDriver, CanNavigateToTestPage) {
 	driver.Navigate(GetUrl("simple.html"));
 	ASSERT_EQ(GetUrl("simple.html"), driver.GetUrl());
 }
-
