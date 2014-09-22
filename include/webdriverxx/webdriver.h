@@ -14,16 +14,11 @@ namespace webdriverxx {
 
 const char *const kDefaultUrl = "http://localhost:4444/wd/hub/";
 
-class WebDriver {
+// Gives access to some API functions but doesn't create session
+class BasicWebDriver {
 public:
-	explicit WebDriver(
-		const std::string& url = kDefaultUrl,
-		const Capabilities& required = Capabilities(),
-		const Capabilities& desired = Capabilities()
-		)
-		: server_root_(&http_connection_, url)
-		, session_(CreateSession(required, desired))
-		, session_deleter_(session_.resource) {}
+	explicit BasicWebDriver(const std::string& url = kDefaultUrl)
+		: server_root_(&http_connection_, url) {}
 
 	picojson::object GetStatus() const {
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
@@ -40,6 +35,64 @@ public:
 			);
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
+
+protected:
+	struct Session {
+		detail::Resource resource;
+		Capabilities capabilities;
+
+		explicit Session(
+			const detail::Resource& resource,
+			const Capabilities& capabilities = Capabilities()
+			)
+			: resource(resource)
+			, capabilities(capabilities) {}
+	};
+
+	Session CreateSession(
+		const Capabilities& required,
+		const Capabilities& desired
+		) const {
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		const picojson::value& response = server_root_.Post("session",
+			detail::JsonObject()
+				.With("requiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(required))
+				.With("desiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(desired))
+				.Build());
+
+		WEBDRIVERXX_CHECK(response.get("sessionId").is<std::string>(), "Session ID is not a string");
+		WEBDRIVERXX_CHECK(response.get("value").is<picojson::object>(), "Capabilities is not an object");
+		
+		const std::string& sessionId = response.get("sessionId").to_str();
+		
+		return Session(
+			server_root_
+				.GetSubResource<detail::Resource>("session")
+				.GetSubResource(sessionId),
+			detail::CapabilitiesAccess::Construct(response.get("value").get<picojson::object>())
+			);
+		WEBDRIVERXX_FUNCTION_CONTEXT_END()
+	}
+
+private:
+	BasicWebDriver(BasicWebDriver&);
+	BasicWebDriver& operator=(BasicWebDriver&);
+
+private:
+	const detail::HttpConnection http_connection_;
+	const detail::ServerRoot server_root_;
+};
+
+class WebDriver : public BasicWebDriver {
+public:
+	explicit WebDriver(
+		const std::string& url = kDefaultUrl,
+		const Capabilities& required = Capabilities(),
+		const Capabilities& desired = Capabilities()
+		)
+		: BasicWebDriver(url)
+		, session_(CreateSession(required, desired))
+		, session_deleter_(session_.resource) {}
 
 	const Capabilities& GetCapabilities() const {
 		return session_.capabilities;
@@ -94,43 +147,6 @@ public:
 	}
 
 private:
-	struct Session {
-		detail::Resource resource;
-		Capabilities capabilities;
-
-		explicit Session(
-			const detail::Resource& resource,
-			const Capabilities& capabilities = Capabilities()
-			)
-			: resource(resource)
-			, capabilities(capabilities) {}
-	};
-
-	Session CreateSession(
-		const Capabilities& required,
-		const Capabilities& desired
-		) const {
-		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-		const picojson::value& response = server_root_.Post("session",
-			detail::JsonObject()
-				.With("requiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(required))
-				.With("desiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(desired))
-				.Build());
-
-		WEBDRIVERXX_CHECK(response.get("sessionId").is<std::string>(), "Session ID is not a string");
-		WEBDRIVERXX_CHECK(response.get("value").is<picojson::object>(), "Capabilities is not an object");
-		
-		const std::string& sessionId = response.get("sessionId").to_str();
-		
-		return Session(
-			server_root_
-				.GetSubResource<detail::Resource>("session")
-				.GetSubResource(sessionId),
-			detail::CapabilitiesAccess::Construct(response.get("value").get<picojson::object>())
-			);
-		WEBDRIVERXX_FUNCTION_CONTEXT_END()
-	}
-
 	Window MakeWindow(const std::string& handle) const
 	{
 		return Window(handle,
@@ -139,12 +155,6 @@ private:
 	}	
 
 private:
-	WebDriver(WebDriver&);
-	WebDriver& operator=(WebDriver&);
-
-private:
-	const detail::HttpConnection http_connection_;
-	const detail::ServerRoot server_root_;
 	const Session session_;
 	const detail::AutoResourceDeleter session_deleter_;
 };

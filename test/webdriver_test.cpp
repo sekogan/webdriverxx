@@ -5,29 +5,24 @@
 
 using namespace webdriverxx;
 
-TEST(WebDriver, CanBeCreated) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
+TEST(BasicWebDriver, CanBeCreated) {
+	BasicWebDriver driver(g_driver.url);
 }
 
-TEST(WebDriver, InstancesDoNotHaveConflicts) {
-	WebDriver a(g_driver.url, g_driver.required, g_driver.desired);
-	WebDriver b(g_driver.url, g_driver.required, g_driver.desired);
-}
-
-TEST(WebDriver, CanGetStatus) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
+TEST(BasicWebDriver, CanGetStatus) {
+	BasicWebDriver driver(g_driver.url);
 	picojson::object status = driver.GetStatus();
 	ASSERT_TRUE(status["build"].is<picojson::object>());
 	ASSERT_TRUE(status["os"].is<picojson::object>());
 }
 
-TEST(WebDriver, CanGetSessions) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
+TEST(BasicWebDriver, CanGetSessions) {
+	BasicWebDriver driver(g_driver.url);
 	driver.GetSessions();
 }
 
 TEST(WebDriver, RegistersSession) {
-	WebDriver spy(g_driver.url, g_driver.required, g_driver.desired);
+	BasicWebDriver spy(g_driver.url);
 	size_t number_of_sessions_before = spy.GetSessions().size();
 	WebDriver testee(g_driver.url, g_driver.required, g_driver.desired);
 	size_t number_of_sessions_after = spy.GetSessions().size();
@@ -35,7 +30,7 @@ TEST(WebDriver, RegistersSession) {
 }
 
 TEST(WebDriver, UnregistersSessionOnScopeExit) {
-	WebDriver spy(g_driver.url, g_driver.required, g_driver.desired);
+	BasicWebDriver spy(g_driver.url);
 	size_t number_of_sessions_before = 0;
 	{
 		WebDriver testee(g_driver.url, g_driver.required, g_driver.desired);
@@ -45,45 +40,59 @@ TEST(WebDriver, UnregistersSessionOnScopeExit) {
 	ASSERT_EQ(number_of_sessions_before - 1, number_of_sessions_after);
 }
 
-TEST(WebDriver, CanGetCapabilities)
-{
+TEST(WebDriver, CanCloseCurrentWindow) {
 	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
-	Capabilities c = driver.GetCapabilities();
+	driver.CloseCurrentWindow();
+}
+
+class SharedWebDriver : public ::testing::Test {
+protected:
+	static void SetUpTestCase() {
+		driver = new WebDriver(g_driver.url, g_driver.required, g_driver.desired);
+	}
+
+	static void TearDownTestCase() {
+		delete driver;
+		driver = 0;
+	}
+
+	static WebDriver* driver;
+};
+
+WebDriver* SharedWebDriver::driver = 0;
+
+TEST_F(SharedWebDriver, CanGetCapabilities)
+{
+	Capabilities c = driver->GetCapabilities();
 	ASSERT_TRUE(c.Contains("browserName"));
 	ASSERT_TRUE(c.Contains("version"));
 	ASSERT_TRUE(c.Contains("platform"));
 	ASSERT_NE("", c.GetString("browserName"));
 }
 
-TEST(WebDriver, CanGetCurrentWindow) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
-	driver.GetCurrentWindow();
+TEST_F(SharedWebDriver, CanStartSecondBrowser) {
+	WebDriver second(g_driver.url, g_driver.required, g_driver.desired);
 }
 
-TEST(WebDriver, CanGetWindowHandle) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
-	ASSERT_NE("", driver.GetCurrentWindow().GetHandle());
+TEST_F(SharedWebDriver, CanGetCurrentWindow) {
+	driver->GetCurrentWindow();
 }
 
-TEST(WebDriver, CanCloseCurrentWindow) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
-	driver.CloseCurrentWindow();
+TEST_F(SharedWebDriver, CanGetWindowHandle) {
+	ASSERT_NE("", driver->GetCurrentWindow().GetHandle());
 }
 
-TEST(WebDriver, CanSetFocusToWindow) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
-	driver.SetFocusToWindow(driver.GetCurrentWindow().GetHandle());
+TEST_F(SharedWebDriver, CanSetFocusToWindow) {
+	driver->SetFocusToWindow(driver->GetCurrentWindow().GetHandle());
 }
 
-TEST(WebDriver, CanGetWindowSize) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
-	Window window = driver.GetCurrentWindow();
+TEST_F(SharedWebDriver, CanGetWindowSize) {
+	Window window = driver->GetCurrentWindow();
 	window.GetSize();
 }
 
-TEST(WebDriver, CanSetWindowSize) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
-	Window window = driver.GetCurrentWindow();
+TEST_F(SharedWebDriver, CanSetWindowSize) {
+	Window window = driver->GetCurrentWindow();
 	Size size1;
 	size1.width = 601;
 	size1.height = 602;
@@ -93,20 +102,18 @@ TEST(WebDriver, CanSetWindowSize) {
 	ASSERT_EQ(602, size2.height);
 }
 
-TEST(WebDriver, CanGetWindowPosition) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
-	Window window = driver.GetCurrentWindow();
+TEST_F(SharedWebDriver, CanGetWindowPosition) {
+	Window window = driver->GetCurrentWindow();
 	window.GetPosition();
 }
 
-TEST(WebDriver, CanSetWindowPosition) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
-	Window window = driver.GetCurrentWindow();
+TEST_F(SharedWebDriver, CanSetWindowPosition) {
+	Window window = driver->GetCurrentWindow();
 	Position position1;
 	position1.x = 101;
 	position1.y = 102;
 	window.SetPosition(position1);
-	if (driver.GetCapabilities().GetString("browserName") != "phantomjs")
+	if (driver->GetCapabilities().GetString("browserName") != "phantomjs")
 	{
 		Position position2 = window.GetPosition();
 		ASSERT_EQ(101, position2.x);
@@ -114,26 +121,22 @@ TEST(WebDriver, CanSetWindowPosition) {
 	}
 }
 
-TEST(WebDriver, CanMaximizeWindow) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
-	Window window = driver.GetCurrentWindow();
+TEST_F(SharedWebDriver, CanMaximizeWindow) {
+	Window window = driver->GetCurrentWindow();
 	window.Maximize();
 }
 
-TEST(WebDriver, CanGetWindows) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
-	driver.GetWindows();
+TEST_F(SharedWebDriver, CanGetWindows) {
+	driver->GetWindows();
 }
 
-TEST(WebDriver, CanNavigate) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
+TEST_F(SharedWebDriver, CanNavigate) {
 	std::string url = std::string(g_driver.url) + "status";
-	driver.Navigate(url);
-	ASSERT_EQ(url, driver.GetUrl());
+	driver->Navigate(url);
+	ASSERT_EQ(url, driver->GetUrl());
 }
 
-TEST(WebDriver, CanNavigateToTestPage) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
-	driver.Navigate(GetUrl("simple.html"));
-	ASSERT_EQ(GetUrl("simple.html"), driver.GetUrl());
+TEST_F(SharedWebDriver, CanNavigateToTestPage) {
+	driver->Navigate(GetUrl("simple.html"));
+	ASSERT_EQ(GetUrl("simple.html"), driver->GetUrl());
 }
