@@ -56,6 +56,10 @@ protected:
 		driver = 0;
 	}
 
+	void SetUp() {
+		ASSERT_TRUE(driver);
+	}
+
 	static WebDriver* driver;
 };
 
@@ -139,4 +143,64 @@ TEST_F(SharedWebDriver, CanNavigate) {
 TEST_F(SharedWebDriver, CanNavigateToTestPage) {
 	driver->Navigate(GetUrl("simple.html"));
 	ASSERT_EQ(GetUrl("simple.html"), driver->GetUrl());
+}
+
+TEST_F(SharedWebDriver, CanFindElementById) {
+	driver->Navigate(GetUrl("elements.html"));
+	driver->FindElement(ById("id1"));
+}
+
+TEST_F(SharedWebDriver, CannotFindNonExistingElementById) {
+	driver->Navigate(GetUrl("elements.html"));
+	ASSERT_THROW(driver->FindElement(ById("non existing id")), WebDriverException);
+}
+
+TEST_F(SharedWebDriver, CanFindElementByClassName) {
+	driver->Navigate(GetUrl("elements.html"));
+	driver->FindElement(ByClassName("black"));
+}
+
+TEST_F(SharedWebDriver, CanFindElementByCssSelector) {
+	driver->Navigate(GetUrl("elements.html"));
+	driver->FindElement(ByCssSelector("body div#id1"));
+}
+
+TEST_F(SharedWebDriver, CanFindElementByName) {
+	driver->Navigate(GetUrl("elements.html"));
+	driver->FindElement(ByName("john"));
+}
+
+TEST_F(SharedWebDriver, CanFindElementByLinkText) {
+	driver->Navigate(GetUrl("elements.html"));
+	driver->FindElement(ByLinkText("some link"));
+}
+
+TEST_F(SharedWebDriver, CanFindElementByPartialLinkText) {
+	driver->Navigate(GetUrl("elements.html"));
+	driver->FindElement(ByPartialLinkText("some"));
+}
+
+TEST_F(SharedWebDriver, CanFindElementByTagName) {
+	driver->Navigate(GetUrl("elements.html"));
+	driver->FindElement(ByTagName("body"));
+}
+
+TEST_F(SharedWebDriver, CanFindElementByXPath) {
+	driver->Navigate(GetUrl("elements.html"));
+	driver->FindElement(ByXPath("//input"));
+}
+
+TEST_F(SharedWebDriver, CanFindElementsById) {
+	driver->Navigate(GetUrl("elements.html"));
+	ASSERT_EQ(1, driver->FindElements(ById("id1")).size());
+}
+
+TEST_F(SharedWebDriver, ReturnsEmptyListIfElementsAreNotFound) {
+	driver->Navigate(GetUrl("elements.html"));
+	ASSERT_EQ(0, driver->FindElements(ById("non existing id")).size());
+}
+
+TEST_F(SharedWebDriver, CanFindMoreThanOneElement) {
+	driver->Navigate(GetUrl("elements.html"));
+	ASSERT_EQ(2, driver->FindElements(ByTagName("div")).size());
 }

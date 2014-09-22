@@ -1,7 +1,9 @@
 #ifndef WEBDRIVERXX_WEBDRIVER_H
 #define WEBDRIVERXX_WEBDRIVER_H
 
+#include "element.h"
 #include "window.h"
+#include "by.h"
 #include "capabilities.h"
 #include "types.h"
 #include "detail/resource.h"
@@ -146,11 +148,53 @@ public:
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
+	Element FindElement(const By& by) const {
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		return MakeElement(detail::FromJson<detail::ElementId>(
+			session_.resource.Post("element",
+				detail::JsonObject()
+					.With("using", by.GetStrategy())
+					.With("value", by.GetValue())
+					.Build()
+				)).id);
+		WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(detail::Fmt()
+			<< "strategy: " << by.GetStrategy()
+			<< ", value: " << by.GetValue()
+			)
+	}
+
+	std::vector<Element> FindElements(const By& by) const {
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		const std::vector<detail::ElementId> ids =
+			detail::FromJsonArray<detail::ElementId>(
+				session_.resource.Post("elements", detail::JsonObject()
+					.With("using", by.GetStrategy())
+					.With("value", by.GetValue())
+					.Build()
+				));
+		std::vector<Element> result;
+		for (std::vector<detail::ElementId>::const_iterator it = ids.begin();
+			it != ids.end(); ++it)
+			result.push_back(MakeElement(it->id));
+		return result;
+		WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(detail::Fmt()
+			<< "strategy: " << by.GetStrategy()
+			<< ", value: " << by.GetValue()
+			)
+	}
+
 private:
 	Window MakeWindow(const std::string& handle) const
 	{
 		return Window(handle,
 			session_.resource.GetSubResource("window").GetSubResource(handle)
+			);
+	}	
+
+	Element MakeElement(const std::string& id) const
+	{
+		return Element(id,
+			session_.resource.GetSubResource("element").GetSubResource(id)
 			);
 	}	
 

@@ -9,6 +9,10 @@
 namespace webdriverxx {
 namespace detail {
 
+struct ElementId {
+	std::string id;
+};
+
 class JsonObject { // copyable
 public:
 	JsonObject()
@@ -114,6 +118,16 @@ picojson::value ToJson(const Position& position)
 		.With("x", position.x)
 		.With("y", position.y)
 		.Build();
+}
+
+template<>
+inline
+ElementId FromJson<ElementId>(const picojson::value& value) {
+	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Element is not an object");
+	WEBDRIVERXX_CHECK(value.get("ELEMENT").is<std::string>(), "Element ID is not a string");
+	ElementId result;
+	result.id = value.get("ELEMENT").to_str();
+	return result;
 }
 
 template<typename T>
