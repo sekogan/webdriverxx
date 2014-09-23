@@ -30,13 +30,13 @@ public:
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
-	Position GetPosition() const {
+	Point GetPosition() const {
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-		return detail::FromJson<Position>(resource_.Get("position"));
+		return detail::FromJson<Point>(resource_.Get("position"));
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
-	void SetPosition(const Position& position) const {
+	void SetPosition(const Point& position) const {
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 		resource_.Post("position", detail::ToJson(position));
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()

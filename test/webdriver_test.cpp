@@ -113,13 +113,13 @@ TEST_F(SharedWebDriver, CanGetWindowPosition) {
 
 TEST_F(SharedWebDriver, CanSetWindowPosition) {
 	Window window = driver->GetCurrentWindow();
-	Position position1;
+	Point position1;
 	position1.x = 101;
 	position1.y = 102;
 	window.SetPosition(position1);
 	if (driver->GetCapabilities().GetString("browserName") != "phantomjs")
 	{
-		Position position2 = window.GetPosition();
+		Point position2 = window.GetPosition();
 		ASSERT_EQ(101, position2.x);
 		ASSERT_EQ(102, position2.y);
 	}
@@ -202,7 +202,7 @@ TEST_F(SharedWebDriver, ReturnsEmptyListIfElementsAreNotFound) {
 
 TEST_F(SharedWebDriver, CanFindMoreThanOneElement) {
 	driver->Navigate(GetUrl("elements.html"));
-	ASSERT_EQ(3, driver->FindElements(ByTagName("div")).size());
+	ASSERT_TRUE(1 < driver->FindElements(ByTagName("div")).size());
 }
 
 TEST_F(SharedWebDriver, CanFindNestedElementByTagName) {
@@ -228,4 +228,74 @@ TEST_F(SharedWebDriver, CannotFindNonExistingNestedElement) {
 TEST_F(SharedWebDriver, CanFindMoreThanOneNestedElement) {
 	driver->Navigate(GetUrl("elements.html"));
 	ASSERT_EQ(2, driver->FindElement(ByTagName("div")).FindElements(ByTagName("span")).size());
+}
+
+// TODO: Element::Click
+// TODO: Element::Submit
+
+TEST_F(SharedWebDriver, GetsElementsText) {
+	driver->Navigate(GetUrl("elements.html"));
+	ASSERT_EQ("first span", driver->FindElement(ByTagName("span")).GetText());
+}
+
+TEST_F(SharedWebDriver, GetsElementsTagName) {
+	driver->Navigate(GetUrl("elements.html"));
+	ASSERT_EQ("div", driver->FindElement(ById("id1")).GetTagName());
+}
+
+// TODO: Element::Clear
+// IsEnabled
+// IsSelected
+
+TEST_F(SharedWebDriver, GetsElementsAttribute) {
+	driver->Navigate(GetUrl("elements.html"));
+	ASSERT_EQ("id1", driver->FindElement(ByTagName("div")).GetAttribute("id"));
+}
+
+TEST_F(SharedWebDriver, CanDetermineThatElementsAreEqual) {
+	driver->Navigate(GetUrl("elements.html"));
+	ASSERT_TRUE(driver->FindElement(ByTagName("div")).Equals(
+		driver->FindElement(ById("id1"))));
+}
+
+TEST_F(SharedWebDriver, CanDetermineThatElementsAreNotEqual) {
+	driver->Navigate(GetUrl("elements.html"));
+	ASSERT_TRUE(!driver->FindElement(ByTagName("span")).Equals(
+		driver->FindElement(ById("id1"))));
+}
+
+TEST_F(SharedWebDriver, CanCompareElementsWithEqualOperator) {
+	driver->Navigate(GetUrl("elements.html"));
+	ASSERT_TRUE(driver->FindElement(ByTagName("div")) ==
+		driver->FindElement(ById("id1")));
+}
+
+TEST_F(SharedWebDriver, CanCompareElementsWithNotEqualOperator) {
+	driver->Navigate(GetUrl("elements.html"));
+	ASSERT_TRUE(driver->FindElement(ByTagName("span")) !=
+		driver->FindElement(ById("id1")));
+}
+
+TEST_F(SharedWebDriver, CanGetElementsDisplayed) {
+	driver->Navigate(GetUrl("elements.html"));
+	ASSERT_TRUE(driver->FindElement(ById("id1")).IsDisplayed());
+	ASSERT_FALSE(driver->FindElement(ById("hidden")).IsDisplayed());
+}
+
+TEST_F(SharedWebDriver, CanGetElementsLocationSmokeTest) {
+	driver->Navigate(GetUrl("elements.html"));
+	driver->FindElement(ById("id1")).GetLocation();
+	driver->FindElement(ById("id1")).GetLocationInView();
+}
+
+TEST_F(SharedWebDriver, CanGetElementsSize) {
+	driver->Navigate(GetUrl("elements.html"));
+	Size size = driver->FindElement(ById("id1")).GetSize();
+	ASSERT_NE(0, size.width);
+	ASSERT_NE(0, size.height);
+}
+
+TEST_F(SharedWebDriver, CanGetElementsCssProperty) {
+	driver->Navigate(GetUrl("elements.html"));
+	ASSERT_EQ("none", driver->FindElement(ById("hidden")).GetCssProperty("display"));
 }

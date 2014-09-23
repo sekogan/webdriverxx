@@ -103,16 +103,16 @@ picojson::value ToJson(const Size& size)
 
 template<>
 inline
-Position FromJson<Position>(const picojson::value& value) {
-	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Position is not an object");
-	Position result;
+Point FromJson<Point>(const picojson::value& value) {
+	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Point is not an object");
+	Point result;
 	result.x = FromJson<int>(value.get("x"));
 	result.y = FromJson<int>(value.get("y"));
 	return result;
 }
 
 inline
-picojson::value ToJson(const Position& position)
+picojson::value ToJson(const Point& position)
 {
 	return JsonObject()
 		.With("x", position.x)

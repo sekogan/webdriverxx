@@ -14,8 +14,13 @@ Element::Element(
 	, finder_(finder) {}
 
 inline
-bool Element::operator != (const Element& e) const {
-	return id_ != e.id_;
+bool Element::operator != (const Element& other) const {
+	return !Equals(other);
+}
+
+inline
+bool Element::operator == (const Element& other) const {
+	return Equals(other);
 }
 
 inline
@@ -36,6 +41,104 @@ std::vector<Element> Element::FindElements(const By& by) const {
 		<< "strategy: " << by.GetStrategy()
 		<< ", value: " << by.GetValue()
 		)
+}
+
+inline
+void Element::Click() const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	resource_.Post("click");
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
+void Element::Submit() const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	resource_.Post("submit");
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
+std::string Element::GetText() const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return resource_.Get("text").to_str();
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
+std::string Element::GetTagName() const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return resource_.Get("name").to_str();
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
+void Element::Clear() const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	resource_.Post("clear");
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
+bool Element::IsSelected() const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return resource_.Get("selected").evaluate_as_boolean();
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
+bool Element::IsEnabled() const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return resource_.Get("enabled").evaluate_as_boolean();
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
+bool Element::Equals(const Element& other) const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return resource_.Get(std::string("equals/") + other.id_).evaluate_as_boolean();
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
+std::string Element::GetAttribute(const std::string& name) const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return resource_.Get(std::string("attribute/") + name).to_str();
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
+bool Element::IsDisplayed() const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return resource_.Get("displayed").evaluate_as_boolean();
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
+Point Element::GetLocation() const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return detail::FromJson<Point>(resource_.Get("location"));
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
+Point Element::GetLocationInView() const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return detail::FromJson<Point>(resource_.Get("location_in_view"));
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
+Size Element::GetSize() const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return detail::FromJson<Size>(resource_.Get("size"));
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
+std::string Element::GetCssProperty(const std::string& name) const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return resource_.Get(std::string("css/") + name).to_str();
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
 } // namespace webdriverxx

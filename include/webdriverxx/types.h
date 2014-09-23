@@ -19,10 +19,10 @@ struct Size {
 	Size() : width(0), height(0) {}
 };
 
-struct Position {
+struct Point {
 	int x;
 	int y;
-	Position() : x(0), y(0) {}
+	Point() : x(0), y(0) {}
 };
 
 } // namespace webdriverxx
