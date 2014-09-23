@@ -25,10 +25,6 @@ struct Position {
 	Position() : x(0), y(0) {}
 };
 
-struct ElementId {
-	std::string id;
-};
-
 } // namespace webdriverxx
 
 #endif

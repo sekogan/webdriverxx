@@ -202,5 +202,30 @@ TEST_F(SharedWebDriver, ReturnsEmptyListIfElementsAreNotFound) {
 
 TEST_F(SharedWebDriver, CanFindMoreThanOneElement) {
 	driver->Navigate(GetUrl("elements.html"));
-	ASSERT_EQ(2, driver->FindElements(ByTagName("div")).size());
+	ASSERT_EQ(3, driver->FindElements(ByTagName("div")).size());
+}
+
+TEST_F(SharedWebDriver, CanFindNestedElementByTagName) {
+	driver->Navigate(GetUrl("elements.html"));
+	Element e1 = driver->FindElement(ByTagName("div"));
+	Element e2 = e1.FindElement(ByTagName("div"));
+	ASSERT_TRUE(e1 != e2);
+}
+
+TEST_F(SharedWebDriver, FindsOnlyNestedElements) {
+	driver->Navigate(GetUrl("elements.html"));
+	Element e = driver->FindElement(ByTagName("div"));
+	ASSERT_EQ(1, e.FindElements(ByTagName("div")).size());
+}
+
+TEST_F(SharedWebDriver, CannotFindNonExistingNestedElement) {
+	driver->Navigate(GetUrl("elements.html"));
+	Element e = driver->FindElement(ByTagName("div"));
+	ASSERT_THROW(e.FindElement(ByTagName("p")), WebDriverException);
+	ASSERT_EQ(0, e.FindElements(ByTagName("p")).size());
+}
+
+TEST_F(SharedWebDriver, CanFindMoreThanOneNestedElement) {
+	driver->Navigate(GetUrl("elements.html"));
+	ASSERT_EQ(2, driver->FindElement(ByTagName("div")).FindElements(ByTagName("span")).size());
 }
