@@ -76,18 +76,20 @@ Window WebDriver::GetCurrentWindow() const {
 }
 
 inline
-void WebDriver::CloseCurrentWindow() const {
+const WebDriver& WebDriver::CloseCurrentWindow() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	session_.resource.Delete("window");
+	return *this;
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
 inline
-void WebDriver::SetFocusToWindow(const std::string& name_or_handle) const {
+const WebDriver& WebDriver::SetFocusToWindow(const std::string& name_or_handle) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	session_.resource.Post("window",
 		detail::JsonObject().With("name", name_or_handle).Build()
 		);
+	return *this;
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
@@ -114,9 +116,10 @@ std::string WebDriver::GetUrl() const {
 }
 
 inline
-void WebDriver::Navigate(const std::string& url) const {
+const WebDriver& WebDriver::Navigate(const std::string& url) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	session_.resource.Post("url", detail::JsonObject().With("url", url).Build());
+	return *this;
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
@@ -138,6 +141,27 @@ std::vector<Element> WebDriver::FindElements(const By& by) const {
 		<< "strategy: " << by.GetStrategy()
 		<< ", value: " << by.GetValue()
 		)
+}
+
+inline
+const WebDriver& WebDriver::SendKeys(const char* keys) const {
+	return SendKeys(std::string(keys));
+}
+
+inline
+const WebDriver& WebDriver::SendKeys(const std::string& keys) const {
+	std::vector<std::string> list(1, keys);
+	return SendKeys(list);
+}
+
+template<class IterableStringList>
+inline
+const WebDriver& WebDriver::SendKeys(const IterableStringList& keys) const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	session_.resource.Post("keys", detail::JsonObject()
+		.With("value", detail::ToJsonArray(keys)).Build());
+	return *this;
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
 inline

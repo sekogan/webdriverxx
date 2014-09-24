@@ -44,16 +44,18 @@ std::vector<Element> Element::FindElements(const By& by) const {
 }
 
 inline
-void Element::Click() const {
+const Element& Element::Click() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	resource_.Post("click");
+	return *this;
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
 inline
-void Element::Submit() const {
+const Element& Element::Submit() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	resource_.Post("submit");
+	return *this;
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
@@ -65,6 +67,27 @@ std::string Element::GetText() const {
 }
 
 inline
+const Element& Element::SendKeys(const char* keys) const {
+	return SendKeys(std::string(keys));
+}
+
+inline
+const Element& Element::SendKeys(const std::string& keys) const {
+	std::vector<std::string> list(1, keys);
+	return SendKeys(list);
+}
+
+template<class IterableStringList>
+inline
+const Element& Element::SendKeys(const IterableStringList& keys) const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	resource_.Post("value", detail::JsonObject()
+		.With("value", detail::ToJsonArray(keys)).Build());
+	return *this;
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
 std::string Element::GetTagName() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	return resource_.Get("name").to_str();
@@ -72,9 +95,10 @@ std::string Element::GetTagName() const {
 }
 
 inline
-void Element::Clear() const {
+const Element& Element::Clear() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	resource_.Post("clear");
+	return *this;
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 

@@ -27,11 +27,15 @@ public:
 	bool operator == (const Element& other) const;
 	Element FindElement(const By& by) const;
 	std::vector<Element> FindElements(const By& by) const;
-	void Click() const;
-	void Submit() const;
+	const Element& Click() const;
+	const Element& Submit() const;
 	std::string GetText() const;
+	const Element& SendKeys(const char* keys) const;
+	const Element& SendKeys(const std::string& keys) const;
+	template<class IterableStringList>
+	const Element& SendKeys(const IterableStringList& keys) const;
 	std::string GetTagName() const;
-	void Clear() const;
+	const Element& Clear() const;
 	bool IsSelected() const;
 	bool IsEnabled() const;
 	bool Equals(const Element& other) const;

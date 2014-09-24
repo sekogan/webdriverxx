@@ -62,13 +62,17 @@ public:
 
 	const Capabilities& GetCapabilities() const;
 	Window GetCurrentWindow() const;
-	void CloseCurrentWindow() const;
-	void SetFocusToWindow(const std::string& name_or_handle) const;
+	const WebDriver& CloseCurrentWindow() const;
+	const WebDriver& SetFocusToWindow(const std::string& name_or_handle) const;
 	std::vector<Window> GetWindows() const;
 	std::string GetUrl() const;
-	void Navigate(const std::string& url) const;
+	const WebDriver& Navigate(const std::string& url) const;
 	Element FindElement(const By& by) const;
 	std::vector<Element> FindElements(const By& by) const;
+	const WebDriver& SendKeys(const char* keys) const;
+	const WebDriver& SendKeys(const std::string& keys) const;
+	template<class IterableStringList>
+	const WebDriver& SendKeys(const IterableStringList& keys) const;
 
 private:
 	Element FindElement(

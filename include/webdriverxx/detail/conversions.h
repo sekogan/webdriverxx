@@ -56,6 +56,12 @@ struct CapabilitiesAccess {
 
 template<typename T>
 inline
+picojson::value ToJson(const T& value) {
+	return picojson::value(value);
+}
+
+template<typename T>
+inline
 T FromJson(const picojson::value& value);
 
 template<>
@@ -138,6 +144,15 @@ std::vector<T> FromJsonArray(const picojson::value& value) {
 	std::vector<T> result;
 	result.reserve(array.size());
 	std::transform(array.begin(), array.end(), std::back_inserter(result), FromJson<T>);
+	return result;
+}
+
+template<class Iterable>
+inline
+picojson::value ToJsonArray(const Iterable& src) {
+	picojson::value result = picojson::value(picojson::array());
+	picojson::array& dst = result.get<picojson::array>();
+	std::transform(src.begin(), src.end(), std::back_inserter(dst), ToJson<std::string>);
 	return result;
 }
 

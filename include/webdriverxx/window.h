@@ -24,9 +24,10 @@ public:
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
-	void SetSize(const Size& size) const {
+	const Window& SetSize(const Size& size) const {
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 		resource_.Post("size", detail::ToJson(size));
+		return *this;
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
@@ -36,15 +37,17 @@ public:
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
-	void SetPosition(const Point& position) const {
+	const Window& SetPosition(const Point& position) const {
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 		resource_.Post("position", detail::ToJson(position));
+		return *this;
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
-	void Maximize() const {
+	const Window& Maximize() const {
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 		resource_.Post("maximize");
+		return *this;
 		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 

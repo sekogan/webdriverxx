@@ -10,7 +10,7 @@ TEST(HttpConnection, CanBeCreated) {
 	HttpConnection connection;
 }
 
-TEST(HttpConnection, CanGetPage) {
+TEST(HttpConnection, GetsPage) {
 	HttpConnection connection;
 	HttpResponse response = connection.Get(std::string(kPhantomUrl) + "status");
 	ASSERT_EQ(200, response.http_code);
