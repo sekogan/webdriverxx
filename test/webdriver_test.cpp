@@ -205,17 +205,17 @@ TEST_F(SharedWebDriver, FindsElementByXPath) {
 
 TEST_F(SharedWebDriver, FindsElementsById) {
 	driver->Navigate(GetUrl("elements.html"));
-	ASSERT_EQ(1, driver->FindElements(ById("id1")).size());
+	ASSERT_EQ(1u, driver->FindElements(ById("id1")).size());
 }
 
 TEST_F(SharedWebDriver, ReturnsEmptyListIfElementsAreNotFound) {
 	driver->Navigate(GetUrl("elements.html"));
-	ASSERT_EQ(0, driver->FindElements(ById("non existing id")).size());
+	ASSERT_EQ(0u, driver->FindElements(ById("non existing id")).size());
 }
 
 TEST_F(SharedWebDriver, FindsMoreThanOneElement) {
 	driver->Navigate(GetUrl("elements.html"));
-	ASSERT_TRUE(1 < driver->FindElements(ByTagName("div")).size());
+	ASSERT_TRUE(1u < driver->FindElements(ByTagName("div")).size());
 }
 
 TEST_F(SharedWebDriver, FindsInnerElementByTagName) {
@@ -228,19 +228,19 @@ TEST_F(SharedWebDriver, FindsInnerElementByTagName) {
 TEST_F(SharedWebDriver, FindsOnlyInnerElements) {
 	driver->Navigate(GetUrl("elements.html"));
 	Element e = driver->FindElement(ByTagName("div"));
-	ASSERT_EQ(1, e.FindElements(ByTagName("div")).size());
+	ASSERT_EQ(1u, e.FindElements(ByTagName("div")).size());
 }
 
 TEST_F(SharedWebDriver, DoesNotFindNonExistingInnerElements) {
 	driver->Navigate(GetUrl("elements.html"));
 	Element e = driver->FindElement(ByTagName("div"));
 	ASSERT_THROW(e.FindElement(ByTagName("p")), WebDriverException);
-	ASSERT_EQ(0, e.FindElements(ByTagName("p")).size());
+	ASSERT_EQ(0u, e.FindElements(ByTagName("p")).size());
 }
 
 TEST_F(SharedWebDriver, FindsMoreThanOneInnerElement) {
 	driver->Navigate(GetUrl("elements.html"));
-	ASSERT_EQ(2, driver->FindElement(ByTagName("div")).FindElements(ByTagName("span")).size());
+	ASSERT_EQ(2u, driver->FindElement(ByTagName("div")).FindElements(ByTagName("span")).size());
 }
 
 TEST_F(SharedWebDriver, ClicksElement) {
