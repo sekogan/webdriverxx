@@ -124,6 +124,22 @@ const WebDriver& WebDriver::Navigate(const std::string& url) const {
 }
 
 inline
+std::string WebDriver::GetSource() const
+{
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return session_.resource.Get("source").to_str();
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
+std::string WebDriver::GetTitle() const
+{
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return session_.resource.Get("title").to_str();
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
 Element WebDriver::FindElement(const By& by) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	return FindElement(by, session_.resource);

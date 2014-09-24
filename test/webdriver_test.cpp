@@ -146,6 +146,18 @@ TEST_F(SharedWebDriver, NavigatesToTestPage) {
 	ASSERT_EQ(GetUrl("simple.html"), driver->GetUrl());
 }
 
+TEST_F(SharedWebDriver, GetsPageSource) {
+	driver->Navigate(GetUrl("elements.html"));
+	std::string source = driver->GetSource();
+	ASSERT_NE(std::string::npos, source.find("<html>"));
+	ASSERT_NE(std::string::npos, source.find("</html>"));
+}
+
+TEST_F(SharedWebDriver, GetsPageTitle) {
+	driver->Navigate(GetUrl("elements.html"));
+	ASSERT_EQ("Test title", driver->GetTitle());
+}
+
 TEST_F(SharedWebDriver, FindsElementById) {
 	driver->Navigate(GetUrl("elements.html"));
 	driver->FindElement(ById("id1"));

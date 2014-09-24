@@ -19,6 +19,7 @@ const char *const kDefaultUrl = "http://localhost:4444/wd/hub/";
 class BasicWebDriver { // noncopyable
 public:
 	explicit BasicWebDriver(const std::string& url = kDefaultUrl);
+	virtual ~BasicWebDriver() {}
 
 	picojson::object GetStatus() const;
 	SessionsInformation GetSessions() const;
@@ -67,6 +68,8 @@ public:
 	std::vector<Window> GetWindows() const;
 	std::string GetUrl() const;
 	const WebDriver& Navigate(const std::string& url) const;
+	std::string GetSource() const;
+	std::string GetTitle() const;
 	Element FindElement(const By& by) const;
 	std::vector<Element> FindElements(const By& by) const;
 	const WebDriver& SendKeys(const char* keys) const;

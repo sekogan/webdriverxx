@@ -11,7 +11,7 @@
 namespace webdriverxx {
 namespace detail {
 
-class Finder;
+struct Finder;
 
 } // namespace detail
 
