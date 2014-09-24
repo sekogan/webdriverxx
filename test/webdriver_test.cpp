@@ -58,7 +58,7 @@ protected:
 	}
 
 	void SetUp() {
-		ASSERT_TRUE(driver);
+		ASSERT_TRUE(!!driver);
 	}
 
 	static WebDriver* driver;

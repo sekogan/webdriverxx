@@ -74,7 +74,7 @@ template<>
 inline
 int FromJson<int>(const picojson::value& value) {
 	WEBDRIVERXX_CHECK(value.is<double>(), "Value is not a number");
-	return value.get<double>();
+	return static_cast<int>(value.get<double>());
 }
 
 template<>

@@ -183,6 +183,10 @@ struct AutoResourceDeleter {
 	}
 
 private:
+	AutoResourceDeleter(AutoResourceDeleter&);
+	AutoResourceDeleter& operator = (AutoResourceDeleter&);
+
+private:
 	const Resource& resource_;
 };
 
