@@ -57,9 +57,7 @@ private:
 		)
 
 #define WEBDRIVERXX_CHECK(pred, message) \
-	do { \
-		if (!(0, (pred))) \
-			WEBDRIVERXX_THROW(message); \
-	} while(0, 0)
+	for (;!(pred);) \
+		WEBDRIVERXX_THROW(message)
 
 #endif
