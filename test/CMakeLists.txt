@@ -44,7 +44,7 @@ endif()
 # picojson
 externalproject_add(picojson_project
 	PREFIX picojson
-	GIT_REPOSITORY https://github.com/kazuho/picojson
+	GIT_REPOSITORY https://github.com/sekogan/picojson
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND ""
 	INSTALL_COMMAND ""
