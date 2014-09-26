@@ -5,14 +5,16 @@
 #include <webdriverxx/capabilities.h>
 #include <gtest/gtest.h>
 #include <string>
+#include <algorithm>
 
 const char* const kPhantomUrl = "http://localhost:7777/";
 
-struct DriverParameters
+struct Parameters
 {
 	std::string url;
 	webdriverxx::Capabilities required;
 	webdriverxx::Capabilities desired;
+	std::string test_dir;
 };
 
 class Environment : public ::testing::Environment {
@@ -21,7 +23,7 @@ public:
 		return *instance_;
 	}
 
-	explicit Environment(const DriverParameters& parameters)
+	explicit Environment(const Parameters& parameters)
 		: driver_(0)
 		, parameters_(parameters) {}
 
@@ -40,8 +42,14 @@ public:
 		return parameters_.url;
 	}
 
-	DriverParameters GetParameters() const {
+	Parameters GetParameters() const {
 		return parameters_;
+	}
+
+	std::string GetTestPageUrl(const std::string& page_name) const {
+		std::string path = parameters_.test_dir;
+		std::replace(path.begin(), path.end(), '\\', '/');
+		return std::string("file://") + path + "pages/" + page_name;
 	}
 
 private:
@@ -62,7 +70,7 @@ private:
 private:
 	static Environment* instance_;
 	webdriverxx::WebDriver* driver_;
-	DriverParameters parameters_;
+	Parameters parameters_;
 };
 
 #endif

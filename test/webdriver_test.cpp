@@ -1,5 +1,4 @@
 #include "environment.h"
-#include "test_helpers.h"
 #include <webdriverxx/webdriver.h>
 #include <webdriverxx/keys.h>
 #include <gtest/gtest.h>
@@ -37,7 +36,7 @@ TEST_F(TestBasicWebDriver, GetsSessions) {
 }
 
 TEST(WebDriver, RegistersSession) {
-	DriverParameters params = Environment::Instance().GetParameters();
+	Parameters params = Environment::Instance().GetParameters();
 	BasicWebDriver spy(params.url);
 	size_t number_of_sessions_before = spy.GetSessions().size();
 	WebDriver testee(params.url, params.required, params.desired);
@@ -46,7 +45,7 @@ TEST(WebDriver, RegistersSession) {
 }
 
 TEST(WebDriver, UnregistersSessionOnScopeExit) {
-	DriverParameters params = Environment::Instance().GetParameters();
+	Parameters params = Environment::Instance().GetParameters();
 	BasicWebDriver spy(params.url);
 	size_t number_of_sessions_before = 0;
 	{
@@ -84,7 +83,7 @@ TEST_F(TestWebDriver, GetsCapabilities)
 }
 
 TEST_F(TestWebDriver, StartsSecondBrowser) {
-	DriverParameters params = Environment::Instance().GetParameters();
+	Parameters params = Environment::Instance().GetParameters();
 	WebDriver second(params.url, params.required, params.desired);
 }
 
@@ -151,15 +150,16 @@ TEST_F(TestWebDriver, Navigates) {
 }
 
 TEST_F(TestWebDriver, NavigatesToTestPage) {
-	driver->Navigate(GetUrl("simple.html"));
-	ASSERT_EQ(GetUrl("simple.html"), driver->GetUrl());
+	const std::string url = Environment::Instance().GetTestPageUrl("simple.html");
+	driver->Navigate(url);
+	ASSERT_EQ(url, driver->GetUrl());
 }
 
 class WebDriverOnElementsPage : public ::testing::Test {
 protected:
 	static void SetUpTestCase() {
 		driver = Environment::Instance().GetDriver();
-		driver->Navigate(GetUrl("elements.html"));
+		driver->Navigate(Environment::Instance().GetTestPageUrl("elements.html"));
 	}
 
 	void SetUp() {
@@ -173,7 +173,7 @@ WebDriver* WebDriverOnElementsPage::driver = 0;
 
 TEST_F(WebDriverOnElementsPage, GetsPageSource) {
 	std::string source = driver->GetSource();
-	ASSERT_NE(std::string::npos, source.find("<html>"));
+	ASSERT_NE(std::string::npos, source.find("<html"));
 	ASSERT_NE(std::string::npos, source.find("</html>"));
 }
 

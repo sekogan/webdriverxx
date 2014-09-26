@@ -103,6 +103,12 @@ private:
 			)
 	}
 
+	static std::string ToUploadData(const picojson::value& upload_data)
+	{
+		return upload_data.is<picojson::null>() ?
+			std::string() : upload_data.serialize();
+	}
+
 	picojson::value Upload(
 		const std::string& command, 
 		const picojson::value& upload_data,
@@ -112,13 +118,13 @@ private:
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 		return ProcessResponse((http_client_->*member)(
 			ConcatUrl(url_, command),
-			upload_data.serialize()
+			ToUploadData(upload_data)
 			));
 		WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(Fmt()
 			<< "request: " << request_type
 			<< ", command: " << command
 			<< ", resource: " << url_
-			<< ", data: " << upload_data.serialize()
+			<< ", data: " << ToUploadData(upload_data)
 			)
 	}
 

@@ -1,9 +1,8 @@
 set(SOURCE_FILES
+	environment.h
 	http_connection_test.cpp
 	main.cpp
 	resource_test.cpp
-	environment.h
-	test_helpers.h
 	webdriver_test.cpp
 	)
 

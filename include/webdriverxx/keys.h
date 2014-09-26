@@ -59,6 +59,7 @@ const char *const F10 = "\xee\x80\xba";
 const char *const F11 = "\xee\x80\xbb";
 const char *const F12 = "\xee\x80\xbc";
 const char *const Command = "\xee\x80\xbd";
+const char *const Meta = Command;
 
 } // namespace response_status_code 
 } // namespace webdriverxx 
