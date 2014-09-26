@@ -19,36 +19,26 @@ public:
 	}
 
 	Size GetSize() const {
-		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-		return detail::FromJson<Size>(resource_.Get("size"));
-		WEBDRIVERXX_FUNCTION_CONTEXT_END()
+		return resource_.GetValue<Size>("size");
 	}
 
 	const Window& SetSize(const Size& size) const {
-		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-		resource_.Post("size", detail::ToJson(size));
+		resource_.PostValue("size", size);
 		return *this;
-		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
 	Point GetPosition() const {
-		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-		return detail::FromJson<Point>(resource_.Get("position"));
-		WEBDRIVERXX_FUNCTION_CONTEXT_END()
+		return resource_.GetValue<Point>("position");
 	}
 
 	const Window& SetPosition(const Point& position) const {
-		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-		resource_.Post("position", detail::ToJson(position));
+		resource_.PostValue("position", position);
 		return *this;
-		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
 	const Window& Maximize() const {
-		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 		resource_.Post("maximize");
 		return *this;
-		WEBDRIVERXX_FUNCTION_CONTEXT_END()
 	}
 
 private:

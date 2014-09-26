@@ -4,6 +4,7 @@
 #include "http_client.h"
 #include "error_handling.h"
 #include "../response_status_code.h"
+#include "conversions.h"
 #include <picojson.h>
 
 namespace webdriverxx {
@@ -33,6 +34,23 @@ public:
 		return Download(command, &IHttpClient::Get, "GET");
 	}
 
+	template<typename T>
+	T GetValue(const std::string& command) const {
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		return detail::FromJson<T>(Get(command));
+		WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(detail::Fmt() <<
+			"command: " << command
+			)
+	}
+
+	std::string GetString(const std::string& command) const {
+		return GetValue<std::string>(command);
+	}
+
+	bool GetBool(const std::string& command) const {
+		return GetValue<bool>(command);
+	}
+
 	picojson::value Delete(const std::string& command = std::string()) const {
 		return Download(command, &IHttpClient::Delete, "DELETE");
 	}
@@ -43,6 +61,23 @@ public:
 		) const {
 		return Upload(command, upload_data, &IHttpClient::Post, "POST");
 	}
+
+	void Post(
+		const std::string& command,
+		const std::string& arg_name,
+		const std::string& arg_value
+		) const {
+		Post(command, detail::JsonObject().With(arg_name, arg_value).Build());
+	}	
+
+	template<typename T>
+	void PostValue(const std::string& command, const T& value) const {
+		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+		Post(command, ToJson(value));
+		WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(detail::Fmt() <<
+			"command: " << command
+			)
+	}	
 
 	picojson::value Put(
 		const std::string& command = std::string(),
@@ -150,9 +185,7 @@ private:
 };
 
 struct ReturnFullResponse {
-	static
-	picojson::value ReturnResponse(picojson::value& response)
-	{
+	static picojson::value ReturnResponse(picojson::value& response) {
 		picojson::value result;
 		response.swap(result);
 		return result;
@@ -160,9 +193,7 @@ struct ReturnFullResponse {
 };
 
 struct ReturnValue {
-	static
-	picojson::value ReturnResponse(picojson::value& response)
-	{
+	static picojson::value ReturnResponse(picojson::value& response) {
 		picojson::value result;
 		response.get("value").swap(result);
 		return result;

@@ -9,6 +9,7 @@
 #include "detail/finder.h"
 #include "detail/resource.h"
 #include "detail/http_connection.h"
+#include "detail/keyboard.h"
 #include <string>
 
 namespace webdriverxx {
@@ -61,17 +62,20 @@ public:
 		const Capabilities& desired = Capabilities()
 		);
 
-	const Capabilities& GetCapabilities() const;
-	Window GetCurrentWindow() const;
-	const WebDriver& CloseCurrentWindow() const;
-	const WebDriver& SetFocusToWindow(const std::string& name_or_handle) const;
-	std::vector<Window> GetWindows() const;
-	std::string GetUrl() const;
-	const WebDriver& Navigate(const std::string& url) const;
+	Capabilities GetCapabilities() const;
 	std::string GetSource() const;
 	std::string GetTitle() const;
+	std::string GetUrl() const;
+	std::vector<Window> GetWindows() const;
+	Window GetCurrentWindow() const;
+
+	const WebDriver& CloseCurrentWindow() const;
+	const WebDriver& Navigate(const std::string& url) const;
+	const WebDriver& SetFocusToWindow(const std::string& name_or_handle) const;
+	
 	Element FindElement(const By& by) const;
 	std::vector<Element> FindElements(const By& by) const;
+
 	const WebDriver& SendKeys(const char* keys) const;
 	const WebDriver& SendKeys(const std::string& keys) const;
 	template<class IterableStringList>
@@ -88,9 +92,11 @@ private:
 		) const;
 	Window MakeWindow(const std::string& handle) const;
 	Element MakeElement(const std::string& id) const;
+	detail::Keyboard GetKeyboard() const;
 
 private:
 	const Session session_;
+	const detail::Resource& resource_;
 	const detail::AutoResourceDeleter session_deleter_;
 };
 

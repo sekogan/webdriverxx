@@ -5,6 +5,7 @@
 #include "types.h"
 #include "detail/resource.h"
 #include "detail/conversions.h"
+#include "detail/keyboard.h"
 #include <string>
 #include <vector>
 
@@ -23,28 +24,35 @@ public:
 		const detail::Finder* finder
 		);
 
-	bool operator != (const Element& other) const;
-	bool operator == (const Element& other) const;
+	bool IsDisplayed() const;
+	bool IsEnabled() const;
+	bool IsSelected() const;
+	Point GetLocation() const;
+	Point GetLocationInView() const;
+	Size GetSize() const;
+	std::string GetAttribute(const std::string& name) const;
+	std::string GetCssProperty(const std::string& name) const;
+	std::string GetTagName() const;
+	std::string GetText() const;
+
 	Element FindElement(const By& by) const;
 	std::vector<Element> FindElements(const By& by) const;
+
+	const Element& Clear() const;
 	const Element& Click() const;
 	const Element& Submit() const;
-	std::string GetText() const;
+
 	const Element& SendKeys(const char* keys) const;
 	const Element& SendKeys(const std::string& keys) const;
 	template<class IterableStringList>
 	const Element& SendKeys(const IterableStringList& keys) const;
-	std::string GetTagName() const;
-	const Element& Clear() const;
-	bool IsSelected() const;
-	bool IsEnabled() const;
+
 	bool Equals(const Element& other) const;
-	std::string GetAttribute(const std::string& name) const;
-	bool IsDisplayed() const;
-	Point GetLocation() const;
-	Point GetLocationInView() const;
-	Size GetSize() const;
-	std::string GetCssProperty(const std::string& name) const;
+	bool operator != (const Element& other) const;
+	bool operator == (const Element& other) const;
+
+private:
+	detail::Keyboard GetKeyboard() const;
 
 private:
 	std::string id_;

@@ -59,38 +59,46 @@ WebDriver::WebDriver(
 	)
 	: BasicWebDriver(url)
 	, session_(CreateSession(required, desired))
-	, session_deleter_(session_.resource) {}
+	, resource_(session_.resource)
+	, session_deleter_(resource_) {}
 
 inline
-const Capabilities& WebDriver::GetCapabilities() const {
+Capabilities WebDriver::GetCapabilities() const {
 	return session_.capabilities;
+}
+
+inline
+std::string WebDriver::GetSource() const {
+	return resource_.GetString("source");
+}
+
+inline
+std::string WebDriver::GetTitle() const {
+	return resource_.GetString("title");
+}
+
+inline
+std::string WebDriver::GetUrl() const {
+	return resource_.GetString("url");
 }
 
 inline
 Window WebDriver::GetCurrentWindow() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return MakeWindow(detail::FromJson<std::string>(
-		session_.resource.Get("window_handle")
-		));
+	return MakeWindow(resource_.GetString("window_handle"));
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
 inline
 const WebDriver& WebDriver::CloseCurrentWindow() const {
-	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	session_.resource.Delete("window");
+	resource_.Delete("window");
 	return *this;
-	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
 inline
 const WebDriver& WebDriver::SetFocusToWindow(const std::string& name_or_handle) const {
-	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	session_.resource.Post("window",
-		detail::JsonObject().With("name", name_or_handle).Build()
-		);
+	resource_.Post("window", "name", name_or_handle);
 	return *this;
-	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
 inline
@@ -98,7 +106,7 @@ std::vector<Window> WebDriver::GetWindows() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	const std::vector<std::string> handles =
 		detail::FromJsonArray<std::string>(
-			session_.resource.Get("window_handles")
+			resource_.Get("window_handles")
 			);
 	std::vector<Window> result;
 	for (std::vector<std::string>::const_iterator it = handles.begin();
@@ -109,34 +117,9 @@ std::vector<Window> WebDriver::GetWindows() const {
 }
 
 inline
-std::string WebDriver::GetUrl() const {
-	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return session_.resource.Get("url").to_str();
-	WEBDRIVERXX_FUNCTION_CONTEXT_END()
-}
-
-inline
 const WebDriver& WebDriver::Navigate(const std::string& url) const {
-	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	session_.resource.Post("url", detail::JsonObject().With("url", url).Build());
+	resource_.Post("url", "url", url);
 	return *this;
-	WEBDRIVERXX_FUNCTION_CONTEXT_END()
-}
-
-inline
-std::string WebDriver::GetSource() const
-{
-	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return session_.resource.Get("source").to_str();
-	WEBDRIVERXX_FUNCTION_CONTEXT_END()
-}
-
-inline
-std::string WebDriver::GetTitle() const
-{
-	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return session_.resource.Get("title").to_str();
-	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
 inline
@@ -161,23 +144,21 @@ std::vector<Element> WebDriver::FindElements(const By& by) const {
 
 inline
 const WebDriver& WebDriver::SendKeys(const char* keys) const {
-	return SendKeys(std::string(keys));
+	GetKeyboard().SendKeys(keys);
+	return *this;
 }
 
 inline
 const WebDriver& WebDriver::SendKeys(const std::string& keys) const {
-	std::vector<std::string> list(1, keys);
-	return SendKeys(list);
+	GetKeyboard().SendKeys(keys);
+	return *this;
 }
 
 template<class IterableStringList>
 inline
 const WebDriver& WebDriver::SendKeys(const IterableStringList& keys) const {
-	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	session_.resource.Post("keys", detail::JsonObject()
-		.With("value", detail::ToJsonArray(keys)).Build());
+	GetKeyboard().SendKeys(keys);
 	return *this;
-	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
 inline
@@ -216,7 +197,7 @@ std::vector<Element> WebDriver::FindElements(
 inline
 Window WebDriver::MakeWindow(const std::string& handle) const {
 	return Window(handle,
-		session_.resource.GetSubResource("window").GetSubResource(handle)
+		resource_.GetSubResource("window").GetSubResource(handle)
 		);
 }	
 
@@ -224,9 +205,15 @@ inline
 Element WebDriver::MakeElement(const std::string& id) const {
 	return Element(
 		id,
-		session_.resource.GetSubResource("element").GetSubResource(id),
+		resource_.GetSubResource("element").GetSubResource(id),
 		this
 		);
-}	
+}
+
+inline
+detail::Keyboard WebDriver::GetKeyboard() const
+{
+	return detail::Keyboard(resource_, "keys");
+}
 
 } // namespace webdriverxx

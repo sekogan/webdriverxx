@@ -1,22 +1,19 @@
-#include "test_data.h"
+#include "environment.h"
 #include <webdriverxx/webdriver.h>
 #include <gtest/gtest.h>
 
-DriverParameters g_driver;
+Environment* Environment::instance_ = 0;
 
-bool IsArgument(const std::string& arg, const char* name)
-{
+bool IsArgument(const std::string& arg, const char* name) {
 	return arg.find(std::string("--") + name) == 0;
 }
 
-std::string GetArgumentValue(const std::string& arg)
-{
+std::string GetArgumentValue(const std::string& arg) {
 	const size_t pos = arg.find('=');
 	return pos == std::string::npos ? std::string() : arg.substr(pos + 1);
 }
 
-DriverParameters ParseDriverParameters(int argc, char **argv)
-{
+DriverParameters ParseDriverParameters(int argc, char **argv) {
 	DriverParameters result;
 	result.url = kPhantomUrl;
 	for(int i = 1; i < argc; ++i) {
@@ -33,6 +30,8 @@ DriverParameters ParseDriverParameters(int argc, char **argv)
 
 int main(int argc, char **argv) {
 	::testing::InitGoogleTest(&argc, argv);
-	g_driver = ParseDriverParameters(argc, argv);
+	::testing::AddGlobalTestEnvironment(
+		new Environment(ParseDriverParameters(argc, argv))
+		);
 	return RUN_ALL_TESTS();
 }

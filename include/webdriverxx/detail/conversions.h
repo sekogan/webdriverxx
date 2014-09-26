@@ -72,6 +72,12 @@ std::string FromJson<std::string>(const picojson::value& value) {
 
 template<>
 inline
+bool FromJson<bool>(const picojson::value& value) {
+	return value.evaluate_as_boolean();
+}
+
+template<>
+inline
 int FromJson<int>(const picojson::value& value) {
 	WEBDRIVERXX_CHECK(value.is<double>(), "Value is not a number");
 	return static_cast<int>(value.get<double>());

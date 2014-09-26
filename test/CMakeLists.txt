@@ -2,7 +2,7 @@ set(SOURCE_FILES
 	http_connection_test.cpp
 	main.cpp
 	resource_test.cpp
-	test_data.h
+	environment.h
 	test_helpers.h
 	webdriver_test.cpp
 	)

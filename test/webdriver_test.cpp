@@ -1,4 +1,4 @@
-#include "test_data.h"
+#include "environment.h"
 #include "test_helpers.h"
 #include <webdriverxx/webdriver.h>
 #include <webdriverxx/keys.h>
@@ -6,50 +6,10 @@
 
 using namespace webdriverxx;
 
-TEST(BasicWebDriver, CanBeCreated) {
-	BasicWebDriver driver(g_driver.url);
-}
-
-TEST(BasicWebDriver, GetsStatus) {
-	BasicWebDriver driver(g_driver.url);
-	picojson::object status = driver.GetStatus();
-	ASSERT_TRUE(status["build"].is<picojson::object>());
-	ASSERT_TRUE(status["os"].is<picojson::object>());
-}
-
-TEST(BasicWebDriver, GetsSessions) {
-	BasicWebDriver driver(g_driver.url);
-	driver.GetSessions();
-}
-
-TEST(WebDriver, RegistersSession) {
-	BasicWebDriver spy(g_driver.url);
-	size_t number_of_sessions_before = spy.GetSessions().size();
-	WebDriver testee(g_driver.url, g_driver.required, g_driver.desired);
-	size_t number_of_sessions_after = spy.GetSessions().size();
-	ASSERT_EQ(number_of_sessions_before + 1, number_of_sessions_after);
-}
-
-TEST(WebDriver, UnregistersSessionOnScopeExit) {
-	BasicWebDriver spy(g_driver.url);
-	size_t number_of_sessions_before = 0;
-	{
-		WebDriver testee(g_driver.url, g_driver.required, g_driver.desired);
-		number_of_sessions_before = spy.GetSessions().size();
-	}
-	size_t number_of_sessions_after = spy.GetSessions().size();
-	ASSERT_EQ(number_of_sessions_before - 1, number_of_sessions_after);
-}
-
-TEST(WebDriver, ClosesCurrentWindow) {
-	WebDriver driver(g_driver.url, g_driver.required, g_driver.desired);
-	driver.CloseCurrentWindow();
-}
-
-class SharedWebDriver : public ::testing::Test {
+class TestBasicWebDriver : public ::testing::Test {
 protected:
 	static void SetUpTestCase() {
-		driver = new WebDriver(g_driver.url, g_driver.required, g_driver.desired);
+		driver = new BasicWebDriver(Environment::Instance().GetUrl());
 	}
 
 	static void TearDownTestCase() {
@@ -61,12 +21,60 @@ protected:
 		ASSERT_TRUE(!!driver);
 	}
 
-	static WebDriver* driver;
+	static BasicWebDriver* driver;
 };
 
-WebDriver* SharedWebDriver::driver = 0;
+BasicWebDriver* TestBasicWebDriver::driver = 0;
 
-TEST_F(SharedWebDriver, GetsCapabilities)
+TEST_F(TestBasicWebDriver, GetsStatus) {
+	picojson::object status = driver->GetStatus();
+	ASSERT_TRUE(status["build"].is<picojson::object>());
+	ASSERT_TRUE(status["os"].is<picojson::object>());
+}
+
+TEST_F(TestBasicWebDriver, GetsSessions) {
+	driver->GetSessions();
+}
+
+TEST(WebDriver, RegistersSession) {
+	DriverParameters params = Environment::Instance().GetParameters();
+	BasicWebDriver spy(params.url);
+	size_t number_of_sessions_before = spy.GetSessions().size();
+	WebDriver testee(params.url, params.required, params.desired);
+	size_t number_of_sessions_after = spy.GetSessions().size();
+	ASSERT_EQ(number_of_sessions_before + 1, number_of_sessions_after);
+}
+
+TEST(WebDriver, UnregistersSessionOnScopeExit) {
+	DriverParameters params = Environment::Instance().GetParameters();
+	BasicWebDriver spy(params.url);
+	size_t number_of_sessions_before = 0;
+	{
+		WebDriver testee(params.url, params.required, params.desired);
+		number_of_sessions_before = spy.GetSessions().size();
+	}
+	size_t number_of_sessions_after = spy.GetSessions().size();
+	ASSERT_EQ(number_of_sessions_before - 1, number_of_sessions_after);
+}
+
+TEST(WebDriver, ClosesCurrentWindow) {
+	WebDriver* driver = Environment::Instance().GetDriver();
+	driver->CloseCurrentWindow();
+	Environment::Instance().GetFreshDriver();
+}
+
+class TestWebDriver : public ::testing::Test {
+protected:
+	TestWebDriver() : driver(0) {}
+
+	void SetUp() {
+		driver = Environment::Instance().GetDriver();
+	}
+
+	WebDriver* driver;
+};
+
+TEST_F(TestWebDriver, GetsCapabilities)
 {
 	Capabilities c = driver->GetCapabilities();
 	ASSERT_TRUE(c.Contains("browserName"));
@@ -75,28 +83,29 @@ TEST_F(SharedWebDriver, GetsCapabilities)
 	ASSERT_NE("", c.GetString("browserName"));
 }
 
-TEST_F(SharedWebDriver, StartsSecondBrowser) {
-	WebDriver second(g_driver.url, g_driver.required, g_driver.desired);
+TEST_F(TestWebDriver, StartsSecondBrowser) {
+	DriverParameters params = Environment::Instance().GetParameters();
+	WebDriver second(params.url, params.required, params.desired);
 }
 
-TEST_F(SharedWebDriver, GetsCurrentWindow) {
+TEST_F(TestWebDriver, GetsCurrentWindow) {
 	driver->GetCurrentWindow();
 }
 
-TEST_F(SharedWebDriver, GetsWindowHandle) {
+TEST_F(TestWebDriver, GetsWindowHandle) {
 	ASSERT_NE("", driver->GetCurrentWindow().GetHandle());
 }
 
-TEST_F(SharedWebDriver, SetsFocusToWindow) {
+TEST_F(TestWebDriver, SetsFocusToWindow) {
 	driver->SetFocusToWindow(driver->GetCurrentWindow().GetHandle());
 }
 
-TEST_F(SharedWebDriver, GetsWindowSize) {
+TEST_F(TestWebDriver, GetsWindowSize) {
 	Window window = driver->GetCurrentWindow();
 	window.GetSize();
 }
 
-TEST_F(SharedWebDriver, SetsWindowSize) {
+TEST_F(TestWebDriver, SetsWindowSize) {
 	Window window = driver->GetCurrentWindow();
 	Size size1;
 	size1.width = 601;
@@ -107,12 +116,12 @@ TEST_F(SharedWebDriver, SetsWindowSize) {
 	ASSERT_EQ(602, size2.height);
 }
 
-TEST_F(SharedWebDriver, GetsWindowPosition) {
+TEST_F(TestWebDriver, GetsWindowPosition) {
 	Window window = driver->GetCurrentWindow();
 	window.GetPosition();
 }
 
-TEST_F(SharedWebDriver, SetsWindowPosition) {
+TEST_F(TestWebDriver, SetsWindowPosition) {
 	Window window = driver->GetCurrentWindow();
 	Point position1;
 	position1.x = 101;
@@ -126,218 +135,203 @@ TEST_F(SharedWebDriver, SetsWindowPosition) {
 	}
 }
 
-TEST_F(SharedWebDriver, MaximizesWindow) {
+TEST_F(TestWebDriver, MaximizesWindow) {
 	Window window = driver->GetCurrentWindow();
 	window.Maximize();
 }
 
-TEST_F(SharedWebDriver, GetsWindows) {
+TEST_F(TestWebDriver, GetsWindows) {
 	driver->GetWindows();
 }
 
-TEST_F(SharedWebDriver, Navigates) {
-	std::string url = std::string(g_driver.url) + "status";
+TEST_F(TestWebDriver, Navigates) {
+	std::string url = std::string(Environment::Instance().GetUrl()) + "status";
 	driver->Navigate(url);
 	ASSERT_EQ(url, driver->GetUrl());
 }
 
-TEST_F(SharedWebDriver, NavigatesToTestPage) {
+TEST_F(TestWebDriver, NavigatesToTestPage) {
 	driver->Navigate(GetUrl("simple.html"));
 	ASSERT_EQ(GetUrl("simple.html"), driver->GetUrl());
 }
 
-TEST_F(SharedWebDriver, GetsPageSource) {
-	driver->Navigate(GetUrl("elements.html"));
+class WebDriverOnElementsPage : public ::testing::Test {
+protected:
+	static void SetUpTestCase() {
+		driver = Environment::Instance().GetDriver();
+		driver->Navigate(GetUrl("elements.html"));
+	}
+
+	void SetUp() {
+		ASSERT_TRUE(!!driver);
+	}
+
+	static WebDriver* driver;
+};
+
+WebDriver* WebDriverOnElementsPage::driver = 0;
+
+TEST_F(WebDriverOnElementsPage, GetsPageSource) {
 	std::string source = driver->GetSource();
 	ASSERT_NE(std::string::npos, source.find("<html>"));
 	ASSERT_NE(std::string::npos, source.find("</html>"));
 }
 
-TEST_F(SharedWebDriver, GetsPageTitle) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, GetsPageTitle) {
 	ASSERT_EQ("Test title", driver->GetTitle());
 }
 
-TEST_F(SharedWebDriver, FindsElementById) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, FindsElementById) {
 	driver->FindElement(ById("id1"));
 }
 
-TEST_F(SharedWebDriver, DoesNotFindNonExistingElementById) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, DoesNotFindNonExistingElementById) {
 	ASSERT_THROW(driver->FindElement(ById("non existing id")), WebDriverException);
 }
 
-TEST_F(SharedWebDriver, FindsElementByClassName) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, FindsElementByClassName) {
 	driver->FindElement(ByClassName("black"));
 }
 
-TEST_F(SharedWebDriver, FindsElementByCssSelector) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, FindsElementByCssSelector) {
 	driver->FindElement(ByCssSelector("body div#id1"));
 }
 
-TEST_F(SharedWebDriver, FindsElementByName) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, FindsElementByName) {
 	driver->FindElement(ByName("john"));
 }
 
-TEST_F(SharedWebDriver, FindsElementByLinkText) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, FindsElementByLinkText) {
 	driver->FindElement(ByLinkText("some link"));
 }
 
-TEST_F(SharedWebDriver, FindsElementByPartialLinkText) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, FindsElementByPartialLinkText) {
 	driver->FindElement(ByPartialLinkText("some"));
 }
 
-TEST_F(SharedWebDriver, FindsElementByTagName) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, FindsElementByTagName) {
 	driver->FindElement(ByTagName("body"));
 }
 
-TEST_F(SharedWebDriver, FindsElementByXPath) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, FindsElementByXPath) {
 	driver->FindElement(ByXPath("//input"));
 }
 
-TEST_F(SharedWebDriver, FindsElementsById) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, FindsElementsById) {
 	ASSERT_EQ(1u, driver->FindElements(ById("id1")).size());
 }
 
-TEST_F(SharedWebDriver, ReturnsEmptyListIfElementsAreNotFound) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, ReturnsEmptyListIfElementsAreNotFound) {
 	ASSERT_EQ(0u, driver->FindElements(ById("non existing id")).size());
 }
 
-TEST_F(SharedWebDriver, FindsMoreThanOneElement) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, FindsMoreThanOneElement) {
 	ASSERT_TRUE(1u < driver->FindElements(ByTagName("div")).size());
 }
 
-TEST_F(SharedWebDriver, FindsInnerElementByTagName) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, FindsInnerElementByTagName) {
 	Element e1 = driver->FindElement(ByTagName("div"));
 	Element e2 = e1.FindElement(ByTagName("div"));
 	ASSERT_TRUE(e1 != e2);
 }
 
-TEST_F(SharedWebDriver, FindsOnlyInnerElements) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, FindsOnlyInnerElements) {
 	Element e = driver->FindElement(ByTagName("div"));
 	ASSERT_EQ(1u, e.FindElements(ByTagName("div")).size());
 }
 
-TEST_F(SharedWebDriver, DoesNotFindNonExistingInnerElements) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, DoesNotFindNonExistingInnerElements) {
 	Element e = driver->FindElement(ByTagName("div"));
 	ASSERT_THROW(e.FindElement(ByTagName("p")), WebDriverException);
 	ASSERT_EQ(0u, e.FindElements(ByTagName("p")).size());
 }
 
-TEST_F(SharedWebDriver, FindsMoreThanOneInnerElement) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, FindsMoreThanOneInnerElement) {
 	ASSERT_EQ(2u, driver->FindElement(ByTagName("div")).FindElements(ByTagName("span")).size());
 }
 
-TEST_F(SharedWebDriver, ClicksElement) {
-	driver->Navigate(GetUrl("elements.html")).FindElement(ByName("john")).Click();
+TEST_F(WebDriverOnElementsPage, ClicksElement) {
+	driver->FindElement(ByName("john")).Click();
 }
 
 // TODO: Element::Submit
 
-TEST_F(SharedWebDriver, GetsElementText) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, GetsElementText) {
 	ASSERT_EQ("first span", driver->FindElement(ByTagName("span")).GetText());
 }
 
-TEST_F(SharedWebDriver, SendsKeysToElement) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, ClearsElement) {
 	Element e = driver->FindElement(ByName("john"));
-	e.SendKeys("abc").SendKeys(keys::Home).SendKeys("def");
+	e.SendKeys("abc");
+	ASSERT_NE("", e.GetAttribute("value"));
+	e.Clear();
+	ASSERT_EQ("", e.GetAttribute("value"));
+}
+
+TEST_F(WebDriverOnElementsPage, SendsKeysToElement) {
+	Element e = driver->FindElement(ByName("john"));
+	e.Clear().SendKeys("abc").SendKeys(keys::Home).SendKeys("def");
 	ASSERT_EQ("defabc", e.GetAttribute("value"));
 }
 
-TEST_F(SharedWebDriver, SendsKeysToActiveElement) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, SendsKeysToActiveElement) {
 	Element john = driver->FindElement(ByName("john"));
 	Element peter = driver->FindElement(ByName("peter"));
-	john.Click();
+	john.Click().Clear();
 	driver->SendKeys("abc");
-	peter.Click();
+	peter.Click().Clear();
 	driver->SendKeys("def");
 	ASSERT_EQ("abc", john.GetAttribute("value"));
 	ASSERT_EQ("def", peter.GetAttribute("value"));
 }
 
-TEST_F(SharedWebDriver, GetsElementTagName) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, GetsElementTagName) {
 	ASSERT_EQ("div", driver->FindElement(ById("id1")).GetTagName());
-}
-
-TEST_F(SharedWebDriver, ClearsElement) {
-	driver->Navigate(GetUrl("elements.html"));
-	Element e = driver->FindElement(ByName("john"));
-	e.SendKeys("abc");
-	e.Clear();
-	ASSERT_EQ("", e.GetAttribute("value"));
 }
 
 // IsEnabled
 // IsSelected
 
-TEST_F(SharedWebDriver, GetsElementAttributes) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, GetsElementAttributes) {
 	ASSERT_EQ("id1", driver->FindElement(ByTagName("div")).GetAttribute("id"));
 }
 
-TEST_F(SharedWebDriver, DeterminesThatElementsAreEqual) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, DeterminesThatElementsAreEqual) {
 	ASSERT_TRUE(driver->FindElement(ByTagName("div")).Equals(
 		driver->FindElement(ById("id1"))));
 }
 
-TEST_F(SharedWebDriver, DeterminesThatElementsAreNotEqual) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, DeterminesThatElementsAreNotEqual) {
 	ASSERT_TRUE(!driver->FindElement(ByTagName("span")).Equals(
 		driver->FindElement(ById("id1"))));
 }
 
-TEST_F(SharedWebDriver, ComparesElementsWithEqualOperator) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, ComparesElementsWithEqualOperator) {
 	ASSERT_TRUE(driver->FindElement(ByTagName("div")) ==
 		driver->FindElement(ById("id1")));
 }
 
-TEST_F(SharedWebDriver, ComparesElementsWithNotEqualOperator) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, ComparesElementsWithNotEqualOperator) {
 	ASSERT_TRUE(driver->FindElement(ByTagName("span")) !=
 		driver->FindElement(ById("id1")));
 }
 
-TEST_F(SharedWebDriver, GetsElementIsDisplayed) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, GetsElementIsDisplayed) {
 	ASSERT_TRUE(driver->FindElement(ById("id1")).IsDisplayed());
 	ASSERT_FALSE(driver->FindElement(ById("hidden")).IsDisplayed());
 }
 
-TEST_F(SharedWebDriver, GetsElementLocation) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, GetsElementLocation) {
 	driver->FindElement(ById("id1")).GetLocation();
 	driver->FindElement(ById("id1")).GetLocationInView();
 }
 
-TEST_F(SharedWebDriver, GetsElementSize) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, GetsElementSize) {
 	Size size = driver->FindElement(ById("id1")).GetSize();
 	ASSERT_NE(0, size.width);
 	ASSERT_NE(0, size.height);
 }
 
-TEST_F(SharedWebDriver, GetsElementCssProperty) {
-	driver->Navigate(GetUrl("elements.html"));
+TEST_F(WebDriverOnElementsPage, GetsElementCssProperty) {
 	ASSERT_EQ("none", driver->FindElement(ById("hidden")).GetCssProperty("display"));
 }
