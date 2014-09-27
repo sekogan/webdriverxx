@@ -154,10 +154,9 @@ const WebDriver& WebDriver::SendKeys(const std::string& keys) const {
 	return *this;
 }
 
-template<class IterableStringList>
 inline
-const WebDriver& WebDriver::SendKeys(const IterableStringList& keys) const {
-	GetKeyboard().SendKeys(keys);
+const WebDriver& WebDriver::SendKeys(const Shortcut& shortcut) const {
+	GetKeyboard().SendKeys(shortcut);
 	return *this;
 }
 

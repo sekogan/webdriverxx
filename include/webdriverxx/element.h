@@ -3,6 +3,7 @@
 
 #include "by.h"
 #include "types.h"
+#include "keys.h"
 #include "detail/resource.h"
 #include "detail/conversions.h"
 #include "detail/keyboard.h"
@@ -44,8 +45,7 @@ public:
 
 	const Element& SendKeys(const char* keys) const;
 	const Element& SendKeys(const std::string& keys) const;
-	template<class IterableStringList>
-	const Element& SendKeys(const IterableStringList& keys) const;
+	const Element& SendKeys(const Shortcut& shortcut) const;
 
 	bool Equals(const Element& other) const;
 	bool operator != (const Element& other) const;

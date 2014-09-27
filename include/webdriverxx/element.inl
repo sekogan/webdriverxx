@@ -112,10 +112,9 @@ const Element& Element::SendKeys(const std::string& keys) const {
 	return *this;
 }
 
-template<class IterableStringList>
 inline
-const Element& Element::SendKeys(const IterableStringList& keys) const {
-	GetKeyboard().SendKeys(keys);
+const Element& Element::SendKeys(const Shortcut& shortcut) const {
+	GetKeyboard().SendKeys(shortcut);
 	return *this;
 }
 

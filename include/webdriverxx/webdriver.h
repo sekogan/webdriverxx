@@ -6,6 +6,7 @@
 #include "by.h"
 #include "capabilities.h"
 #include "types.h"
+#include "keys.h"
 #include "detail/finder.h"
 #include "detail/resource.h"
 #include "detail/http_connection.h"
@@ -78,8 +79,7 @@ public:
 
 	const WebDriver& SendKeys(const char* keys) const;
 	const WebDriver& SendKeys(const std::string& keys) const;
-	template<class IterableStringList>
-	const WebDriver& SendKeys(const IterableStringList& keys) const;
+	const WebDriver& SendKeys(const Shortcut& shortcut) const;
 
 private:
 	Element FindElement(

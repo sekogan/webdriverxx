@@ -61,7 +61,30 @@ const char *const F12 = "\xee\x80\xbc";
 const char *const Command = "\xee\x80\xbd";
 const char *const Meta = Command;
 
-} // namespace response_status_code 
+} // namespace keys 
+
+namespace detail {
+class Keyboard;
+} // namespace detail
+
+class Shortcut // copyable
+{
+public:
+	Shortcut& operator << (const std::string& key) {
+		keys_.push_back(key);
+		return *this;
+	}
+
+	Shortcut& operator << (const char* key) {
+		keys_.push_back(key);
+		return *this;
+	}
+
+private:
+	friend class detail::Keyboard;
+	std::vector<std::string> keys_;
+};
+
 } // namespace webdriverxx 
 
 #endif

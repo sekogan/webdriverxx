@@ -270,8 +270,21 @@ TEST_F(WebDriverOnElementsPage, ClearsElement) {
 
 TEST_F(WebDriverOnElementsPage, SendsKeysToElement) {
 	Element e = driver->FindElement(ByName("john"));
-	e.Clear().SendKeys("abc").SendKeys(keys::Home).SendKeys("def");
+	e.Clear()
+		.SendKeys("abc")
+		.SendKeys(keys::Left).SendKeys(keys::Left).SendKeys(keys::Left)
+		.SendKeys("def")
+		;
 	ASSERT_EQ("defabc", e.GetAttribute("value"));
+}
+
+TEST_F(WebDriverOnElementsPage, SendsShortcuts) {
+	Element e = driver->FindElement(ByName("john"));
+	e.Clear()
+		.SendKeys(Shortcut() << keys::Shift << "a" << "bc")
+		.SendKeys("def")
+		;
+	ASSERT_EQ("ABCdef", e.GetAttribute("value"));
 }
 
 TEST_F(WebDriverOnElementsPage, SendsKeysToActiveElement) {

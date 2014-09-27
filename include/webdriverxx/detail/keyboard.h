@@ -3,6 +3,7 @@
 
 #include "resource.h"
 #include "conversions.h"
+#include "../keys.h"
 #include <vector>
 
 namespace webdriverxx {
@@ -15,19 +16,17 @@ public:
 		, command_(command) {}
 
 	void SendKeys(const char* keys) const {
-		SendKeys(std::string(keys));
+		SendKeys(Shortcut() << keys);
 	}
 
 	void SendKeys(const std::string& keys) const {
-		std::vector<std::string> list(1, keys);
-		SendKeys(list);
+		SendKeys(Shortcut() << keys);
 	}
 
-	template<class IterableStringList>
-	void SendKeys(const IterableStringList& keys) const {
+	void SendKeys(const Shortcut& shortcut) const {
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 		resource_->Post(command_, detail::JsonObject()
-			.With("value", detail::ToJsonArray(keys)).Build());
+			.With("value", detail::ToJsonArray(shortcut.keys_)).Build());
 		WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(Fmt()
 			<< "command: " << command_
 			<< ", resource: " << resource_->GetUrl()
