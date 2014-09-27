@@ -70,8 +70,12 @@ public:
 	std::vector<Window> GetWindows() const;
 	Window GetCurrentWindow() const;
 
-	const WebDriver& CloseCurrentWindow() const;
 	const WebDriver& Navigate(const std::string& url) const;
+	const WebDriver& Forward() const;
+	const WebDriver& Back() const;
+	const WebDriver& Refresh() const;
+
+	const WebDriver& CloseCurrentWindow() const;
 	const WebDriver& SetFocusToWindow(const std::string& name_or_handle) const;
 	
 	Element FindElement(const By& by) const;

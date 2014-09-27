@@ -63,11 +63,7 @@ TEST(WebDriver, ClosesCurrentWindow) {
 
 class TestWebDriver : public ::testing::Test {
 protected:
-	TestWebDriver() : driver(0) {}
-
-	void SetUp() {
-		driver = Environment::Instance().GetDriver();
-	}
+	TestWebDriver() : driver(Environment::Instance().GetDriver()) {}
 
 	WebDriver* driver;
 };
@@ -152,6 +148,29 @@ TEST_F(TestWebDriver, NavigatesToTestPage) {
 	const std::string url = Environment::Instance().GetTestPageUrl("webdriver.html");
 	driver->Navigate(url);
 	ASSERT_EQ(url, driver->GetUrl());
+}
+
+TEST_F(TestWebDriver, GoesBack) {
+	const std::string page1 = Environment::Instance().GetTestPageUrl("navigation1.html");
+	const std::string page2 = Environment::Instance().GetTestPageUrl("navigation2.html");
+	driver->Navigate(page1).Navigate(page2).Back();
+	ASSERT_EQ(page1, driver->GetUrl());
+}
+
+TEST_F(TestWebDriver, GoesForward) {
+	const std::string page1 = Environment::Instance().GetTestPageUrl("navigation1.html");
+	const std::string page2 = Environment::Instance().GetTestPageUrl("navigation2.html");
+	driver->Navigate(page1).Navigate(page2).Back().Forward();
+	ASSERT_EQ(page2, driver->GetUrl());
+}
+
+TEST_F(TestWebDriver, DoesRefresh) {
+	const std::string page = Environment::Instance().GetTestPageUrl("navigation1.html");
+	driver->Navigate(page).FindElement(ByTagName("input")).Click().SendKeys("abc");
+	ASSERT_EQ("abc", driver->FindElement(ByTagName("input")).GetAttribute("value"));
+	driver->Refresh();
+	ASSERT_EQ(page, driver->GetUrl());
+	ASSERT_EQ("", driver->FindElement(ByTagName("input")).GetAttribute("value"));
 }
 
 class WebDriverOnTestPage : public ::testing::Test {

@@ -96,6 +96,30 @@ const WebDriver& WebDriver::CloseCurrentWindow() const {
 }
 
 inline
+const WebDriver& WebDriver::Navigate(const std::string& url) const {
+	resource_.Post("url", "url", url);
+	return *this;
+}
+
+inline
+const WebDriver& WebDriver::Forward() const {
+	resource_.Post("forward");
+	return *this;
+}
+
+inline
+const WebDriver& WebDriver::Back() const {
+	resource_.Post("back");
+	return *this;
+}
+
+inline
+const WebDriver& WebDriver::Refresh() const {
+	resource_.Post("refresh");
+	return *this;
+}
+
+inline
 const WebDriver& WebDriver::SetFocusToWindow(const std::string& name_or_handle) const {
 	resource_.Post("window", "name", name_or_handle);
 	return *this;
@@ -114,12 +138,6 @@ std::vector<Window> WebDriver::GetWindows() const {
 		result.push_back(MakeWindow(*it));
 	return result;
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
-}
-
-inline
-const WebDriver& WebDriver::Navigate(const std::string& url) const {
-	resource_.Post("url", "url", url);
-	return *this;
 }
 
 inline
