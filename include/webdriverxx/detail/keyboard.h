@@ -26,7 +26,7 @@ public:
 	void SendKeys(const Shortcut& shortcut) const {
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 		resource_->Post(command_, detail::JsonObject()
-			.With("value", detail::ToJsonArray(shortcut.keys_)).Build());
+			.With("value", detail::ToJson(shortcut.keys_)).Build());
 		WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(Fmt()
 			<< "command: " << command_
 			<< ", resource: " << resource_->GetUrl()

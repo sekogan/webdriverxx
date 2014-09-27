@@ -120,6 +120,23 @@ const WebDriver& WebDriver::Refresh() const {
 }
 
 inline
+const WebDriver& WebDriver::Execute(const std::string& script, const JsArgs& args) const {
+	resource_.Post("execute", 
+		detail::JsonObject()
+			.With("script", script)
+			.With("args", args.args_)
+			.Build()
+		);
+	return *this;
+}
+
+template<typename T>
+inline
+T WebDriver::Eval(const std::string& script, const JsArgs& args) const {
+	return T();
+}
+
+inline
 const WebDriver& WebDriver::SetFocusToWindow(const std::string& name_or_handle) const {
 	resource_.Post("window", "name", name_or_handle);
 	return *this;
@@ -183,13 +200,13 @@ Element WebDriver::FindElement(
 	const By& by,
 	const detail::Resource& context
 	) const {
-	return MakeElement(detail::FromJson<detail::ElementId>(
+	return MakeElement(detail::FromJson<detail::ElementRef>(
 		context.Post("element",
 			detail::JsonObject()
 				.With("using", by.GetStrategy())
 				.With("value", by.GetValue())
 				.Build()
-			)).id);
+			)).ref);
 }
 
 inline
@@ -197,17 +214,17 @@ std::vector<Element> WebDriver::FindElements(
 	const By& by,
 	const detail::Resource& context
 	) const {
-	const std::vector<detail::ElementId> ids =
-		detail::FromJsonArray<detail::ElementId>(
+	const std::vector<detail::ElementRef> ids =
+		detail::FromJsonArray<detail::ElementRef>(
 			context.Post("elements", detail::JsonObject()
 				.With("using", by.GetStrategy())
 				.With("value", by.GetValue())
 				.Build()
 			));
 	std::vector<Element> result;
-	for (std::vector<detail::ElementId>::const_iterator it = ids.begin();
+	for (std::vector<detail::ElementRef>::const_iterator it = ids.begin();
 		it != ids.end(); ++it)
-		result.push_back(MakeElement(it->id));
+		result.push_back(MakeElement(it->ref));
 	return result;
 }
 

@@ -2,14 +2,24 @@
 #include "detail/error_handling.h"
 
 namespace webdriverxx {
+namespace detail {
+
+template<>
+inline
+picojson::value ToJson(const Element& element)
+{
+	return element.ToJson();
+}
+
+} // namespace detail
 
 inline
 Element::Element(
-	const std::string& id,
+	const std::string& ref,
 	const detail::Resource& resource,
 	const detail::Finder* finder
 	)
-	: id_(id)
+	: ref_(ref)
 	, resource_(resource)
 	, finder_(finder) {}
 
@@ -120,7 +130,7 @@ const Element& Element::SendKeys(const Shortcut& shortcut) const {
 
 inline
 bool Element::Equals(const Element& other) const {
-	return resource_.GetBool(std::string("equals/") + other.id_);
+	return resource_.GetBool(std::string("equals/") + other.ref_);
 }
 
 inline
@@ -131,6 +141,12 @@ bool Element::operator != (const Element& other) const {
 inline
 bool Element::operator == (const Element& other) const {
 	return Equals(other);
+}
+
+inline
+picojson::value Element::ToJson() const {
+	detail::ElementRef ref = { ref_ };
+	return detail::ToJson(ref);
 }
 
 inline

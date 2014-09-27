@@ -7,6 +7,7 @@
 #include "detail/resource.h"
 #include "detail/conversions.h"
 #include "detail/keyboard.h"
+#include <picojson.h>
 #include <string>
 #include <vector>
 
@@ -20,7 +21,7 @@ struct Finder;
 class Element { // copyable
 public:
 	Element(
-		const std::string& id,
+		const std::string& ref,
 		const detail::Resource& resource,
 		const detail::Finder* finder
 		);
@@ -51,11 +52,13 @@ public:
 	bool operator != (const Element& other) const;
 	bool operator == (const Element& other) const;
 
+	picojson::value ToJson() const;
+
 private:
 	detail::Keyboard GetKeyboard() const;
 
 private:
-	std::string id_;
+	std::string ref_;
 	detail::Resource resource_;
 	const detail::Finder* finder_;
 };

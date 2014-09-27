@@ -9,8 +9,8 @@
 namespace webdriverxx {
 namespace detail {
 
-struct ElementId {
-	std::string id;
+struct ElementRef {
+	std::string ref;
 };
 
 class JsonObject { // copyable
@@ -66,26 +66,32 @@ T FromJson(const picojson::value& value);
 
 template<>
 inline
-std::string FromJson<std::string>(const picojson::value& value) {
+std::string FromJson(const picojson::value& value) {
 	return value.to_str();
 }
 
 template<>
 inline
-bool FromJson<bool>(const picojson::value& value) {
+bool FromJson(const picojson::value& value) {
 	return value.evaluate_as_boolean();
 }
 
 template<>
 inline
-int FromJson<int>(const picojson::value& value) {
+int FromJson(const picojson::value& value) {
 	WEBDRIVERXX_CHECK(value.is<double>(), "Value is not a number");
 	return static_cast<int>(value.get<double>());
 }
 
 template<>
 inline
-SessionInformation FromJson<SessionInformation>(const picojson::value& value) {
+picojson::value ToJson(const int& value) {
+	return picojson::value(static_cast<double>(value));
+}
+
+template<>
+inline
+SessionInformation FromJson(const picojson::value& value) {
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Session information is not an object");
 	SessionInformation result;
 	result.id = value.get("sessionId").to_str();
@@ -96,7 +102,7 @@ SessionInformation FromJson<SessionInformation>(const picojson::value& value) {
 
 template<>
 inline
-Size FromJson<Size>(const picojson::value& value) {
+Size FromJson(const picojson::value& value) {
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Size is not an object");
 	Size result;
 	result.width = FromJson<int>(value.get("width"));
@@ -104,6 +110,7 @@ Size FromJson<Size>(const picojson::value& value) {
 	return result;
 }
 
+template<>
 inline
 picojson::value ToJson(const Size& size)
 {
@@ -115,7 +122,7 @@ picojson::value ToJson(const Size& size)
 
 template<>
 inline
-Point FromJson<Point>(const picojson::value& value) {
+Point FromJson(const picojson::value& value) {
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Point is not an object");
 	Point result;
 	result.x = FromJson<int>(value.get("x"));
@@ -123,6 +130,7 @@ Point FromJson<Point>(const picojson::value& value) {
 	return result;
 }
 
+template<>
 inline
 picojson::value ToJson(const Point& position)
 {
@@ -134,12 +142,20 @@ picojson::value ToJson(const Point& position)
 
 template<>
 inline
-ElementId FromJson<ElementId>(const picojson::value& value) {
-	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Element is not an object");
-	WEBDRIVERXX_CHECK(value.get("ELEMENT").is<std::string>(), "Element ID is not a string");
-	ElementId result;
-	result.id = value.get("ELEMENT").to_str();
+ElementRef FromJson(const picojson::value& value) {
+	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "ElementRef is not an object");
+	ElementRef result;
+	result.ref = FromJson<std::string>(value.get("ELEMENT"));
 	return result;
+}
+
+template<>
+inline
+picojson::value ToJson(const ElementRef& ref)
+{
+	return JsonObject()
+		.With("ELEMENT", ref.ref)
+		.Build();
 }
 
 template<typename T>
@@ -153,13 +169,19 @@ std::vector<T> FromJsonArray(const picojson::value& value) {
 	return result;
 }
 
-template<class Iterable>
+template<typename T, class Iterable>
 inline
 picojson::value ToJsonArray(const Iterable& src) {
 	picojson::value result = picojson::value(picojson::array());
 	picojson::array& dst = result.get<picojson::array>();
-	std::transform(src.begin(), src.end(), std::back_inserter(dst), ToJson<std::string>);
+	std::transform(src.begin(), src.end(), std::back_inserter(dst), ToJson<T>);
 	return result;
+}
+
+template<typename T>
+inline
+picojson::value ToJson(const std::vector<T>& src) {
+	return ToJsonArray<T>(src);
 }
 
 } // namespace detail

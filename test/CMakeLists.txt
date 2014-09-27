@@ -3,6 +3,7 @@ set(SOURCE_FILES
 	environment.h
 	finder_test.cpp
 	http_connection_test.cpp
+	js_test.cpp
 	keyboard_test.cpp
 	main.cpp
 	resource_test.cpp

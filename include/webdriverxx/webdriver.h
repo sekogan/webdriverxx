@@ -7,6 +7,7 @@
 #include "capabilities.h"
 #include "types.h"
 #include "keys.h"
+#include "js_args.h"
 #include "detail/finder.h"
 #include "detail/resource.h"
 #include "detail/http_connection.h"
@@ -74,6 +75,10 @@ public:
 	const WebDriver& Forward() const;
 	const WebDriver& Back() const;
 	const WebDriver& Refresh() const;
+
+	const WebDriver& Execute(const std::string& script, const JsArgs& args = JsArgs()) const;
+	template<typename T>
+	T Eval(const std::string& script, const JsArgs& args = JsArgs()) const;
 
 	const WebDriver& CloseCurrentWindow() const;
 	const WebDriver& SetFocusToWindow(const std::string& name_or_handle) const;
