@@ -1,6 +1,5 @@
 #include "environment.h"
 #include <webdriverxx/webdriver.h>
-#include <webdriverxx/keys.h>
 #include <gtest/gtest.h>
 
 using namespace webdriverxx;
@@ -150,201 +149,30 @@ TEST_F(TestWebDriver, Navigates) {
 }
 
 TEST_F(TestWebDriver, NavigatesToTestPage) {
-	const std::string url = Environment::Instance().GetTestPageUrl("simple.html");
+	const std::string url = Environment::Instance().GetTestPageUrl("webdriver.html");
 	driver->Navigate(url);
 	ASSERT_EQ(url, driver->GetUrl());
 }
 
-class WebDriverOnElementsPage : public ::testing::Test {
+class WebDriverOnTestPage : public ::testing::Test {
 protected:
 	static void SetUpTestCase() {
-		driver = Environment::Instance().GetDriver();
-		driver->Navigate(Environment::Instance().GetTestPageUrl("elements.html"));
+		Environment::Instance().GetDriver()->Navigate(
+			Environment::Instance().GetTestPageUrl("webdriver.html")
+			);
 	}
 
-	void SetUp() {
-		ASSERT_TRUE(!!driver);
-	}
+	WebDriverOnTestPage() : driver(Environment::Instance().GetDriver()) {}
 
-	static WebDriver* driver;
+	WebDriver* driver;
 };
 
-WebDriver* WebDriverOnElementsPage::driver = 0;
-
-TEST_F(WebDriverOnElementsPage, GetsPageSource) {
+TEST_F(WebDriverOnTestPage, GetsPageSource) {
 	std::string source = driver->GetSource();
 	ASSERT_NE(std::string::npos, source.find("<html"));
 	ASSERT_NE(std::string::npos, source.find("</html>"));
 }
 
-TEST_F(WebDriverOnElementsPage, GetsPageTitle) {
+TEST_F(WebDriverOnTestPage, GetsPageTitle) {
 	ASSERT_EQ("Test title", driver->GetTitle());
-}
-
-TEST_F(WebDriverOnElementsPage, FindsElementById) {
-	driver->FindElement(ById("id1"));
-}
-
-TEST_F(WebDriverOnElementsPage, DoesNotFindNonExistingElementById) {
-	ASSERT_THROW(driver->FindElement(ById("non existing id")), WebDriverException);
-}
-
-TEST_F(WebDriverOnElementsPage, FindsElementByClassName) {
-	driver->FindElement(ByClassName("black"));
-}
-
-TEST_F(WebDriverOnElementsPage, FindsElementByCssSelector) {
-	driver->FindElement(ByCssSelector("body div#id1"));
-}
-
-TEST_F(WebDriverOnElementsPage, FindsElementByName) {
-	driver->FindElement(ByName("john"));
-}
-
-TEST_F(WebDriverOnElementsPage, FindsElementByLinkText) {
-	driver->FindElement(ByLinkText("some link"));
-}
-
-TEST_F(WebDriverOnElementsPage, FindsElementByPartialLinkText) {
-	driver->FindElement(ByPartialLinkText("some"));
-}
-
-TEST_F(WebDriverOnElementsPage, FindsElementByTagName) {
-	driver->FindElement(ByTagName("body"));
-}
-
-TEST_F(WebDriverOnElementsPage, FindsElementByXPath) {
-	driver->FindElement(ByXPath("//input"));
-}
-
-TEST_F(WebDriverOnElementsPage, FindsElementsById) {
-	ASSERT_EQ(1u, driver->FindElements(ById("id1")).size());
-}
-
-TEST_F(WebDriverOnElementsPage, ReturnsEmptyListIfElementsAreNotFound) {
-	ASSERT_EQ(0u, driver->FindElements(ById("non existing id")).size());
-}
-
-TEST_F(WebDriverOnElementsPage, FindsMoreThanOneElement) {
-	ASSERT_TRUE(1u < driver->FindElements(ByTagName("div")).size());
-}
-
-TEST_F(WebDriverOnElementsPage, FindsInnerElementByTagName) {
-	Element e1 = driver->FindElement(ByTagName("div"));
-	Element e2 = e1.FindElement(ByTagName("div"));
-	ASSERT_TRUE(e1 != e2);
-}
-
-TEST_F(WebDriverOnElementsPage, FindsOnlyInnerElements) {
-	Element e = driver->FindElement(ByTagName("div"));
-	ASSERT_EQ(1u, e.FindElements(ByTagName("div")).size());
-}
-
-TEST_F(WebDriverOnElementsPage, DoesNotFindNonExistingInnerElements) {
-	Element e = driver->FindElement(ByTagName("div"));
-	ASSERT_THROW(e.FindElement(ByTagName("p")), WebDriverException);
-	ASSERT_EQ(0u, e.FindElements(ByTagName("p")).size());
-}
-
-TEST_F(WebDriverOnElementsPage, FindsMoreThanOneInnerElement) {
-	ASSERT_EQ(2u, driver->FindElement(ByTagName("div")).FindElements(ByTagName("span")).size());
-}
-
-TEST_F(WebDriverOnElementsPage, ClicksElement) {
-	driver->FindElement(ByName("john")).Click();
-}
-
-// TODO: Element::Submit
-
-TEST_F(WebDriverOnElementsPage, GetsElementText) {
-	ASSERT_EQ("first span", driver->FindElement(ByTagName("span")).GetText());
-}
-
-TEST_F(WebDriverOnElementsPage, ClearsElement) {
-	Element e = driver->FindElement(ByName("john"));
-	e.SendKeys("abc");
-	ASSERT_NE("", e.GetAttribute("value"));
-	e.Clear();
-	ASSERT_EQ("", e.GetAttribute("value"));
-}
-
-TEST_F(WebDriverOnElementsPage, SendsKeysToElement) {
-	Element e = driver->FindElement(ByName("john"));
-	e.Clear()
-		.SendKeys("abc")
-		.SendKeys(keys::Left).SendKeys(keys::Left).SendKeys(keys::Left)
-		.SendKeys("def")
-		;
-	ASSERT_EQ("defabc", e.GetAttribute("value"));
-}
-
-TEST_F(WebDriverOnElementsPage, SendsShortcuts) {
-	Element e = driver->FindElement(ByName("john"));
-	e.Clear()
-		.SendKeys(Shortcut() << keys::Shift << "a" << "bc")
-		.SendKeys("def")
-		;
-	ASSERT_EQ("ABCdef", e.GetAttribute("value"));
-}
-
-TEST_F(WebDriverOnElementsPage, SendsKeysToActiveElement) {
-	Element john = driver->FindElement(ByName("john"));
-	Element peter = driver->FindElement(ByName("peter"));
-	john.Click().Clear();
-	driver->SendKeys("abc");
-	peter.Click().Clear();
-	driver->SendKeys("def");
-	ASSERT_EQ("abc", john.GetAttribute("value"));
-	ASSERT_EQ("def", peter.GetAttribute("value"));
-}
-
-TEST_F(WebDriverOnElementsPage, GetsElementTagName) {
-	ASSERT_EQ("div", driver->FindElement(ById("id1")).GetTagName());
-}
-
-// IsEnabled
-// IsSelected
-
-TEST_F(WebDriverOnElementsPage, GetsElementAttributes) {
-	ASSERT_EQ("id1", driver->FindElement(ByTagName("div")).GetAttribute("id"));
-}
-
-TEST_F(WebDriverOnElementsPage, DeterminesThatElementsAreEqual) {
-	ASSERT_TRUE(driver->FindElement(ByTagName("div")).Equals(
-		driver->FindElement(ById("id1"))));
-}
-
-TEST_F(WebDriverOnElementsPage, DeterminesThatElementsAreNotEqual) {
-	ASSERT_TRUE(!driver->FindElement(ByTagName("span")).Equals(
-		driver->FindElement(ById("id1"))));
-}
-
-TEST_F(WebDriverOnElementsPage, ComparesElementsWithEqualOperator) {
-	ASSERT_TRUE(driver->FindElement(ByTagName("div")) ==
-		driver->FindElement(ById("id1")));
-}
-
-TEST_F(WebDriverOnElementsPage, ComparesElementsWithNotEqualOperator) {
-	ASSERT_TRUE(driver->FindElement(ByTagName("span")) !=
-		driver->FindElement(ById("id1")));
-}
-
-TEST_F(WebDriverOnElementsPage, GetsElementIsDisplayed) {
-	ASSERT_TRUE(driver->FindElement(ById("id1")).IsDisplayed());
-	ASSERT_FALSE(driver->FindElement(ById("hidden")).IsDisplayed());
-}
-
-TEST_F(WebDriverOnElementsPage, GetsElementLocation) {
-	driver->FindElement(ById("id1")).GetLocation();
-	driver->FindElement(ById("id1")).GetLocationInView();
-}
-
-TEST_F(WebDriverOnElementsPage, GetsElementSize) {
-	Size size = driver->FindElement(ById("id1")).GetSize();
-	ASSERT_NE(0, size.width);
-	ASSERT_NE(0, size.height);
-}
-
-TEST_F(WebDriverOnElementsPage, GetsElementCssProperty) {
-	ASSERT_EQ("none", driver->FindElement(ById("hidden")).GetCssProperty("display"));
 }

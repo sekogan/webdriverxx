@@ -1,6 +1,9 @@
 set(SOURCE_FILES
+	element_test.cpp
 	environment.h
+	finder_test.cpp
 	http_connection_test.cpp
+	keyboard_test.cpp
 	main.cpp
 	resource_test.cpp
 	webdriver_test.cpp
