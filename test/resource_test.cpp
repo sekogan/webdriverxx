@@ -64,34 +64,34 @@ TEST_F(TestResource, IsCopyable) {
 	ASSERT_EQ("456", a.GetUrl());
 }
 
-TEST_F(TestResource, ServerRootReturnsJsonObject)
+TEST_F(TestResource, RootResourceReturnsJsonObject)
 {
-	ServerRoot resource(&http_client, kTestUrl);
+	RootResource resource(&http_client, kTestUrl);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
 	ASSERT_TRUE(resource.Get("command").is<picojson::object>());
 }
 
-TEST_F(TestResource, ServerRootReturnsSessionId)
+TEST_F(TestResource, RootResourceReturnsSessionId)
 {
-	ServerRoot resource(&http_client, kTestUrl);
+	RootResource resource(&http_client, kTestUrl);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
 	ASSERT_TRUE(resource.Get("command").contains("sessionId"));
 	ASSERT_EQ("123", resource.Get("command").get("sessionId").to_str());
 }
 
-TEST_F(TestResource, ServerRootReturnsNullSessionId)
+TEST_F(TestResource, RootResourceReturnsNullSessionId)
 {
-	ServerRoot resource(&http_client, kTestUrl);
+	RootResource resource(&http_client, kTestUrl);
 	http_response.body = "{\"sessionId\":null,\"status\":0,\"value\":12345}";
 	ASSERT_TRUE(resource.Get("command").contains("sessionId"));
 	ASSERT_TRUE(resource.Get("command").get("sessionId").is<picojson::null>());
 }
 
-TEST_F(TestResource, ServerRootReturnsScalarValueFromPositiveResponse)
+TEST_F(TestResource, RootResourceReturnsScalarValueFromPositiveResponse)
 {
-	ServerRoot resource(&http_client, kTestUrl);
+	RootResource resource(&http_client, kTestUrl);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
 	picojson::value value = resource.Get("command").get("value");
@@ -99,9 +99,9 @@ TEST_F(TestResource, ServerRootReturnsScalarValueFromPositiveResponse)
 	ASSERT_EQ(12345, value.get<double>());
 }
 
-TEST_F(TestResource, ServerRootReturnsObjectValueFromPositiveResponse)
+TEST_F(TestResource, RootResourceReturnsObjectValueFromPositiveResponse)
 {
-	ServerRoot resource(&http_client, kTestUrl);
+	RootResource resource(&http_client, kTestUrl);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":{\"member\":12345}}";
 	picojson::value value = resource.Get("command").get("value");

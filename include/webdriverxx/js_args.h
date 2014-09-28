@@ -6,7 +6,7 @@
 
 namespace webdriverxx {
 
-class WebDriver;
+class Session;
 
 class JsArgs // copyable
 {
@@ -25,14 +25,14 @@ public:
 		return *this;
 	}
 
-	// Alternative way to pass custom data structures as arguments.
+	// Alternative backdoor for passing custom data structures as arguments.
 	JsArgs& operator << (const picojson::value& arg) {
 		args_.get<picojson::array>().push_back(arg);
 		return *this;
 	}
 
 private:
-	friend class WebDriver;
+	friend class Session;
 	picojson::value args_;
 };
 

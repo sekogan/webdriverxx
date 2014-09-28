@@ -2,7 +2,6 @@
 #define WEBDRIVERXX_CONVERSIONS_H
 
 #include "types.h"
-#include "detail/types.h"
 #include "detail/error_handling.h"
 #include <picojson.h>
 #include <algorithm>
@@ -131,18 +130,6 @@ struct FromJsonImpl< std::vector<T> > {
 };
 
 ///////////////////////////////////////////////////////////////////
-
-template<>
-struct FromJsonImpl<SessionInformation> {
-	static SessionInformation Convert(const picojson::value& value) {
-		WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Session information is not an object");
-		SessionInformation result;
-		result.id = value.get("sessionId").to_str();
-		if (value.get("capabilities").is<picojson::object>())
-			result.capabilities = detail::CapabilitiesAccess::Construct(value.get("capabilities").get<picojson::object>());
-		return result;
-	}
-};
 
 template<>
 struct ToJsonImpl<Size> {

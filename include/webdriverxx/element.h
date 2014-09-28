@@ -18,6 +18,7 @@ struct Finder;
 
 } // namespace detail
 
+// An element from DOM
 class Element { // copyable
 public:
 	Element(

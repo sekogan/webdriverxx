@@ -7,6 +7,8 @@ set(SOURCE_FILES
 	keyboard_test.cpp
 	main.cpp
 	resource_test.cpp
+	server_test.cpp
+	session_test.cpp
 	webdriver_test.cpp
 	)
 

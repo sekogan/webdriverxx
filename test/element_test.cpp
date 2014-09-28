@@ -21,7 +21,7 @@ TEST_F(TestElement, CanBeClicked) {
 	driver->FindElement(ByTagName("input")).Click();
 }
 
-// TODO: Element::Submit
+// TODO: Submit
 
 TEST_F(TestElement, GetsText) {
 	ASSERT_EQ("Some text", driver->FindElement(ById("element_with_text")).GetText());
@@ -39,8 +39,8 @@ TEST_F(TestElement, GetsTagName) {
 	ASSERT_EQ("div", driver->FindElement(ByTagName("div")).GetTagName());
 }
 
-// IsEnabled
-// IsSelected
+// TODO: IsEnabled
+// TODO: IsSelected
 
 TEST_F(TestElement, GetsAttributes) {
 	Element e = driver->FindElement(ById("div_with_attributes"));

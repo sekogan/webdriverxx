@@ -9,6 +9,7 @@ namespace detail {
 struct CapabilitiesAccess;
 } // namespace detail
 
+// List of keys and values indicating features that server can or should provide.
 class Capabilities { // copyable
 public:
 	bool Contains(const std::string& name) const {

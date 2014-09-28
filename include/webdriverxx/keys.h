@@ -1,6 +1,9 @@
 #ifndef WEBDRIVERXX_KEYS_H
 #define WEBDRIVERXX_KEYS_H 
 
+#include <string>
+#include <vector>
+
 namespace webdriverxx {
 namespace keys { 
 

@@ -206,26 +206,8 @@ struct ReturnValue {
 	}
 };
 
-typedef ResourceBase<ReturnFullResponse> ServerRoot;
+typedef ResourceBase<ReturnFullResponse> RootResource;
 typedef ResourceBase<ReturnValue> Resource;
-
-struct AutoResourceDeleter {
-	explicit AutoResourceDeleter(const Resource& resource)
-		: resource_(resource) {}
-
-	~AutoResourceDeleter() {
-		try {
-			resource_.Delete();
-		} catch(const std::exception&) {}
-	}
-
-private:
-	AutoResourceDeleter(AutoResourceDeleter&);
-	AutoResourceDeleter& operator = (AutoResourceDeleter&);
-
-private:
-	const Resource& resource_;
-};
 
 } // namespace detail
 } // namespace webdriverxx
