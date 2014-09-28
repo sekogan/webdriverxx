@@ -121,19 +121,23 @@ const WebDriver& WebDriver::Refresh() const {
 
 inline
 const WebDriver& WebDriver::Execute(const std::string& script, const JsArgs& args) const {
-	resource_.Post("execute", 
-		JsonObject()
-			.With("script", script)
-			.With("args", args.args_)
-			.Build()
-		);
+	InternalEval(script, args);
 	return *this;
 }
 
 template<typename T>
 inline
 T WebDriver::Eval(const std::string& script, const JsArgs& args) const {
-	return T();
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return FromJson<T>(InternalEval(script, args));
+	WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(detail::Fmt()
+		<< "script: " << script
+		)
+}
+
+inline
+Element WebDriver::EvalElement(const std::string& script, const JsArgs& args) const {
+	return MakeElement(Eval<detail::ElementRef>(script, args).ref);
 }
 
 inline
@@ -248,6 +252,16 @@ inline
 detail::Keyboard WebDriver::GetKeyboard() const
 {
 	return detail::Keyboard(resource_, "keys");
+}
+
+inline
+picojson::value WebDriver::InternalEval(const std::string& script, const JsArgs& args) const {
+	return resource_.Post("execute", 
+		JsonObject()
+			.With("script", script)
+			.With("args", args.args_)
+			.Build()
+		);
 }
 
 } // namespace webdriverxx

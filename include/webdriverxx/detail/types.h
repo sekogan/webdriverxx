@@ -8,10 +8,6 @@
 namespace webdriverxx {
 namespace detail {
 
-struct ElementRef {
-	std::string ref;
-};
-
 struct CapabilitiesAccess {
 	static
 	Capabilities Construct(const picojson::object& object) {

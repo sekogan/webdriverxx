@@ -79,6 +79,7 @@ public:
 	const WebDriver& Execute(const std::string& script, const JsArgs& args = JsArgs()) const;
 	template<typename T>
 	T Eval(const std::string& script, const JsArgs& args = JsArgs()) const;
+	Element EvalElement(const std::string& script, const JsArgs& args = JsArgs()) const;
 
 	const WebDriver& CloseCurrentWindow() const;
 	const WebDriver& SetFocusToWindow(const std::string& name_or_handle) const;
@@ -102,6 +103,7 @@ private:
 	Window MakeWindow(const std::string& handle) const;
 	Element MakeElement(const std::string& id) const;
 	detail::Keyboard GetKeyboard() const;
+	picojson::value InternalEval(const std::string& script, const JsArgs& args) const;
 
 private:
 	const Session session_;

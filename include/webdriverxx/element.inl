@@ -2,10 +2,36 @@
 #include "detail/error_handling.h"
 
 namespace webdriverxx {
+namespace detail {
+
+struct ElementRef {
+	std::string ref;
+};
+
+} // namespace detail
+
+template<>
+struct FromJsonImpl<detail::ElementRef> {
+	static detail::ElementRef Convert(const picojson::value& value) {
+		WEBDRIVERXX_CHECK(value.is<picojson::object>(), "ElementRef is not an object");
+		detail::ElementRef result;
+		result.ref = FromJson<std::string>(value.get("ELEMENT"));
+		return result;
+	}
+};
+
+template<>
+struct ToJsonImpl<detail::ElementRef> {
+	static picojson::value Convert(const detail::ElementRef& ref) {
+		return JsonObject()
+			.With("ELEMENT", ref.ref)
+			.Build();
+	}
+};
 
 template<>
 struct ToJsonImpl<Element> {
-	static picojson::value ToJson(const Element& element) {
+	static picojson::value Convert(const Element& element) {
 		return element.ToJson();
 	}
 };
