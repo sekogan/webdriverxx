@@ -39,6 +39,10 @@ public:
 	template<typename T>
 	T Eval(const std::string& script, const JsArgs& args = JsArgs()) const;
 	Element EvalElement(const std::string& script, const JsArgs& args = JsArgs()) const;
+	const Session& ExecuteAsync(const std::string& script, const JsArgs& args = JsArgs()) const;
+	template<typename T>
+	T EvalAsync(const std::string& script, const JsArgs& args = JsArgs()) const;
+	Element EvalElementAsync(const std::string& script, const JsArgs& args = JsArgs()) const;
 
 	const Session& CloseCurrentWindow() const;
 	const Session& SetFocusToWindow(const std::string& name_or_handle) const;
@@ -72,6 +76,9 @@ private:
 	Element MakeElement(const std::string& id) const;
 	detail::Keyboard GetKeyboard() const;
 	picojson::value InternalEval(const std::string& script, const JsArgs& args) const;
+	picojson::value InternalEvalAsync(const std::string& script, const JsArgs& args) const;
+	picojson::value InternalEval(const std::string& command, const std::string& script,
+		const JsArgs& args) const;
 
 private:
 	detail::Resource resource_;
