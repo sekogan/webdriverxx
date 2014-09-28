@@ -68,7 +68,6 @@ Parameters ParseParameters(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
-	std::cerr << argv[0] << "\n";
 	::testing::InitGoogleTest(&argc, argv);
 	::testing::AddGlobalTestEnvironment(
 		new Environment(ParseParameters(argc, argv))

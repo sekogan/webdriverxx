@@ -2,8 +2,8 @@
 #define WEBDRIVERXX_WINDOW_H
 
 #include "types.h"
+#include "conversions.h"
 #include "detail/resource.h"
-#include "detail/conversions.h"
 #include <string>
 
 namespace webdriverxx {

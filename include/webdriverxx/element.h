@@ -4,8 +4,8 @@
 #include "by.h"
 #include "types.h"
 #include "keys.h"
+#include "conversions.h"
 #include "detail/resource.h"
-#include "detail/conversions.h"
 #include "detail/keyboard.h"
 #include <picojson.h>
 #include <string>

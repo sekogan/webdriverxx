@@ -1,6 +1,7 @@
 #include "environment.h"
 #include <webdriverxx/webdriver.h>
 #include <gtest/gtest.h>
+#include <list>
 
 using namespace webdriverxx;
 
@@ -67,29 +68,57 @@ TEST_F(TestJsExecutor, CanPassArray) {
 	ASSERT_EQ("444", driver->GetTitle());
 }
 
+namespace webdriverxx {
+
+template<typename T>
+struct ToJsonImpl< std::list<T> > {
+	static picojson::value ToJson(const std::list<T>& value) {
+		return ToJsonArray<T>(value);
+	}
+};
+
+} // namespace webdriverxx
+
+
+TEST_F(TestJsExecutor, CanPassCustomArray) {
+	std::list<int> numbers;
+	numbers.push_back(123);
+	numbers.push_back(321);
+	driver->Execute("document.title = arguments[0][0] + arguments[0][1]",
+		JsArgs() << numbers);
+	ASSERT_EQ("444", driver->GetTitle());
+}
+
 struct CustomObject {
 	std::string string;
 	int number;
 };
 
 namespace webdriverxx {
-namespace detail {
 
 template<>
-inline
-picojson::value ToJson(const CustomObject& value) {
-	return JsonObject()
-		.With("string", value.string)
-		.With("number", value.number)
-		.Build();
-}
+struct ToJsonImpl<CustomObject> {
+	static picojson::value ToJson(const CustomObject& value) {
+		return JsonObject()
+			.With("string", value.string)
+			.With("number", value.number)
+			.Build();
+	}
+};
 
-} // namespace detail
 } // namespace webdriverxx
 
 TEST_F(TestJsExecutor, CanPassCustomObject) {
 	CustomObject o = { "abc", 123 };
 	driver->Execute("o = arguments[0]; document.title = (o.string + 'def') + (o.number + 1)",
 		JsArgs() << o);
+	ASSERT_EQ("abcdef124", driver->GetTitle());
+}
+
+TEST_F(TestJsExecutor, CanPassArrayWithCustomObjects) {
+	CustomObject o = { "abc", 123 };
+	std::vector<CustomObject> os(2, o);
+	driver->Execute("o = arguments[0][1]; document.title = (o.string + 'def') + (o.number + 1)",
+		JsArgs() << os);
 	ASSERT_EQ("abcdef124", driver->GetTitle());
 }

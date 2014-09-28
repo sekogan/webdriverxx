@@ -2,7 +2,7 @@
 #define WEBDRIVERXX_DETAIL_KEYBOARD_H
 
 #include "resource.h"
-#include "conversions.h"
+#include "../conversions.h"
 #include "../keys.h"
 #include <vector>
 
@@ -25,8 +25,8 @@ public:
 
 	void SendKeys(const Shortcut& shortcut) const {
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-		resource_->Post(command_, detail::JsonObject()
-			.With("value", detail::ToJson(shortcut.keys_)).Build());
+		resource_->Post(command_, JsonObject()
+			.With("value", ToJson(shortcut.keys_)).Build());
 		WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(Fmt()
 			<< "command: " << command_
 			<< ", resource: " << resource_->GetUrl()

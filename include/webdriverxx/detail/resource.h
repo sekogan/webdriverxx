@@ -1,10 +1,10 @@
 #ifndef WEBDRIVERXX_DETAIL_RESOURCE_H
 #define WEBDRIVERXX_DETAIL_RESOURCE_H
 
-#include "http_client.h"
 #include "error_handling.h"
+#include "http_client.h"
+#include "../conversions.h"
 #include "../response_status_code.h"
-#include "conversions.h"
 #include <picojson.h>
 
 namespace webdriverxx {
@@ -37,7 +37,7 @@ public:
 	template<typename T>
 	T GetValue(const std::string& command) const {
 		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-		return detail::FromJson<T>(Get(command));
+		return FromJson<T>(Get(command));
 		WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(detail::Fmt() <<
 			"command: " << command
 			)
@@ -67,7 +67,7 @@ public:
 		const std::string& arg_name,
 		const std::string& arg_value
 		) const {
-		Post(command, detail::JsonObject().With(arg_name, arg_value).Build());
+		Post(command, JsonObject().With(arg_name, arg_value).Build());
 	}	
 
 	template<typename T>

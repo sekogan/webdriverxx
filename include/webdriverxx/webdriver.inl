@@ -1,5 +1,5 @@
+#include "conversions.h"
 #include "detail/error_handling.h"
-#include "detail/conversions.h"
 
 namespace webdriverxx {
 
@@ -19,7 +19,7 @@ picojson::object BasicWebDriver::GetStatus() const {
 inline
 SessionsInformation BasicWebDriver::GetSessions() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return detail::FromJsonArray<SessionInformation>(
+	return FromJsonArray<SessionInformation>(
 		server_root_.Get("sessions").get("value")
 		);
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
@@ -32,7 +32,7 @@ BasicWebDriver::Session BasicWebDriver::CreateSession(
 	) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	const picojson::value& response = server_root_.Post("session",
-		detail::JsonObject()
+		JsonObject()
 			.With("requiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(required))
 			.With("desiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(desired))
 			.Build());
@@ -122,7 +122,7 @@ const WebDriver& WebDriver::Refresh() const {
 inline
 const WebDriver& WebDriver::Execute(const std::string& script, const JsArgs& args) const {
 	resource_.Post("execute", 
-		detail::JsonObject()
+		JsonObject()
 			.With("script", script)
 			.With("args", args.args_)
 			.Build()
@@ -146,7 +146,7 @@ inline
 std::vector<Window> WebDriver::GetWindows() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	const std::vector<std::string> handles =
-		detail::FromJsonArray<std::string>(
+		FromJsonArray<std::string>(
 			resource_.Get("window_handles")
 			);
 	std::vector<Window> result;
@@ -200,9 +200,9 @@ Element WebDriver::FindElement(
 	const By& by,
 	const detail::Resource& context
 	) const {
-	return MakeElement(detail::FromJson<detail::ElementRef>(
+	return MakeElement(FromJson<detail::ElementRef>(
 		context.Post("element",
-			detail::JsonObject()
+			JsonObject()
 				.With("using", by.GetStrategy())
 				.With("value", by.GetValue())
 				.Build()
@@ -215,8 +215,8 @@ std::vector<Element> WebDriver::FindElements(
 	const detail::Resource& context
 	) const {
 	const std::vector<detail::ElementRef> ids =
-		detail::FromJsonArray<detail::ElementRef>(
-			context.Post("elements", detail::JsonObject()
+		FromJsonArray<detail::ElementRef>(
+			context.Post("elements", JsonObject()
 				.With("using", by.GetStrategy())
 				.With("value", by.GetValue())
 				.Build()

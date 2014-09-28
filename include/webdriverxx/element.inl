@@ -2,16 +2,13 @@
 #include "detail/error_handling.h"
 
 namespace webdriverxx {
-namespace detail {
 
 template<>
-inline
-picojson::value ToJson(const Element& element)
-{
-	return element.ToJson();
-}
-
-} // namespace detail
+struct ToJsonImpl<Element> {
+	static picojson::value ToJson(const Element& element) {
+		return element.ToJson();
+	}
+};
 
 inline
 Element::Element(
@@ -146,7 +143,7 @@ bool Element::operator == (const Element& other) const {
 inline
 picojson::value Element::ToJson() const {
 	detail::ElementRef ref = { ref_ };
-	return detail::ToJson(ref);
+	return ::webdriverxx::ToJson(ref);
 }
 
 inline

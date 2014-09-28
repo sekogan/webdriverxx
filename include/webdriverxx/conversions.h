@@ -1,16 +1,57 @@
-#ifndef WEBDRIVERXX_DETAIL_CONVERSIONS_H
-#define WEBDRIVERXX_DETAIL_CONVERSIONS_H
+#ifndef WEBDRIVERXX_CONVERSIONS_H
+#define WEBDRIVERXX_CONVERSIONS_H
 
-#include "error_handling.h"
-#include "../types.h"
+#include "types.h"
+#include "detail/types.h"
+#include "detail/error_handling.h"
 #include <picojson.h>
 #include <algorithm>
 
 namespace webdriverxx {
-namespace detail {
 
-struct ElementRef {
-	std::string ref;
+template<typename T>
+struct ToJsonImpl {
+	static picojson::value ToJson(const T& value) {
+		return picojson::value(value);
+	}
+};
+
+// Do not specialize or overload ToJson(). Add specializations
+// for ToJsonImpl instead.
+template<typename T>
+inline
+picojson::value ToJson(const T& value) {
+	return ToJsonImpl<T>::ToJson(value);
+}
+
+template<typename Item, class Iterable>
+inline
+picojson::value ToJsonArray(const Iterable& src) {
+	picojson::value result = picojson::value(picojson::array());
+	picojson::array& dst = result.get<picojson::array>();
+	std::transform(src.begin(), src.end(), std::back_inserter(dst), ToJson<Item>);
+	return result;
+}
+
+template<typename T>
+struct ToJsonImpl< std::vector<T> > {
+	static picojson::value ToJson(const std::vector<T>& value) {
+		return ToJsonArray<T>(value);
+	}
+};
+
+template<>
+struct ToJsonImpl<picojson::value> {
+	static picojson::value ToJson(const picojson::value& value) {
+		return value;
+	}
+};
+
+template<>
+struct ToJsonImpl<int> {
+	static picojson::value ToJson(int value) {
+		return picojson::value(static_cast<double>(value));
+	}
 };
 
 class JsonObject { // copyable
@@ -18,19 +59,9 @@ public:
 	JsonObject()
 		: value_(picojson::object()) {}
 
-	JsonObject& With(const std::string& name, const picojson::value& value) {
-		value_.get<picojson::object>()[name] = value;
-		return *this;
-	}
-
-	JsonObject& With(const std::string& name, int value) {
-		value_.get<picojson::object>()[name] = picojson::value(static_cast<double>(value));
-		return *this;
-	}
-
 	template<typename T>
 	JsonObject& With(const std::string& name, const T& value) {
-		value_.get<picojson::object>()[name] = picojson::value(value);
+		value_.get<picojson::object>()[name] = ToJson(value);
 		return *this;
 	}
 
@@ -42,23 +73,7 @@ private:
 	picojson::value value_;
 };
 
-struct CapabilitiesAccess {
-	static
-	Capabilities Construct(const picojson::object& object) {
-		return Capabilities(object);
-	}
-
-	static
-	const picojson::object& GetJsonObject(const Capabilities& capabilities) {
-		return capabilities.GetJsonObject();
-	}
-};
-
-template<typename T>
-inline
-picojson::value ToJson(const T& value) {
-	return picojson::value(value);
-}
+///////////////////////////////////////////////////////////////////
 
 template<typename T>
 inline
@@ -85,18 +100,12 @@ int FromJson(const picojson::value& value) {
 
 template<>
 inline
-picojson::value ToJson(const int& value) {
-	return picojson::value(static_cast<double>(value));
-}
-
-template<>
-inline
 SessionInformation FromJson(const picojson::value& value) {
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Session information is not an object");
 	SessionInformation result;
 	result.id = value.get("sessionId").to_str();
 	if (value.get("capabilities").is<picojson::object>())
-		result.capabilities = CapabilitiesAccess::Construct(value.get("capabilities").get<picojson::object>());
+		result.capabilities = detail::CapabilitiesAccess::Construct(value.get("capabilities").get<picojson::object>());
 	return result;
 }
 
@@ -111,14 +120,14 @@ Size FromJson(const picojson::value& value) {
 }
 
 template<>
-inline
-picojson::value ToJson(const Size& size)
-{
-	return JsonObject()
-		.With("width", size.width)
-		.With("height", size.height)
-		.Build();
-}
+struct ToJsonImpl<Size> {
+	static picojson::value ToJson(const Size& size) {
+		return JsonObject()
+			.With("width", size.width)
+			.With("height", size.height)
+			.Build();
+	}
+};
 
 template<>
 inline
@@ -131,32 +140,32 @@ Point FromJson(const picojson::value& value) {
 }
 
 template<>
-inline
-picojson::value ToJson(const Point& position)
-{
-	return JsonObject()
-		.With("x", position.x)
-		.With("y", position.y)
-		.Build();
-}
+struct ToJsonImpl<Point> {
+	static picojson::value ToJson(const Point& position) {
+		return JsonObject()
+			.With("x", position.x)
+			.With("y", position.y)
+			.Build();
+	}
+};
 
 template<>
 inline
-ElementRef FromJson(const picojson::value& value) {
+detail::ElementRef FromJson(const picojson::value& value) {
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "ElementRef is not an object");
-	ElementRef result;
+	detail::ElementRef result;
 	result.ref = FromJson<std::string>(value.get("ELEMENT"));
 	return result;
 }
 
 template<>
-inline
-picojson::value ToJson(const ElementRef& ref)
-{
-	return JsonObject()
-		.With("ELEMENT", ref.ref)
-		.Build();
-}
+struct ToJsonImpl<detail::ElementRef> {
+	static picojson::value ToJson(const detail::ElementRef& ref) {
+		return JsonObject()
+			.With("ELEMENT", ref.ref)
+			.Build();
+	}
+};
 
 template<typename T>
 inline
@@ -169,22 +178,6 @@ std::vector<T> FromJsonArray(const picojson::value& value) {
 	return result;
 }
 
-template<typename T, class Iterable>
-inline
-picojson::value ToJsonArray(const Iterable& src) {
-	picojson::value result = picojson::value(picojson::array());
-	picojson::array& dst = result.get<picojson::array>();
-	std::transform(src.begin(), src.end(), std::back_inserter(dst), ToJson<T>);
-	return result;
-}
-
-template<typename T>
-inline
-picojson::value ToJson(const std::vector<T>& src) {
-	return ToJsonArray<T>(src);
-}
-
-} // namespace detail
 } // namespace webdriverxx
 
 #endif
