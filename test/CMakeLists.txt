@@ -34,6 +34,7 @@ if (WIN32)
 		PREFIX curl
 		CMAKE_ARGS -DCURL_STATICLIB=ON -DBUILD_SHARED_LIBS=OFF -DBUILD_CURL_EXE=OFF -DBUILD_CURL_TESTS=OFF -DCMAKE_USE_OPENSSL=OFF -DCURL_ZLIB=OFF -DHTTP_ONLY=ON
 		INSTALL_COMMAND ""
+		UPDATE_COMMAND ""
 	)
 	externalproject_get_property(curl_project source_dir binary_dir)
 	include_directories("${source_dir}/include")
@@ -50,10 +51,12 @@ endif()
 # picojson
 externalproject_add(picojson_project
 	PREFIX picojson
-	GIT_REPOSITORY https://github.com/sekogan/picojson
+	GIT_REPOSITORY https://github.com/kazuho/picojson
+	GIT_TAG 806c5740e2c673189fee7e53acc0429af0b24691
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND ""
 	INSTALL_COMMAND ""
+	UPDATE_COMMAND ""
 	)
 externalproject_get_property(picojson_project source_dir)
 include_directories("${source_dir}")
@@ -65,6 +68,7 @@ externalproject_add(gmock_project
 	URL "http://googlemock.googlecode.com/files/gmock-1.7.0.zip"
 	CMAKE_ARGS -Dgtest_force_shared_crt=ON
 	INSTALL_COMMAND ""
+	UPDATE_COMMAND ""
 	)
 externalproject_get_property(gmock_project source_dir binary_dir)
 include_directories("${source_dir}/include")
