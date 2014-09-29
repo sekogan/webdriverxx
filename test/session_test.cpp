@@ -141,3 +141,17 @@ TEST_F(TestSession, GetsScreenshot) {
 	driver->Navigate(Environment::Instance().GetTestPageUrl("session.html"));
 	ASSERT_TRUE(!driver->GetScreenshot().empty());
 }
+
+TEST_F(TestSession, SetsTimeouts) {
+	driver->SetTimeout(timeout::ImplicitWait, 1000);
+	driver->SetTimeout(timeout::PageLoad, 1000);
+	driver->SetTimeout(timeout::Script, 1000);
+}
+
+TEST_F(TestSession, SetsAsyncScriptTimeout) {
+	driver->SetTimeout(timeout::AsyncScript, 1000);
+}
+
+TEST_F(TestSession, SetsElementFindTimeout) {
+	driver->SetTimeout(timeout::ElementFind, 1000);
+}

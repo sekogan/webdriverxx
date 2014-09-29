@@ -25,10 +25,12 @@ public:
 
 	Capabilities GetCapabilities() const;
 	std::string GetBrowser() const;
+	const Session& SetTimeout(timeout::Type type, int milliseconds);
+
 	std::string GetSource() const;
 	std::string GetTitle() const;
 	std::string GetUrl() const;
-	std::string GetScreenshot() const; // Base64 PNG	
+	std::string GetScreenshot() const; // Base64 PNG
 
 	const Session& Navigate(const std::string& url) const;
 	const Session& Forward() const;
@@ -89,6 +91,7 @@ private:
 	picojson::value InternalEval(const std::string& command, const std::string& script,
 		const JsArgs& args) const;
 	const Session& InternalSetFocusToFrame(const picojson::value& id) const;
+	const Session& InternalSetTimeout(const std::string& type, int milliseconds) const;
 
 private:
 	detail::Resource resource_;

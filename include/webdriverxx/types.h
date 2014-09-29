@@ -15,6 +15,16 @@ struct Point {
 	Point() : x(0), y(0) {}
 };
 
+namespace timeout {
+enum Type {
+	ImplicitWait,
+	PageLoad,
+	Script,
+	AsyncScript,
+	ElementFind
+};
+} // namespace timeout
+
 namespace browser {
 const char *const Android = "android";
 const char *const Chrome = "chrome";

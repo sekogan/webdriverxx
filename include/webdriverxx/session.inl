@@ -47,6 +47,29 @@ std::string Session::GetScreenshot() const {
 }
 
 inline
+const Session& Session::SetTimeout(timeout::Type type, int milliseconds) {
+	switch (type) {
+	case timeout::ImplicitWait:
+		return InternalSetTimeout("implicit", milliseconds);
+	case timeout::PageLoad:
+		return InternalSetTimeout("page load", milliseconds);
+	case timeout::Script:
+		return InternalSetTimeout("script", milliseconds);
+	case timeout::AsyncScript:
+		resource_.Post("timeouts/async_script",
+			JsonObject().With("ms", milliseconds).Build());
+		return *this;
+	case timeout::ElementFind:
+		resource_.Post("timeouts/implicit_wait",
+			JsonObject().With("ms", milliseconds).Build());
+		return *this;
+	default:
+		WEBDRIVERXX_CHECK(false, "Unknown timeout type");
+	}
+	return *this;
+}
+
+inline
 Window Session::GetCurrentWindow() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	return MakeWindow(resource_.GetString("window_handle"));
@@ -299,6 +322,17 @@ picojson::value Session::InternalEval(
 			.With("args", args.args_)
 			.Build()
 		);
+}
+
+inline
+const Session& Session::InternalSetTimeout(const std::string& type, int milliseconds) const {
+	resource_.Post("timeouts",
+		JsonObject()
+			.With("type", type)
+			.With("ms", milliseconds)
+			.Build()
+		);
+	return *this;
 }
 
 } // namespace webdriverxx
