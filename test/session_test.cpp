@@ -155,3 +155,10 @@ TEST_F(TestSession, SetsAsyncScriptTimeout) {
 TEST_F(TestSession, SetsElementFindTimeout) {
 	driver->SetTimeout(timeout::ElementFind, 1000);
 }
+
+TEST_F(TestSession, GetsActiveElement) {
+	driver->Navigate(Environment::Instance().GetTestPageUrl("session.html"));
+	Element e = driver->FindElement(ByTagName("input"));
+	e.Click();
+	ASSERT_EQ(e, driver->GetActiveElement());
+}

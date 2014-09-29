@@ -58,6 +58,8 @@ public:
 	const Session& SetFocusToWindow(const std::string& window_name) const;
 	const Session& SetFocusToWindow(const Window& window) const;
 	
+	Element GetActiveElement() const;
+	
 	Element FindElement(const By& by) const;
 	std::vector<Element> FindElements(const By& by) const;
 

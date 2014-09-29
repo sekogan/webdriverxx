@@ -208,6 +208,13 @@ std::vector<Window> Session::GetWindows() const {
 }
 
 inline
+Element Session::GetActiveElement() const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return MakeElement(FromJson<detail::ElementRef>(resource_.Post("element/active")).ref);
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
 Element Session::FindElement(const By& by) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	return FindElement(by, resource_);
