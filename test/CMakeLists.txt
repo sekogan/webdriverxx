@@ -2,6 +2,7 @@ set(SOURCE_FILES
 	element_test.cpp
 	environment.h
 	finder_test.cpp
+	frames_test.cpp
 	http_connection_test.cpp
 	js_test.cpp
 	keyboard_test.cpp

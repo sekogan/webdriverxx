@@ -24,6 +24,7 @@ public:
 	void DeleteSession() const;
 
 	Capabilities GetCapabilities() const;
+	std::string GetBrowser() const;
 	std::string GetSource() const;
 	std::string GetTitle() const;
 	std::string GetUrl() const;
@@ -45,7 +46,14 @@ public:
 	Element EvalElementAsync(const std::string& script, const JsArgs& args = JsArgs()) const;
 
 	const Session& CloseCurrentWindow() const;
-	const Session& SetFocusToWindow(const std::string& name_or_handle) const;
+	const Session& SetFocusToWindow(const std::string& window_name) const;
+	const Session& SetFocusToWindow(const Window& window) const;
+
+	const Session& SetFocusToFrame(const Element& frame) const;
+	const Session& SetFocusToFrame(const std::string& id) const;
+	const Session& SetFocusToFrame(int number) const;
+	const Session& SetFocusToDefaultFrame() const;
+	const Session& SetFocusToParentFrame() const;
 	
 	Element FindElement(const By& by) const;
 	std::vector<Element> FindElements(const By& by) const;
@@ -79,6 +87,7 @@ private:
 	picojson::value InternalEvalAsync(const std::string& script, const JsArgs& args) const;
 	picojson::value InternalEval(const std::string& command, const std::string& script,
 		const JsArgs& args) const;
+	const Session& InternalSetFocusToFrame(const picojson::value& id) const;
 
 private:
 	detail::Resource resource_;

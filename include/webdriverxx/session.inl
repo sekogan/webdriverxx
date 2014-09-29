@@ -22,6 +22,11 @@ Capabilities Session::GetCapabilities() const {
 }
 
 inline
+std::string Session::GetBrowser() const {
+	return capabilities_.GetString(capabilities::BrowserName);
+}
+
+inline
 std::string Session::GetSource() const {
 	return resource_.GetString("source");
 }
@@ -116,8 +121,46 @@ Element Session::EvalElementAsync(const std::string& script, const JsArgs& args)
 }
 
 inline
-const Session& Session::SetFocusToWindow(const std::string& name_or_handle) const {
-	resource_.Post("window", "name", name_or_handle);
+const Session& Session::SetFocusToWindow(const std::string& window_name_or_handle) const {
+	resource_.Post("window", "name", window_name_or_handle);
+	return *this;
+}
+
+inline
+const Session& Session::SetFocusToWindow(const Window& window) const {
+	SetFocusToWindow(window.GetHandle());
+	return *this;
+}
+
+inline
+const Session& Session::SetFocusToFrame(const Element& frame) const {
+	return InternalSetFocusToFrame(ToJson(frame));
+}
+
+inline
+const Session& Session::SetFocusToFrame(const std::string& id) const {
+	return InternalSetFocusToFrame(ToJson(id));
+}
+
+inline
+const Session& Session::SetFocusToFrame(int number) const {
+	return InternalSetFocusToFrame(ToJson(number));
+}
+
+inline
+const Session& Session::SetFocusToDefaultFrame() const {
+	return InternalSetFocusToFrame(picojson::value());
+}
+
+inline
+const Session& Session::SetFocusToParentFrame() const {
+	resource_.Post("frame/parent");
+	return *this;
+}
+
+inline
+const Session& Session::InternalSetFocusToFrame(const picojson::value& id) const {
+	resource_.Post("frame", JsonObject().With("id", id).Build());
 	return *this;
 }
 
