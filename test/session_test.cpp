@@ -136,3 +136,8 @@ TEST_F(TestSession, GetsPageTitle) {
 	driver->Navigate(Environment::Instance().GetTestPageUrl("session.html"));
 	ASSERT_EQ("Test title", driver->GetTitle());
 }
+
+TEST_F(TestSession, GetsScreenshot) {
+	driver->Navigate(Environment::Instance().GetTestPageUrl("session.html"));
+	ASSERT_TRUE(!driver->GetScreenshot().empty());
+}

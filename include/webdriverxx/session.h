@@ -28,8 +28,7 @@ public:
 	std::string GetSource() const;
 	std::string GetTitle() const;
 	std::string GetUrl() const;
-	std::vector<Window> GetWindows() const;
-	Window GetCurrentWindow() const;
+	std::string GetScreenshot() const; // Base64 PNG	
 
 	const Session& Navigate(const std::string& url) const;
 	const Session& Forward() const;
@@ -45,15 +44,17 @@ public:
 	T EvalAsync(const std::string& script, const JsArgs& args = JsArgs()) const;
 	Element EvalElementAsync(const std::string& script, const JsArgs& args = JsArgs()) const;
 
-	const Session& CloseCurrentWindow() const;
-	const Session& SetFocusToWindow(const std::string& window_name) const;
-	const Session& SetFocusToWindow(const Window& window) const;
-
 	const Session& SetFocusToFrame(const Element& frame) const;
 	const Session& SetFocusToFrame(const std::string& id) const;
 	const Session& SetFocusToFrame(int number) const;
 	const Session& SetFocusToDefaultFrame() const;
 	const Session& SetFocusToParentFrame() const;
+
+	std::vector<Window> GetWindows() const;
+	Window GetCurrentWindow() const;
+	const Session& CloseCurrentWindow() const;
+	const Session& SetFocusToWindow(const std::string& window_name) const;
+	const Session& SetFocusToWindow(const Window& window) const;
 	
 	Element FindElement(const By& by) const;
 	std::vector<Element> FindElements(const By& by) const;

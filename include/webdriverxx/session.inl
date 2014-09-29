@@ -42,6 +42,11 @@ std::string Session::GetUrl() const {
 }
 
 inline
+std::string Session::GetScreenshot() const {
+	return resource_.GetString("screenshot");
+}
+
+inline
 Window Session::GetCurrentWindow() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	return MakeWindow(resource_.GetString("window_handle"));
