@@ -27,7 +27,7 @@ Server* TestWebDriver::server = 0;
 
 TEST_F(TestWebDriver, CreatesSession) {
 	size_t number_of_sessions_before = server->GetSessions().size();
-	WebDriver testee(params.url, params.required, params.desired);
+	WebDriver testee(params.url, params.desired, params.required);
 	size_t number_of_sessions_after = server->GetSessions().size();
 	ASSERT_EQ(number_of_sessions_before + 1, number_of_sessions_after);
 }
@@ -35,7 +35,7 @@ TEST_F(TestWebDriver, CreatesSession) {
 TEST_F(TestWebDriver, DeletesSessionOnDestruction) {
 	size_t number_of_sessions_before = 0;
 	{
-		WebDriver testee(params.url, params.required, params.desired);
+		WebDriver testee(params.url, params.desired, params.required);
 		number_of_sessions_before = server->GetSessions().size();
 	}
 	size_t number_of_sessions_after = server->GetSessions().size();

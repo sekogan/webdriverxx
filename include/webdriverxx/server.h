@@ -27,8 +27,8 @@ public:
 	// Creates new session. All sessions created with this member should be
 	// deleted with Session::DeleteSession().
 	Session CreateSession(
-		const Capabilities& required,
-		const Capabilities& desired
+		const Capabilities& desired,
+		const Capabilities& required
 		) const;
 
 private:

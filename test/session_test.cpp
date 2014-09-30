@@ -27,7 +27,7 @@ TEST_F(TestSession, GetsCapabilities)
 
 TEST_F(TestSession, StartsSecondBrowser) {
 	Parameters params = Environment::Instance().GetParameters();
-	WebDriver second(params.url, params.required, params.desired);
+	WebDriver second(params.url, params.desired, params.required);
 }
 
 TEST_F(TestSession, GetsCurrentWindow) {

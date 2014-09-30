@@ -65,14 +65,14 @@ std::vector<Session> Server::GetSessions() const {
 
 inline
 Session Server::CreateSession(
-	const Capabilities& required,
-	const Capabilities& desired
+	const Capabilities& desired,
+	const Capabilities& required
 	) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	const picojson::value& response = resource_.Post("session",
 		JsonObject()
-			.With("requiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(required))
 			.With("desiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(desired))
+			.With("requiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(required))
 			.Build()
 			);
 

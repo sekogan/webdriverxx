@@ -34,7 +34,7 @@ public:
 	webdriverxx::WebDriver* GetFreshDriver() {
 		DeleteDriver();
 		return driver_ = new webdriverxx::WebDriver(
-			parameters_.url, parameters_.required, parameters_.desired
+			parameters_.url, parameters_.desired, parameters_.required
 			);
 	}
 

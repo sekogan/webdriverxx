@@ -14,8 +14,8 @@ class WebDriver // noncopyable
 public:
 	explicit WebDriver(
 		const std::string& url = kDefaultUrl,
-		const Capabilities& required = Capabilities(),
-		const Capabilities& desired = Capabilities()
+		const Capabilities& desired = Capabilities(),
+		const Capabilities& required = Capabilities()
 		);
 	~WebDriver();
 };
@@ -23,11 +23,11 @@ public:
 inline
 WebDriver::WebDriver(
 	const std::string& url,
-	const Capabilities& required,
-	const Capabilities& desired
+	const Capabilities& desired,
+	const Capabilities& required
 	)
 	: Server(url)
-	, Session(CreateSession(required, desired)) {}
+	, Session(CreateSession(desired, required)) {}
 
 inline
 WebDriver::~WebDriver() {
