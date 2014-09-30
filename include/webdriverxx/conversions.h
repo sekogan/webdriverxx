@@ -53,6 +53,13 @@ struct ToJsonImpl<int> {
 	}
 };
 
+template<>
+struct ToJsonImpl<unsigned> {
+	static picojson::value Convert(unsigned value) {
+		return picojson::value(static_cast<double>(value));
+	}
+};
+
 class JsonObject { // copyable
 public:
 	JsonObject()
@@ -122,12 +129,27 @@ struct FromJsonImpl<int> {
 	}
 };
 
+template<>
+struct FromJsonImpl<unsigned> {
+	static unsigned Convert(const picojson::value& value) {
+		WEBDRIVERXX_CHECK(value.is<double>(), "Value is not a number");
+		return static_cast<unsigned>(value.get<double>());
+	}
+};
+
 template<typename T>
 struct FromJsonImpl< std::vector<T> > {
 	static std::vector<T> Convert(const picojson::value& value) {
 		return FromJsonArray<T>(value);
 	}
 };
+
+template<typename T>
+inline
+void OptionalFromJson(const picojson::value& json, T& value) {
+	if (!json.is<picojson::null>())
+		value = FromJson<T>(json);
+}
 
 ///////////////////////////////////////////////////////////////////
 
@@ -169,6 +191,37 @@ struct FromJsonImpl<Point> {
 		Point result;
 		result.x = FromJson<int>(value.get("x"));
 		result.y = FromJson<int>(value.get("y"));
+		return result;
+	}
+};
+
+template<>
+struct ToJsonImpl<Cookie> {
+	static picojson::value Convert(const Cookie& cookie) {
+		JsonObject result;
+		result.With("name", cookie.name);
+		result.With("value", cookie.value);
+		if (!cookie.path.empty()) result.With("path", cookie.path);
+		if (!cookie.domain.empty()) result.With("domain", cookie.domain);
+		if (cookie.secure) result.With("secure", true);
+		if (cookie.http_only) result.With("httpOnly", true);
+		if (cookie.expiry != Cookie::NoExpiry) result.With("expiry", cookie.expiry);
+		return result.Build();
+	}
+};
+
+template<>
+struct FromJsonImpl<Cookie> {
+	static Cookie Convert(const picojson::value& value) {
+		WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Cookie is not an object");
+		Cookie result;
+		result.name = FromJson<std::string>(value.get("name"));
+		result.value = FromJson<std::string>(value.get("value"));
+		OptionalFromJson(value.get("path"), result.path);
+		OptionalFromJson(value.get("domain"), result.domain);
+		OptionalFromJson(value.get("secure"), result.secure);
+		OptionalFromJson(value.get("httpOnly"), result.http_only);
+		OptionalFromJson(value.get("expiry"), result.expiry);
 		return result;
 	}
 };

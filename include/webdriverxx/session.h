@@ -59,9 +59,14 @@ public:
 	const Session& SetFocusToWindow(const Window& window) const;
 	
 	Element GetActiveElement() const;
-	
+
 	Element FindElement(const By& by) const;
 	std::vector<Element> FindElements(const By& by) const;
+
+	std::vector<Cookie> GetCookies() const;
+	const Session& SetCookie(const Cookie& cookie) const;
+	const Session& DeleteCookies() const;
+	const Session& DeleteCookie(const std::string& name) const;
 
 	const Session& SendKeys(const char* keys) const;
 	const Session& SendKeys(const std::string& keys) const;

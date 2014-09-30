@@ -235,6 +235,32 @@ std::vector<Element> Session::FindElements(const By& by) const {
 }
 
 inline
+std::vector<Cookie> Session::GetCookies() const {
+	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
+	return FromJson< std::vector<Cookie> >(resource_.Get("cookie"));
+	WEBDRIVERXX_FUNCTION_CONTEXT_END()
+}
+
+inline
+const Session& Session::SetCookie(const Cookie& cookie) const {
+	resource_.Post("cookie", JsonObject()
+		.With("cookie", ToJson(cookie)).Build());
+	return *this;
+}
+
+inline
+const Session& Session::DeleteCookies() const {
+	resource_.Delete("cookie");
+	return *this;
+}
+
+inline
+const Session& Session::DeleteCookie(const std::string& name) const {
+	resource_.Delete(std::string("cookie/") + name);
+	return *this;
+}
+
+inline
 const Session& Session::SendKeys(const char* keys) const {
 	GetKeyboard().SendKeys(keys);
 	return *this;

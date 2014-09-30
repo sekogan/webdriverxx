@@ -1,6 +1,7 @@
 #include "environment.h"
 #include <webdriverxx/session.h>
 #include <gtest/gtest.h>
+#include <algorithm>
 
 using namespace webdriverxx;
 
@@ -161,4 +162,56 @@ TEST_F(TestSession, GetsActiveElement) {
 	Element e = driver->FindElement(ByTagName("input"));
 	e.Click();
 	ASSERT_EQ(e, driver->GetActiveElement());
+}
+
+Cookie FindCookie(
+	const std::vector<Cookie>& cookies,
+	const std::string& name,
+	const Cookie& default_value = Cookie()
+	) {
+	std::vector<Cookie>::const_iterator it = cookies.begin();
+	for (; it != cookies.end(); ++it)
+		if (it->name == name)
+			return *it;
+	return default_value;
+}
+
+namespace webdriverxx {
+
+void PrintTo(const Cookie& c, ::std::ostream* os) {
+	*os << ToJson(c).serialize();
+}
+
+} // namespace webdriverxx
+
+TEST_F(TestSession, SetsAndGetsCookies) {
+	driver->Navigate(Environment::Instance().GetTestPageUrl("session.html"));
+	driver->SetCookie(Cookie("name1", "value1")).SetCookie(Cookie("name2", "value2"));
+	std::vector<Cookie> cookies = driver->GetCookies();
+	ASSERT_TRUE(cookies.size() >= 2u);
+	ASSERT_EQ("value1", FindCookie(cookies, "name1").value);
+	ASSERT_EQ("value2", FindCookie(cookies, "name2").value);
+}
+
+TEST_F(TestSession, SetsAllFieldsOfACookie) {
+	const Cookie c1("name1", "value1", "/path1", "domain1.com", true, true, 123);
+	const Cookie c2("name2", "value2", "/path2", "domain2.com", false, false, 124);
+	ASSERT_EQ(c1, FromJson<Cookie>(ToJson(c1)));
+	ASSERT_EQ(c2, FromJson<Cookie>(ToJson(c2)));
+}
+
+TEST_F(TestSession, DeletesCookies) {
+	driver->Navigate(Environment::Instance().GetTestPageUrl("session.html"));
+	driver->SetCookie(Cookie("name1", "value1")).SetCookie(Cookie("name2", "value2"));
+	driver->DeleteCookies();
+	ASSERT_EQ(0u, driver->GetCookies().size());
+}
+
+TEST_F(TestSession, DeletesACookie) {
+	driver->Navigate(Environment::Instance().GetTestPageUrl("session.html"));
+	driver->SetCookie(Cookie("name1", "value1")).SetCookie(Cookie("name2", "value2"));
+	driver->DeleteCookie("name1");
+	std::vector<Cookie> cookies = driver->GetCookies();
+	ASSERT_EQ("", FindCookie(cookies, "name1").value);
+	ASSERT_EQ("value2", FindCookie(cookies, "name2").value);
 }
