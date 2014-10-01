@@ -33,6 +33,7 @@ public:
 	std::string GetScreenshot() const; // Base64 PNG
 
 	const Session& Navigate(const std::string& url) const;
+	const Session& Get(const std::string& url) const; // Same as Navigate
 	const Session& Forward() const;
 	const Session& Back() const;
 	const Session& Refresh() const;

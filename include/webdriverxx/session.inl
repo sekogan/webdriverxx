@@ -89,6 +89,11 @@ const Session& Session::Navigate(const std::string& url) const {
 }
 
 inline
+const Session& Session::Get(const std::string& url) const {
+	return Navigate(url);
+}
+
+inline
 const Session& Session::Forward() const {
 	resource_.Post("forward");
 	return *this;
