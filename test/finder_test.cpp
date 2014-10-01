@@ -7,9 +7,10 @@ using namespace webdriverxx;
 class TestFinder : public ::testing::Test {
 protected:
 	static void SetUpTestCase() {
-		Environment::Instance().GetDriver()->Navigate(
-			Environment::Instance().GetTestPageUrl("finder.html")
-			);
+		WebDriver& driver = *Environment::Instance().GetDriver();
+		driver.Navigate(Environment::Instance().GetTestPageUrl("finder.html"));
+		driver.FindElement(ByTagName("body"));
+		driver.SetTimeout(timeout::ElementFind, 0);
 	}
 
 	TestFinder() : driver(Environment::Instance().GetDriver()) {}
