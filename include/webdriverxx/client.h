@@ -1,5 +1,5 @@
-#ifndef WEBDRIVERXX_SERVER_H
-#define WEBDRIVERXX_SERVER_H
+#ifndef WEBDRIVERXX_CLIENT_H
+#define WEBDRIVERXX_CLIENT_H
 
 #include "session.h"
 #include "capabilities.h"
@@ -14,10 +14,10 @@ namespace webdriverxx {
 const char *const kDefaultUrl = "http://localhost:4444/wd/hub/";
 
 // Gives low level access to server's resources. You normally should not use it. 
-class Server { // noncopyable
+class Client { // noncopyable
 public:
-	explicit Server(const std::string& url = kDefaultUrl);
-	virtual ~Server() {}
+	explicit Client(const std::string& url = kDefaultUrl);
+	virtual ~Client() {}
 
 	picojson::object GetStatus() const;
 
@@ -34,8 +34,8 @@ public:
 private:
 	Session MakeSession(const std::string& id, const Capabilities& capabilities) const;
 
-	Server(Server&);
-	Server& operator=(Server&);
+	Client(Client&);
+	Client& operator=(Client&);
 
 private:
 	const detail::HttpConnection http_connection_;
@@ -44,6 +44,6 @@ private:
 
 } // namespace webdriverxx
 
-#include "server.inl"
+#include "client.inl"
 
 #endif

@@ -36,11 +36,11 @@ struct FromJsonImpl<detail::SessionRef> {
 };
 
 inline
-Server::Server(const std::string& url)
+Client::Client(const std::string& url)
 	: resource_(&http_connection_, url) {}
 
 inline
-picojson::object Server::GetStatus() const {
+picojson::object Client::GetStatus() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	const picojson::value value = resource_.Get("status").get("value");
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Value is not an object");
@@ -49,7 +49,7 @@ picojson::object Server::GetStatus() const {
 }
 
 inline
-std::vector<Session> Server::GetSessions() const {
+std::vector<Session> Client::GetSessions() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	const std::vector<detail::SessionRef> sessions =
 		FromJsonArray<detail::SessionRef>(
@@ -64,7 +64,7 @@ std::vector<Session> Server::GetSessions() const {
 }
 
 inline
-Session Server::CreateSession(
+Session Client::CreateSession(
 	const Capabilities& desired,
 	const Capabilities& required
 	) const {
@@ -89,7 +89,7 @@ Session Server::CreateSession(
 }
 
 inline
-Session Server::MakeSession(
+Session Client::MakeSession(
 	const std::string& id,
 	const Capabilities& capabilities
 	) const {

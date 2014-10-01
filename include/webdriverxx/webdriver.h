@@ -1,7 +1,7 @@
 #ifndef WEBDRIVERXX_WEBDRIVER_H
 #define WEBDRIVERXX_WEBDRIVER_H
 
-#include "server.h"
+#include "client.h"
 #include "session.h"
 
 namespace webdriverxx {
@@ -9,7 +9,7 @@ namespace webdriverxx {
 // The main class for interactions with a server. Automatically connects to a server,
 // creates and deletes a session and gives access to session's API.
 class WebDriver // noncopyable
-	: public Server
+	: public Client
 	, public Session {
 public:
 	explicit WebDriver(
@@ -26,7 +26,7 @@ WebDriver::WebDriver(
 	const Capabilities& desired,
 	const Capabilities& required
 	)
-	: Server(url)
+	: Client(url)
 	, Session(CreateSession(desired, required)) {}
 
 inline

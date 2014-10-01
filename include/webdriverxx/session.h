@@ -15,7 +15,7 @@
 
 namespace webdriverxx {
 
-class Server;
+class Client;
 
 class Session : private detail::Finder { // copyable
 public:	
@@ -76,7 +76,7 @@ public:
 	virtual ~Session() {}
 
 private:
-	friend class Server; // Only Server can create Sessions
+	friend class Client; // Only Client can create Sessions
 
 	Session(
 		const detail::Resource& resource,
