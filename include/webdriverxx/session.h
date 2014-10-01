@@ -69,7 +69,11 @@ public:
 	const Session& DeleteCookies() const;
 	const Session& DeleteCookie(const std::string& name) const;
 
-	const Session& SendKeys(const char* keys) const;
+	std::string GetAlertText() const;
+	const Session& SendKeysToAlert(const std::string& text) const;
+	const Session& AcceptAlert() const;
+	const Session& DismissAlert() const;
+
 	const Session& SendKeys(const std::string& keys) const;
 	const Session& SendKeys(const Shortcut& shortcut) const;
 

@@ -266,8 +266,25 @@ const Session& Session::DeleteCookie(const std::string& name) const {
 }
 
 inline
-const Session& Session::SendKeys(const char* keys) const {
-	GetKeyboard().SendKeys(keys);
+std::string Session::GetAlertText() const {
+	return resource_.GetString("alert_text");
+}
+
+inline
+const Session& Session::SendKeysToAlert(const std::string& text) const {
+	resource_.Post("alert_text", "text", text);
+	return *this;
+}
+
+inline
+const Session& Session::AcceptAlert() const {
+	resource_.Post("accept_alert");
+	return *this;
+}
+
+inline
+const Session& Session::DismissAlert() const {
+	resource_.Post("dismiss_alert");
 	return *this;
 }
 
