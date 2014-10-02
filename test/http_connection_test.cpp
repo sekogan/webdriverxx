@@ -12,12 +12,13 @@ TEST(HttpConnection, CanBeCreated) {
 
 TEST(HttpConnection, GetsPage) {
 	HttpConnection connection;
-	HttpResponse response = connection.Get(std::string(kPhantomUrl) + "status");
+	HttpResponse response = connection.Get(std::string(Environment::Instance().GetUrl()) + "status");
 	ASSERT_EQ(200, response.http_code);
 	ASSERT_TRUE(!response.body.empty());
 }
 
 TEST(HttpConnection, ThrowsExceptionIfPortIsClosed) {
 	HttpConnection connection;
-	ASSERT_THROW(connection.Get("http://127.0.0.1:7778/"), WebDriverException);
+	const char *const kUrlWithClosedPort = "http://127.0.0.1:7778/";
+	ASSERT_THROW(connection.Get(kUrlWithClosedPort), WebDriverException);
 }

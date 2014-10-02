@@ -7,14 +7,18 @@
 #include <string>
 #include <algorithm>
 
-const char* const kPhantomUrl = "http://localhost:7777/";
+const char* const kDefaultUrl = "http://localhost:7777/";
+const char* const kDefaultPagesUrl = "http://localhost:8080/";
 
-struct Parameters
-{
+struct Parameters {
 	std::string url;
 	webdriverxx::Capabilities required;
 	webdriverxx::Capabilities desired;
-	std::string test_dir;
+	std::string pages_url;
+
+	Parameters()
+		: url(kDefaultUrl)
+		, pages_url(kDefaultPagesUrl) {}
 };
 
 class Environment : public ::testing::Environment {
@@ -47,9 +51,11 @@ public:
 	}
 
 	std::string GetTestPageUrl(const std::string& page_name) const {
-		std::string path = parameters_.test_dir;
-		std::replace(path.begin(), path.end(), '\\', '/');
-		return std::string("file://") + path + "pages/" + page_name;
+		std::string url = parameters_.pages_url;
+		if (!url.empty() && url[url.length() - 1] != '/')
+			url += "/";
+		url += page_name;
+		return url;
 	}
 
 private:
