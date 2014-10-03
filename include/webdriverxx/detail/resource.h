@@ -3,6 +3,7 @@
 
 #include "error_handling.h"
 #include "http_client.h"
+#include "shared.h"
 #include "../conversions.h"
 #include "../response_status_code.h"
 #include <picojson.h>
@@ -13,9 +14,10 @@ namespace detail {
 template<class ResponseReturnPolicy>
 class ResourceBase { // copyable
 public:
-	ResourceBase(const IHttpClient* http_client, const std::string& url)
+	ResourceBase(const Shared<IHttpClient>& http_client, const std::string& url)
 		: http_client_(http_client)
-		, url_(url) {}
+		, url_(url)
+	{}
 
 	const std::string& GetUrl() const {
 		return url_;
@@ -186,7 +188,7 @@ private:
 	}
 
 private:
-	const IHttpClient* http_client_;
+	Shared<IHttpClient> http_client_;
 	std::string url_;
 };
 

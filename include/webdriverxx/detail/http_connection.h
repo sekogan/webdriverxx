@@ -9,10 +9,11 @@
 namespace webdriverxx {
 namespace detail {
 
-class HttpConnection : public IHttpClient {
+class HttpConnection : public IHttpClient { // noncopyable
 public:
 	HttpConnection()
-		: connection_(InitCurl()) {}
+		: connection_(InitCurl())
+	{}
 
 	~HttpConnection() {
 		curl_easy_cleanup(connection_);

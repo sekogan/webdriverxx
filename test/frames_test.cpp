@@ -8,7 +8,8 @@ class TestFrames : public ::testing::Test {
 protected:
 	TestFrames()
 		: driver(Environment::Instance().GetDriver())
-		, url(Environment::Instance().GetTestPageUrl("frames.html")) {}
+		, url(Environment::Instance().GetTestPageUrl("frames.html"))
+	{}
 
 	void SetUp()
 	{

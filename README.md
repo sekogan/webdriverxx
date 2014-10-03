@@ -1,18 +1,16 @@
 [![Build status](https://secure.travis-ci.org/sekogan/sandbox.png)](http://travis-ci.org/sekogan/sandbox)
 
-# Safety #
+# Thread Safety #
 
-- Window and Element objects can only be used when the corresponding WebDriver
-object is alive. Windows and elements are like STL iterators: they have pointers
-to WebDriver's internals.
-
-- Webdriver++ objects don't use global variables. It is OK to use different
-WebDriver instances in different threads. On the other side, all objects
-are not thread safe. It is not safe to use any single object or several objects
-obtained from a single WebDriver concurrently without synchronization.
+- Webdriver++ objects are not thread safe. It is not safe to use
+neither any single object nor different objects obtained from a single WebDriver
+concurrently without synchronization. On the other side Webdriver++ objects
+don't use global variables, it is OK to use different instances of WebDriver
+in different threads.
 
 - The CURL library should be explicitly initialized if WebDriver is used in
-multiple threads. Call curl_global_init(CURL_GLOBAL_ALL); from \<curl/curl.h\> once per process.
+multiple threads. Call curl_global_init(CURL_GLOBAL_ALL); from \<curl/curl.h\>
+once per process.
 
 # How to build tests #
 

@@ -18,7 +18,8 @@ struct Parameters {
 
 	Parameters()
 		: url(kDefaultUrl)
-		, pages_url(kDefaultPagesUrl) {}
+		, pages_url(kDefaultPagesUrl)
+	{}
 };
 
 class Environment : public ::testing::Environment {
@@ -29,7 +30,8 @@ public:
 
 	explicit Environment(const Parameters& parameters)
 		: driver_(0)
-		, parameters_(parameters) {}
+		, parameters_(parameters)
+	{}
 
 	webdriverxx::WebDriver* GetDriver() {
 		return driver_ ? driver_ : GetFreshDriver();

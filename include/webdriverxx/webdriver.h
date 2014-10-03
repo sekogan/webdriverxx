@@ -8,7 +8,7 @@ namespace webdriverxx {
 
 // The main class for interactions with a server. Automatically connects to a server,
 // creates and deletes a session and gives access to session's API.
-class WebDriver // noncopyable
+class WebDriver // copyable
 	: public Client
 	, public Session {
 public:
@@ -16,25 +16,11 @@ public:
 		const std::string& url = kDefaultUrl,
 		const Capabilities& desired = Capabilities(),
 		const Capabilities& required = Capabilities()
-		);
-	~WebDriver();
+		)
+		: Client(url)
+		, Session(CreateSession(desired, required))
+	{}
 };
-
-inline
-WebDriver::WebDriver(
-	const std::string& url,
-	const Capabilities& desired,
-	const Capabilities& required
-	)
-	: Client(url)
-	, Session(CreateSession(desired, required)) {}
-
-inline
-WebDriver::~WebDriver() {
-	try {
-		DeleteSession();
-	} catch (const std::exception&) {}
-}
 
 } // namespace webdriverxx
 

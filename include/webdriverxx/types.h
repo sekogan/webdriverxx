@@ -44,7 +44,8 @@ struct Cookie {
 		, domain(domain)
 		, secure(secure)
 		, http_only(http_only)
-		, expiry(expiry) {}
+		, expiry(expiry)
+	{}
 
 	bool operator == (const Cookie& c) const {
 		return name == c.name

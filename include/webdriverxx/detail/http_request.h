@@ -13,8 +13,7 @@ const char *const kContentTypeJson = "application/json;charset=UTF-8";
 
 class HttpHeaders {
 public:
-	HttpHeaders()
-		: head_(0) {}
+	HttpHeaders() : head_(0) {}
 
 	~HttpHeaders() {
 		curl_slist_free_all(head_);
@@ -40,7 +39,8 @@ public:
 		const std::string& url
 		)
 		: http_connection_(http_connection)
-		, url_(url) {}
+		, url_(url)
+	{}
 
 	virtual ~HttpRequest() {}
 
@@ -121,7 +121,8 @@ typedef HttpRequest HttpGetRequest;
 class HttpDeleteRequest : public HttpRequest {
 public:
 	HttpDeleteRequest(CURL* http_connection, const std::string& url)
-		: HttpRequest(http_connection, url) {}
+		: HttpRequest(http_connection, url)
+	{}
 
 private:
 	void SetCustomRequestOptions() {
@@ -139,7 +140,8 @@ public:
 		: HttpRequest(http_connection, url)
 		, upload_data_(upload_data)
 		, unsent_ptr_(upload_data.c_str())
-		, unsent_length_(upload_data.size()) {}
+		, unsent_length_(upload_data.size())
+	{}
 
 protected:
 	void SetCustomRequestOptions() {
@@ -178,7 +180,8 @@ public:
 		const std::string& url,
 		const std::string& upload_data
 		)
-		: HttpUploadRequest(http_connection, url, upload_data) {}
+		: HttpUploadRequest(http_connection, url, upload_data)
+	{}
 
 private:
 	void SetCustomRequestOptions() {

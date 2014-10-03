@@ -14,7 +14,7 @@ namespace webdriverxx {
 const char *const kDefaultUrl = "http://localhost:4444/wd/hub/";
 
 // Gives low level access to server's resources. You normally should not use it. 
-class Client { // noncopyable
+class Client { // copyable
 public:
 	explicit Client(const std::string& url = kDefaultUrl);
 	virtual ~Client() {}
@@ -24,22 +24,21 @@ public:
 	// Returns existing sessions.
 	std::vector<Session> GetSessions() const;
 
-	// Creates new session. All sessions created with this member should be
-	// deleted with Session::DeleteSession().
+	// Creates new session.
 	Session CreateSession(
 		const Capabilities& desired,
 		const Capabilities& required
 		) const;
 
 private:
-	Session MakeSession(const std::string& id, const Capabilities& capabilities) const;
-
-	Client(Client&);
-	Client& operator=(Client&);
+	Session MakeSession(
+		const std::string& id,
+		const Capabilities& capabilities,
+		Session::Ownership mode
+		) const;
 
 private:
-	const detail::HttpConnection http_connection_;
-	const detail::RootResource resource_;
+	detail::RootResource resource_;
 };
 
 } // namespace webdriverxx

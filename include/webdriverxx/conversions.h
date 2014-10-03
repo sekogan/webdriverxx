@@ -62,8 +62,7 @@ struct ToJsonImpl<unsigned> {
 
 class JsonObject { // copyable
 public:
-	JsonObject()
-		: value_(picojson::object()) {}
+	JsonObject() : value_(picojson::object()) {}
 
 	template<typename T>
 	JsonObject& With(const std::string& name, const T& value) {

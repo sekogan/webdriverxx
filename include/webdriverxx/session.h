@@ -10,6 +10,7 @@
 #include "detail/finder.h"
 #include "detail/resource.h"
 #include "detail/keyboard.h"
+#include "detail/shared.h"
 #include <picojson.h>
 #include <string>
 
@@ -19,8 +20,6 @@ class Client;
 
 class Session : private detail::Finder { // copyable
 public:	
-	// All sessions that are explicitly created with Server::CreateSession()
-	// should be explicitly deleted.
 	void DeleteSession() const;
 
 	Capabilities GetCapabilities() const;
@@ -82,9 +81,13 @@ public:
 private:
 	friend class Client; // Only Client can create Sessions
 
+	enum Ownership { IsOwner, IsObserver };
+	class Deleter;
+
 	Session(
 		const detail::Resource& resource,
-		const Capabilities& capabilities
+		const Capabilities& capabilities,
+		Ownership mode
 		);
 
 	Element FindElement(
@@ -104,10 +107,12 @@ private:
 		const JsArgs& args) const;
 	const Session& InternalSetFocusToFrame(const picojson::value& id) const;
 	const Session& InternalSetTimeout(const std::string& type, int milliseconds) const;
+	static void DeleteSession(const detail::Resource& resource);
 
 private:
 	detail::Resource resource_;
 	Capabilities capabilities_;
+	detail::Shared<Deleter> deleter_;
 };
 
 } // namespace webdriverxx

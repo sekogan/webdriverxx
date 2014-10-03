@@ -44,7 +44,8 @@ Element::Element(
 	)
 	: ref_(ref)
 	, resource_(resource)
-	, finder_(finder) {}
+	, finder_(finder)
+{}
 
 inline
 bool Element::IsDisplayed() const {

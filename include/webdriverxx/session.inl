@@ -3,17 +3,38 @@
 
 namespace webdriverxx {
 
+class Session::Deleter { // noncopyable
+public:
+	explicit Deleter(const detail::Resource& resource) : resource_(resource) {}
+
+	~Deleter() {
+		try {
+			Session::DeleteSession(resource_);
+		} catch(const std::exception&) {}
+	}
+
+private:
+	Deleter(Deleter&);
+	Deleter& operator = (Deleter&);
+
+private:
+	detail::Resource resource_;
+};
+
 inline
 Session::Session(
 	const detail::Resource& resource,
-	const Capabilities& capabilities
+	const Capabilities& capabilities,
+	Ownership mode
 	)
 	: resource_(resource)
-	, capabilities_(capabilities) {}
+	, capabilities_(capabilities)
+	, deleter_(mode == IsOwner ? new Deleter(resource) : 0)
+{}
 
 inline
 void Session::DeleteSession() const {
-	resource_.Delete();
+	DeleteSession(resource_);
 }
 
 inline
@@ -388,6 +409,11 @@ const Session& Session::InternalSetTimeout(const std::string& type, int millisec
 			.Build()
 		);
 	return *this;
+}
+
+inline
+void Session::DeleteSession(const detail::Resource& resource) {
+	resource.Delete();
 }
 
 } // namespace webdriverxx

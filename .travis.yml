@@ -19,4 +19,4 @@ before_script:
 
 script:
     - cmake --build .
-    - ctest --output-on-failure
+    - ctest -V

@@ -32,5 +32,5 @@ TEST_F(TestClient, GetsSessions) {
 
 TEST_F(TestClient, CreatesSession) {
  	Parameters params = Environment::Instance().GetParameters();
-	client->CreateSession(params.required, params.desired).DeleteSession();
+	client->CreateSession(params.required, params.desired);
 }

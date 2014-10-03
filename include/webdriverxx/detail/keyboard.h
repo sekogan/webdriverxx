@@ -13,7 +13,8 @@ class Keyboard { // copyable
 public:
 	Keyboard(const Resource& resource, const std::string& command)
 		: resource_(&resource)
-		, command_(command) {}
+		, command_(command)
+	{}
 
 	void SendKeys(const char* keys) const {
 		SendKeys(Shortcut() << keys);

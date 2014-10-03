@@ -12,7 +12,8 @@ class Window { // copyable
 public:
 	Window(const std::string& handle, const detail::Resource& resource)
 		: handle_(handle)
-		, resource_(resource) {}
+		, resource_(resource)
+	{}
 
 	std::string GetHandle() const {
 		return handle_;

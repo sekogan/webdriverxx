@@ -11,8 +11,7 @@ class Session;
 class JsArgs // copyable
 {
 public:
-	JsArgs()
-		: args_(picojson::array()) {}
+	JsArgs() : args_(picojson::array()) {}
 
 	// This member works out of the box for scalar values, Elements and std::vector
 	// with scalar values or Elements. Additional code is needed to use it

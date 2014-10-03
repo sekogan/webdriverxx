@@ -1,4 +1,5 @@
 #include "conversions.h"
+#include "detail/shared.h"
 #include "detail/error_handling.h"
 
 namespace webdriverxx {
@@ -37,7 +38,8 @@ struct FromJsonImpl<detail::SessionRef> {
 
 inline
 Client::Client(const std::string& url)
-	: resource_(&http_connection_, url) {}
+	: resource_(detail::Shared<detail::IHttpClient>(new detail::HttpConnection), url)
+{}
 
 inline
 picojson::object Client::GetStatus() const {
@@ -58,7 +60,7 @@ std::vector<Session> Client::GetSessions() const {
 	std::vector<Session> result;
 	for (std::vector<detail::SessionRef>::const_iterator it = sessions.begin();
 		it != sessions.end(); ++it)
-		result.push_back(MakeSession(it->id, it->capabilities));
+		result.push_back(MakeSession(it->id, it->capabilities, Session::IsObserver));
 	return result;
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
@@ -84,20 +86,22 @@ Session Client::CreateSession(
 		response.get("value").get<picojson::object>()
 		);
 	
-	return MakeSession(sessionId, capabilities);
+	return MakeSession(sessionId, capabilities, Session::IsOwner);
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
 inline
 Session Client::MakeSession(
 	const std::string& id,
-	const Capabilities& capabilities
+	const Capabilities& capabilities,
+	Session::Ownership mode
 	) const {
 	return Session(
 		resource_
 			.GetSubResource<detail::Resource>("session")
 			.GetSubResource(id),
-		capabilities
+		capabilities,
+		mode
 		);
 }
 

@@ -9,7 +9,8 @@ class By {
 public:
 	By(const std::string& strategy, const std::string& value)
 		: strategy_(strategy)
-		, value_(value) {}
+		, value_(value)
+	{}
 
 	const std::string& GetStrategy() const {
 		return strategy_;
