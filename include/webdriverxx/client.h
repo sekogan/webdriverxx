@@ -38,7 +38,7 @@ private:
 		) const;
 
 private:
-	detail::RootResource resource_;
+	detail::Resource resource_;
 };
 
 } // namespace webdriverxx

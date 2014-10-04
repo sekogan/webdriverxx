@@ -38,7 +38,11 @@ struct FromJsonImpl<detail::SessionRef> {
 
 inline
 Client::Client(const std::string& url)
-	: resource_(detail::Shared<detail::IHttpClient>(new detail::HttpConnection), url)
+	: resource_(
+		detail::Shared<detail::IHttpClient>(new detail::HttpConnection),
+		url,
+		detail::Resource::ReturnFullResponse
+		)
 {}
 
 inline
@@ -98,7 +102,7 @@ Session Client::MakeSession(
 	) const {
 	return Session(
 		resource_
-			.GetSubResource<detail::Resource>("session")
+			.GetSubResource("session", detail::Resource::ReturnResponseValue)
 			.GetSubResource(id),
 		capabilities,
 		mode

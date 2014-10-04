@@ -11,25 +11,42 @@
 namespace webdriverxx {
 namespace detail {
 
-template<class ResponseReturnPolicy>
-class ResourceBase { // copyable
+class Resource { // copyable
 public:
-	ResourceBase(const Shared<IHttpClient>& http_client, const std::string& url)
+	typedef picojson::value (*ResponseTransformStrategy)(picojson::value& response);
+
+	Resource(
+		const Shared<IHttpClient>& http_client,
+		const std::string& url,
+		ResponseTransformStrategy response_transform_strategy = ReturnResponseValue
+		)
 		: http_client_(http_client)
 		, url_(url)
+		, response_transform_strategy_(response_transform_strategy)
 	{}
+
+	static picojson::value ReturnFullResponse(picojson::value& response) {
+		picojson::value result;
+		response.swap(result);
+		return result;
+	}
+	
+	static picojson::value ReturnResponseValue(picojson::value& response) {
+		picojson::value result;
+		response.get("value").swap(result);
+		return result;
+	}
 
 	const std::string& GetUrl() const {
 		return url_;
 	}
 
-	template<class SubResource>
-	SubResource GetSubResource(const std::string& name) const {
-		return SubResource(http_client_, ConcatUrl(url_, name));
+	Resource GetSubResource(const std::string& name, ResponseTransformStrategy strategy) const {
+		return Resource(http_client_, ConcatUrl(url_, name), strategy);
 	}
 
-	ResourceBase<ResponseReturnPolicy> GetSubResource(const std::string& name) const {
-		return GetSubResource< ResourceBase<ResponseReturnPolicy> >(name);
+	Resource GetSubResource(const std::string& name) const {
+		return GetSubResource(name, response_transform_strategy_);
 	}
 
 	picojson::value Get(const std::string& command = std::string()) const {
@@ -169,7 +186,7 @@ private:
 		WEBDRIVERXX_CHECK(status == response_status_code::kSuccess, "Non-zero response status code");
 		WEBDRIVERXX_CHECK(http_response.http_code == 200, "Unsupported HTTP code");
 
-		return ResponseReturnPolicy::ReturnResponse(response);
+		return response_transform_strategy_(response);
 		WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(Fmt()
 			<< "HTTP code: " << http_response.http_code
 			<< ", body: " << http_response.body
@@ -190,26 +207,8 @@ private:
 private:
 	Shared<IHttpClient> http_client_;
 	std::string url_;
+	ResponseTransformStrategy response_transform_strategy_;
 };
-
-struct ReturnFullResponse {
-	static picojson::value ReturnResponse(picojson::value& response) {
-		picojson::value result;
-		response.swap(result);
-		return result;
-	}
-};
-
-struct ReturnValue {
-	static picojson::value ReturnResponse(picojson::value& response) {
-		picojson::value result;
-		response.get("value").swap(result);
-		return result;
-	}
-};
-
-typedef ResourceBase<ReturnFullResponse> RootResource;
-typedef ResourceBase<ReturnValue> Resource;
 
 } // namespace detail
 } // namespace webdriverxx
