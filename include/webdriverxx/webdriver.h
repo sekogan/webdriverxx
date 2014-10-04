@@ -13,9 +13,9 @@ class WebDriver // copyable
 	, public Session {
 public:
 	explicit WebDriver(
-		const std::string& url = kDefaultUrl,
 		const Capabilities& desired = Capabilities(),
-		const Capabilities& required = Capabilities()
+		const Capabilities& required = Capabilities(),
+		const std::string& url = kDefaultUrl
 		)
 		: Client(url)
 		, Session(CreateSession(desired, required))
