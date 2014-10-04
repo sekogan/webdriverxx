@@ -42,9 +42,9 @@ private:
 	WidgetMonitor& monitor;
 };
 
-class SuperWidget : public Widget {
+class WidgetSubclass : public Widget {
 public:
-	SuperWidget(WidgetMonitor& monitor) : Widget(monitor) {}
+	WidgetSubclass(WidgetMonitor& monitor) : Widget(monitor) {}
 };
 
 TEST(WidgetMonitor, ZeroByDefault) {
@@ -71,9 +71,9 @@ TEST(WidgetMonitor, ShowsCopy) {
 
 }
 
-TEST(WidgetMonitor, MonitorsSuperWidget) {
+TEST(WidgetMonitor, MonitorsWidgetSubclass) {
 	WidgetMonitor m;
-	((void)SuperWidget(m));
+	((void)WidgetSubclass(m));
 	ASSERT_EQ(1, m.created);
 	ASSERT_EQ(0, m.copied);
 	ASSERT_EQ(1, m.deleted);
@@ -103,7 +103,7 @@ TEST(Shared, SupportsImplicitTypecasts) {
 	WidgetMonitor m;
 	{
 		Shared<Widget> c;
-		Shared<SuperWidget> a(new SuperWidget(m));
+		Shared<WidgetSubclass> a(new WidgetSubclass(m));
 		Shared<Widget> b = a;
 		c = b;
 	}
