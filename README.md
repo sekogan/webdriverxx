@@ -28,32 +28,38 @@ Prerequisites:
 Prerequisites:
 - GCC or clang
 
-    git clone http://github.com/sekogan/webdriverxx
-    cd webdriverxx
-    mkdir build
-    cd build
-    cmake ..
-    cmake --build .
-    phantomjs --webdriver=7777 &
-    http-server ./test/pages --silent &
-    ctest -V
+```bash
+git clone http://github.com/sekogan/webdriverxx
+cd webdriverxx
+mkdir build
+cd build
+cmake ..
+cmake --build .
+phantomjs --webdriver=7777 &
+http-server ./test/pages --silent &
+ctest -V
+```
 
 ## Windows ##
 
 Prerequisites:
 - Visual Studio 2010 or newer
 
-    git clone http://github.com/sekogan/webdriverxx
-    cd webdriverxx
-    mkdir build
-    cd build
-    cmake ..
-    cmake --build .
-    start phantomjs --webdriver=7777
-    start http-server ./test/pages
-    ctest -V
+```bash
+git clone http://github.com/sekogan/webdriverxx
+cd webdriverxx
+mkdir build
+cd build
+cmake ..
+cmake --build .
+start phantomjs --webdriver=7777
+start http-server ./test/pages
+ctest -V
+```
 
 ## Testing with real browser ##
 
-    selenium-server -p 4444 &
-    ./webdriverxx --browser=<firefox|chrome|...>
+```bash
+selenium-server -p 4444 &
+./webdriverxx --browser=<firefox|chrome|...>
+```
