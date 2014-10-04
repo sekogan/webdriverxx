@@ -16,10 +16,6 @@ public:
 		, command_(command)
 	{}
 
-	void SendKeys(const char* keys) const {
-		SendKeys(Shortcut() << keys);
-	}
-
 	void SendKeys(const std::string& keys) const {
 		SendKeys(Shortcut() << keys);
 	}

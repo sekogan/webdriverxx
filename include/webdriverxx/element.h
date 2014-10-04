@@ -45,7 +45,6 @@ public:
 	const Element& Click() const;
 	const Element& Submit() const;
 
-	const Element& SendKeys(const char* keys) const;
 	const Element& SendKeys(const std::string& keys) const;
 	const Element& SendKeys(const Shortcut& shortcut) const;
 

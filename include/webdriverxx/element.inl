@@ -135,12 +135,6 @@ const Element& Element::Submit() const {
 }
 
 inline
-const Element& Element::SendKeys(const char* keys) const {
-	GetKeyboard().SendKeys(keys);
-	return *this;
-}
-
-inline
 const Element& Element::SendKeys(const std::string& keys) const {
 	GetKeyboard().SendKeys(keys);
 	return *this;
