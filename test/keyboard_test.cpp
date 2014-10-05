@@ -8,18 +8,18 @@ using namespace webdriverxx;
 class TestKeyboard : public ::testing::Test {
 protected:
 	static void SetUpTestCase() {
-		Environment::Instance().GetDriver()->Navigate(
+		Environment::Instance().GetDriver().Navigate(
 			Environment::Instance().GetTestPageUrl("keyboard.html")
 			);
 	}
 
 	TestKeyboard() : driver(Environment::Instance().GetDriver()) {}
 
-	WebDriver* driver;
+	WebDriver driver;
 };
 
 TEST_F(TestKeyboard, SendsKeysToElement) {
-	Element e = driver->FindElement(ByName("first"));
+	Element e = driver.FindElement(ByName("first"));
 	e.Clear()
 		.SendKeys("abc")
 		.SendKeys(keys::Left).SendKeys(keys::Left).SendKeys(keys::Left)
@@ -29,7 +29,7 @@ TEST_F(TestKeyboard, SendsKeysToElement) {
 }
 
 TEST_F(TestKeyboard, SendsShortcuts) {
-	Element e = driver->FindElement(ByName("first"));
+	Element e = driver.FindElement(ByName("first"));
 	e.Clear()
 		.SendKeys(Shortcut() << keys::Shift << "a" << "bc")
 		.SendKeys("def")
@@ -38,12 +38,12 @@ TEST_F(TestKeyboard, SendsShortcuts) {
 }
 
 TEST_F(TestKeyboard, SendsKeysToActiveElement) {
-	Element first = driver->FindElement(ByName("first"));
-	Element second = driver->FindElement(ByName("second"));
+	Element first = driver.FindElement(ByName("first"));
+	Element second = driver.FindElement(ByName("second"));
 	first.Click().Clear();
-	driver->SendKeys("abc");
+	driver.SendKeys("abc");
 	second.Click().Clear();
-	driver->SendKeys("def");
+	driver.SendKeys("def");
 	ASSERT_EQ("abc", first.GetAttribute("value"));
 	ASSERT_EQ("def", second.GetAttribute("value"));
 }

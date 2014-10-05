@@ -33,14 +33,21 @@ public:
 		, parameters_(parameters)
 	{}
 
-	webdriverxx::WebDriver* GetDriver() {
-		return driver_ ? driver_ : GetFreshDriver();
+	webdriverxx::WebDriver& GetDriver() {
+		return driver_ ? *driver_ : GetFreshDriver();
 	}
 
-	webdriverxx::WebDriver* GetFreshDriver() {
+	webdriverxx::WebDriver& GetFreshDriver() {
 		DeleteDriver();
-		return driver_ = new webdriverxx::WebDriver(
-			parameters_.desired, parameters_.required, parameters_.url
+		driver_ = new webdriverxx::WebDriver(CreateDriver());
+		return *driver_;
+	}
+
+	webdriverxx::WebDriver CreateDriver() {
+		return webdriverxx::WebDriver(
+			parameters_.desired,
+			parameters_.required,
+			parameters_.url
 			);
 	}
 
