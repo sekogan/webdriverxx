@@ -1,29 +1,47 @@
-[![Build status](https://secure.travis-ci.org/sekogan/sandbox.png)](http://travis-ci.org/sekogan/sandbox)
 
-# Thread Safety #
+# Webdriver++
 
-- Webdriver++ objects are not thread safe. It is not safe to use
-neither any single object nor different objects obtained from a single WebDriver
-concurrently without synchronization. On the other side, Webdriver++ objects
-don't use global variables so it is OK to use different instances of WebDriver
-in different threads.
+A lightweight C++ client library for [Selenium Webdriver](http://www.seleniumhq.org/).
 
-- The CURL library should be explicitly initialized if WebDrivers are used in
-multiple threads. Call curl_global_init(CURL_GLOBAL_ALL); from \<curl/curl.h\>
-once per process.
+## A quick example
+```
+#include <webdriverxx.h>
+using namespace webdriverxx;
 
-# How to build and run tests #
+WebDriver firefox = StartFirefox();
+firefox
+    .Navigate("http://google.com")
+    .FindElement(ByTagName("input"))
+    .SendKeys("Hello, world!")
+    .Submit();
+```
 
-## All platforms ##
+## Features
+
+- Easy to use interface: value-like objects, chainable commands.
+- Header-only.
+- Lightweight dependencies:
+    - [libcurl](http://curl.haxx.se/libcurl/),
+    - [picojson](https://github.com/kazuho/picojson).
+- Linux, Mac and Windows.
+- clang, GCC and Visual Studio.
+- No C++11/14 support is required.
+
+## More examples
+
+TODO
+
+## How to build and run tests
+
+### All platforms
 
 Prerequisites:
+- [CMake](http://www.cmake.org/)
 - [PhantomJS](http://phantomjs.org/)
 - [node.js](http://nodejs.org/)
 - [http-server](https://github.com/nodeapps/http-server)
-- [CMake](http://www.cmake.org/)
-- [git](http://git-scm.com/)
 
-## Linux & Mac ##
+### Linux & Mac
 
 Prerequisites:
 - GCC or clang
@@ -40,7 +58,7 @@ http-server ./test/pages --silent &
 ctest -V
 ```
 
-## Windows ##
+### Windows
 
 Prerequisites:
 - Visual Studio 2010 or newer
@@ -57,9 +75,35 @@ start http-server ./test/pages
 ctest -V
 ```
 
-## Testing with real browser ##
+### Testing with real browsers
+
+Prerequisites:
+- [Selenium Server](http://www.seleniumhq.org/download/)
 
 ```bash
 selenium-server -p 4444 &
 ./webdriverxx --browser=<firefox|chrome|...>
 ```
+
+## Advanced topics
+
+### Unicode
+
+All interfaces use UTF-8 strings through std::string or char*.
+
+### Thread safety
+
+- Webdriver++ objects are not thread safe. It is not safe to use
+neither any single object nor different objects obtained from a single WebDriver
+concurrently without synchronization. On the other side, Webdriver++ objects
+don't use global variables so it is OK to use different instances of WebDriver
+in different threads.
+
+- The CURL library should be explicitly initialized if several WebDrivers are used from
+multiple threads. Call `curl_global_init(CURL_GLOBAL_ALL);` from `<curl/curl.h>`
+once per process before using this library.
+
+--------------------
+
+Copyright &copy; 2014 Sergey Kogan.
+Licensed under [The MIT license](https://github.com/sekogan/webdriverxx/blob/master/LICENSE).
