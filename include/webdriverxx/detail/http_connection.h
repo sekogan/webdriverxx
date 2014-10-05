@@ -4,12 +4,16 @@
 #include "http_client.h"
 #include "http_request.h"
 #include "error_handling.h"
+#include "shared.h"
 #include <curl/curl.h>
 
 namespace webdriverxx {
 namespace detail {
 
-class HttpConnection : public IHttpClient { // noncopyable
+class HttpConnection // noncopyable
+	: public IHttpClient
+	, public SharedObjectBase
+{
 public:
 	HttpConnection()
 		: connection_(InitCurl())
@@ -48,10 +52,6 @@ private:
 		WEBDRIVERXX_CHECK(result, "Cannot initialize CURL");
 		return result;
 	}
-
-private:
-	HttpConnection(HttpConnection&);
-	HttpConnection& operator=(HttpConnection&);
 
 private:
 	CURL *const connection_;

@@ -9,7 +9,7 @@ using namespace webdriverxx::detail;
 
 const char *const kTestUrl = "http://test/";
 
-struct MockHttpClient : IHttpClient {
+struct MockHttpClient : IHttpClient, SharedObjectBase {
 	MOCK_CONST_METHOD1(Get, HttpResponse(const std::string& url));
 	MOCK_CONST_METHOD2(Post, HttpResponse(const std::string& url, const std::string& data));
 	MOCK_CONST_METHOD2(Put, HttpResponse(const std::string& url, const std::string& data));
@@ -41,58 +41,76 @@ struct TestResource : Test {
 // Positive tests
 
 TEST_F(TestResource, CanBeCreated) {
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 }
 
 TEST_F(TestResource, ReturnsUrl) {
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_EQ(kTestUrl, resource.GetUrl());
 }
 
-TEST_F(TestResource, ReturnsSubResource) {
-	Resource a(http_client, "a");
-	ASSERT_EQ("a/c", a.GetSubResource("c").GetUrl());
-	ASSERT_EQ("a/c", a.GetSubResource("/c").GetUrl());
-	Resource b(http_client, "b/");
-	ASSERT_EQ("b/c", b.GetSubResource("c").GetUrl());
-	ASSERT_EQ("b/c", b.GetSubResource("/c").GetUrl());
+TEST_F(TestResource, CanBeUsedToMakeSubResource) {
+	Shared<Resource> a(new Resource("a", http_client));
+	ASSERT_EQ("a/c", MakeSubResource(a, "c")->GetUrl());
+	ASSERT_EQ("a/c",MakeSubResource(a, "/c")->GetUrl());
+	Shared<Resource> b(new Resource("b/", http_client));
+	ASSERT_EQ("b/c", MakeSubResource(b, "c")->GetUrl());
+	ASSERT_EQ("b/c", MakeSubResource(b, "/c")->GetUrl());
 }
 
-TEST_F(TestResource, IsCopyable) {
-	Resource a(http_client, "123");
-	Resource b(http_client, "456");
-	a = b;
-	ASSERT_EQ("456", a.GetUrl());
-}
-
-TEST_F(TestResource, WithFullResponseReturnsJsonObject)
+TEST_F(TestResource, DoesNotDeleteResourceByDefault)
 {
-	Resource resource(http_client, kTestUrl, Resource::ReturnFullResponse);
+	EXPECT_CALL(*http_client, Delete(_)).Times(0);
+	Resource resource(kTestUrl, http_client);
+}
+
+TEST_F(TestResource, DeletesResourceIfOwnershipIsEnabled)
+{
+	EXPECT_CALL(*http_client, Delete(kTestUrl));
+	Resource resource(kTestUrl, http_client, Resource::IsOwner);
+}
+
+TEST_F(TestResource, SharesOwnershipOfParentResource)
+{
+	EXPECT_CALL(*http_client, Delete(_)).Times(0);
+	Shared<Resource> parent(new Resource("parent", http_client, Resource::IsOwner));
+	Shared<Resource> child = MakeSubResource(parent, "child", Resource::IsOwner);
+	parent = Shared<Resource>();
+	Mock::VerifyAndClear(http_client); // Parent shouldn't be deleted at this point because child is alive
+	InSequence check_delete_order;
+	EXPECT_CALL(*http_client, Delete("parent/child"));
+	EXPECT_CALL(*http_client, Delete("parent"));
+	child = Shared<Resource>();
+}
+
+TEST_F(TestResource, RootResourceReturnsJsonObject)
+{
+	RootResource resource(kTestUrl, http_client);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
 	ASSERT_TRUE(resource.Get("command").is<picojson::object>());
 }
 
-TEST_F(TestResource, WithFullResponseReturnsSessionId)
+TEST_F(TestResource, RootResourceReturnsSessionId)
 {
-	Resource resource(http_client, kTestUrl, Resource::ReturnFullResponse);
+	RootResource resource(kTestUrl, http_client);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
 	ASSERT_TRUE(resource.Get("command").contains("sessionId"));
 	ASSERT_EQ("123", resource.Get("command").get("sessionId").to_str());
 }
 
-TEST_F(TestResource, WithFullResponseReturnsNullSessionId)
+TEST_F(TestResource, RootResourceReturnsNullSessionId)
 {
-	Resource resource(http_client, kTestUrl, Resource::ReturnFullResponse);
+	RootResource resource(kTestUrl, http_client);
 	http_response.body = "{\"sessionId\":null,\"status\":0,\"value\":12345}";
 	ASSERT_TRUE(resource.Get("command").contains("sessionId"));
 	ASSERT_TRUE(resource.Get("command").get("sessionId").is<picojson::null>());
 }
 
-TEST_F(TestResource, WithFullResponseReturnsScalarValueFromPositiveResponse)
+TEST_F(TestResource, RootResourceReturnsScalarValueFromPositiveResponse)
 {
-	Resource resource(http_client, kTestUrl, Resource::ReturnFullResponse);
+	RootResource resource(kTestUrl, http_client);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
 	picojson::value value = resource.Get("command").get("value");
@@ -100,9 +118,9 @@ TEST_F(TestResource, WithFullResponseReturnsScalarValueFromPositiveResponse)
 	ASSERT_EQ(12345, value.get<double>());
 }
 
-TEST_F(TestResource, WithFullResponseReturnsObjectValueFromPositiveResponse)
+TEST_F(TestResource, RootResourceReturnsObjectValueFromPositiveResponse)
 {
-	Resource resource(http_client, kTestUrl, Resource::ReturnFullResponse);
+	RootResource resource(kTestUrl, http_client);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":{\"member\":12345}}";
 	picojson::value value = resource.Get("command").get("value");
@@ -114,7 +132,7 @@ TEST_F(TestResource, WithFullResponseReturnsObjectValueFromPositiveResponse)
 
 TEST_F(TestResource, ReturnsScalarValueFromPositiveResponse)
 {
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
 	picojson::value value = resource.Get("command");
@@ -124,7 +142,7 @@ TEST_F(TestResource, ReturnsScalarValueFromPositiveResponse)
 
 TEST_F(TestResource, ReturnsObjectValueFromPositiveResponse)
 {
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	http_response.http_code = 200;
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":{\"member\":12345}}";
 	picojson::value value = resource.Get("command");
@@ -139,35 +157,35 @@ TEST_F(TestResource, ReturnsObjectValueFromPositiveResponse)
 TEST_F(TestResource, ThrowsOnHttp404)
 {
 	http_response.http_code = 404;
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
 TEST_F(TestResource, ThrowsOnHttp400)
 {
 	http_response.http_code = 400;
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
 TEST_F(TestResource, ThrowsOnHttp499)
 {
 	http_response.http_code = 499;
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
 TEST_F(TestResource, ThrowsOnHttp501)
 {
 	http_response.http_code = 501;
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
 TEST_F(TestResource, DoesNotHideHttpExceptions)
 {
 	EXPECT_CALL(*http_client, Get(_)).WillOnce(Throw(WebDriverException("HTTP failed")));
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	try {
 		resource.Get("command");
 		FAIL(); // Shouldn't get here
@@ -180,7 +198,7 @@ TEST_F(TestResource, DoesNotHideHttpExceptions)
 TEST_F(TestResource, AddsContextToExceptions)
 {
 	EXPECT_CALL(*http_client, Get(_)).WillOnce(Throw(WebDriverException("HTTP failed")));
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	try {
 		resource.Get("pinky");
 		FAIL(); // Shouldn't get here
@@ -194,7 +212,7 @@ TEST_F(TestResource, WebDriverExceptionContainsCommandAndHttpCodeAndBody)
 {
 	http_response.http_code = 501;
 	http_response.body = "--oops--";
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	try {
 		resource.Get("pinky");
 		FAIL(); // Shouldn't get here
@@ -212,7 +230,7 @@ TEST_F(TestResource, WebDriverExceptionContainsStatusAndStatusDescription)
 	http_response.body = Fmt() << "{\"status\":"
 		<< response_status_code::kNoSuchWindow
 		<< ",\"value\":{\"message\":\"12345\"}}";
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	try {
 		resource.Get("pinky");
 		FAIL(); // Shouldn't get here
@@ -227,7 +245,7 @@ TEST_F(TestResource, ThrowsOnHttp500)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":12,\"value\":{\"message\":\"12345\"}}";
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
@@ -235,7 +253,7 @@ TEST_F(TestResource, ThrowsOnHttp500AndMissingStatus)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"value\":{\"message\":\"12345\"}}";
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
@@ -243,7 +261,7 @@ TEST_F(TestResource, ThrowsOnHttp500AndInvalidStatus)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":\"xxx\",\"value\":{\"message\":\"12345\"}}";
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
@@ -251,7 +269,7 @@ TEST_F(TestResource, ThrowsOnHttp500AndMissingValue)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":12}";
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
@@ -259,7 +277,7 @@ TEST_F(TestResource, ThrowsOnHttp500AndInvalidValue)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":\"xxx\",\"value\":\"12345\"}";
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
@@ -267,7 +285,7 @@ TEST_F(TestResource, ThrowsOnHttp500AndMissingMessage)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":12,\"value\":{\"xxx\":\"12345\"}}";
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
@@ -275,41 +293,41 @@ TEST_F(TestResource, ThrowsOnHttp500AndInvalidMessage)
 {
 	http_response.http_code = 500;
 	http_response.body = "{\"status\":12,\"value\":{\"message\":12345}}";
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
 TEST_F(TestResource, ThrowsOnHttp399)
 {
 	http_response.http_code = 399;
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
 TEST_F(TestResource, ThrowsOnHttp502)
 {
 	http_response.http_code = 502;
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
 TEST_F(TestResource, ThrowsOnEmptyResponse)
 {
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	http_response.body = "";
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
 TEST_F(TestResource, ThrowsOnMalformedResponse)
 {
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	http_response.body = "Blah blah blah";
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
 TEST_F(TestResource, ThrowsIfResponseIsNotAnObject)
 {
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	http_response.body = "\"value\":123";
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
@@ -317,20 +335,20 @@ TEST_F(TestResource, ThrowsIfResponseIsNotAnObject)
 TEST_F(TestResource, ThrowsOnMissingStatus)
 {
 	http_response.body = "{\"sessionId\":\"123\",\"value\":12345}";
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
 TEST_F(TestResource, ThrowsOnInvalidStatus)
 {
 	http_response.body = "{\"sessionId\":\"123\",\"status\":\"5\",\"value\":12345}";
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
 
 TEST_F(TestResource, ThrowsOnNonZeroStatus)
 {
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	http_response.body = "{\"sessionId\":\"123\",\"status\":5,\"value\":12345}";
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
@@ -338,6 +356,6 @@ TEST_F(TestResource, ThrowsOnNonZeroStatus)
 TEST_F(TestResource, ThrowsOnMissingValue)
 {
 	http_response.body = "{\"sessionId\":\"123\",\"status\":0}";
-	Resource resource(http_client, kTestUrl);
+	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }

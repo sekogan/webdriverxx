@@ -3,38 +3,19 @@
 
 namespace webdriverxx {
 
-class Session::Deleter { // noncopyable
-public:
-	explicit Deleter(const detail::Resource& resource) : resource_(resource) {}
-
-	~Deleter() {
-		try {
-			Session::DeleteSession(resource_);
-		} catch(const std::exception&) {}
-	}
-
-private:
-	Deleter(Deleter&);
-	Deleter& operator = (Deleter&);
-
-private:
-	detail::Resource resource_;
-};
-
 inline
 Session::Session(
-	const detail::Resource& resource,
-	const Capabilities& capabilities,
-	Ownership mode
+	const detail::Shared<detail::Resource>& resource,
+	const Capabilities& capabilities
 	)
 	: resource_(resource)
+	, factory_(new detail::SessionFactory(resource))
 	, capabilities_(capabilities)
-	, deleter_(mode == IsOwner ? new Deleter(resource) : 0)
 {}
 
 inline
 void Session::DeleteSession() const {
-	DeleteSession(resource_);
+	resource_->Delete();
 }
 
 inline
@@ -49,22 +30,22 @@ std::string Session::GetBrowser() const {
 
 inline
 std::string Session::GetSource() const {
-	return resource_.GetString("source");
+	return resource_->GetString("source");
 }
 
 inline
 std::string Session::GetTitle() const {
-	return resource_.GetString("title");
+	return resource_->GetString("title");
 }
 
 inline
 std::string Session::GetUrl() const {
-	return resource_.GetString("url");
+	return resource_->GetString("url");
 }
 
 inline
 std::string Session::GetScreenshot() const {
-	return resource_.GetString("screenshot");
+	return resource_->GetString("screenshot");
 }
 
 inline
@@ -77,11 +58,11 @@ const Session& Session::SetTimeout(timeout::Type type, int milliseconds) {
 	case timeout::Script:
 		return InternalSetTimeout("script", milliseconds);
 	case timeout::AsyncScript:
-		resource_.Post("timeouts/async_script",
+		resource_->Post("timeouts/async_script",
 			JsonObject().With("ms", milliseconds).Build());
 		return *this;
 	case timeout::ElementFind:
-		resource_.Post("timeouts/implicit_wait",
+		resource_->Post("timeouts/implicit_wait",
 			JsonObject().With("ms", milliseconds).Build());
 		return *this;
 	default:
@@ -93,19 +74,19 @@ const Session& Session::SetTimeout(timeout::Type type, int milliseconds) {
 inline
 Window Session::GetCurrentWindow() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return MakeWindow(resource_.GetString("window_handle"));
+	return MakeWindow(resource_->GetString("window_handle"));
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
 inline
 const Session& Session::CloseCurrentWindow() const {
-	resource_.Delete("window");
+	resource_->Delete("window");
 	return *this;
 }
 
 inline
 const Session& Session::Navigate(const std::string& url) const {
-	resource_.Post("url", "url", url);
+	resource_->Post("url", "url", url);
 	return *this;
 }
 
@@ -116,19 +97,19 @@ const Session& Session::Get(const std::string& url) const {
 
 inline
 const Session& Session::Forward() const {
-	resource_.Post("forward");
+	resource_->Post("forward");
 	return *this;
 }
 
 inline
 const Session& Session::Back() const {
-	resource_.Post("back");
+	resource_->Post("back");
 	return *this;
 }
 
 inline
 const Session& Session::Refresh() const {
-	resource_.Post("refresh");
+	resource_->Post("refresh");
 	return *this;
 }
 
@@ -150,7 +131,7 @@ T Session::Eval(const std::string& script, const JsArgs& args) const {
 
 inline
 Element Session::EvalElement(const std::string& script, const JsArgs& args) const {
-	return MakeElement(Eval<detail::ElementRef>(script, args).ref);
+	return factory_->MakeElement(Eval<detail::ElementRef>(script, args).ref);
 }
 
 inline
@@ -171,12 +152,12 @@ T Session::EvalAsync(const std::string& script, const JsArgs& args) const {
 
 inline
 Element Session::EvalElementAsync(const std::string& script, const JsArgs& args) const {
-	return MakeElement(EvalAsync<detail::ElementRef>(script, args).ref);
+	return factory_->MakeElement(EvalAsync<detail::ElementRef>(script, args).ref);
 }
 
 inline
 const Session& Session::SetFocusToWindow(const std::string& window_name_or_handle) const {
-	resource_.Post("window", "name", window_name_or_handle);
+	resource_->Post("window", "name", window_name_or_handle);
 	return *this;
 }
 
@@ -208,13 +189,13 @@ const Session& Session::SetFocusToDefaultFrame() const {
 
 inline
 const Session& Session::SetFocusToParentFrame() const {
-	resource_.Post("frame/parent");
+	resource_->Post("frame/parent");
 	return *this;
 }
 
 inline
 const Session& Session::InternalSetFocusToFrame(const picojson::value& id) const {
-	resource_.Post("frame", JsonObject().With("id", id).Build());
+	resource_->Post("frame", JsonObject().With("id", id).Build());
 	return *this;
 }
 
@@ -223,7 +204,7 @@ std::vector<Window> Session::GetWindows() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	const std::vector<std::string> handles =
 		FromJsonArray<std::string>(
-			resource_.Get("window_handles")
+			resource_->Get("window_handles")
 			);
 	std::vector<Window> result;
 	for (std::vector<std::string>::const_iterator it = handles.begin();
@@ -236,76 +217,66 @@ std::vector<Window> Session::GetWindows() const {
 inline
 Element Session::GetActiveElement() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return MakeElement(FromJson<detail::ElementRef>(resource_.Post("element/active")).ref);
+	return factory_->MakeElement(FromJson<detail::ElementRef>(resource_->Post("element/active")).ref);
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
 inline
 Element Session::FindElement(const By& by) const {
-	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return FindElement(by, resource_);
-	WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(detail::Fmt()
-		<< "strategy: " << by.GetStrategy()
-		<< ", value: " << by.GetValue()
-		)
+	return factory_->MakeFinder(resource_).FindElement(by);
 }
 
 inline
 std::vector<Element> Session::FindElements(const By& by) const {
-	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return FindElements(by, resource_);
-	WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(detail::Fmt()
-		<< "strategy: " << by.GetStrategy()
-		<< ", value: " << by.GetValue()
-		)
+	return factory_->MakeFinder(resource_).FindElements(by);
 }
 
 inline
 std::vector<Cookie> Session::GetCookies() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return FromJson< std::vector<Cookie> >(resource_.Get("cookie"));
+	return FromJson< std::vector<Cookie> >(resource_->Get("cookie"));
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
 inline
 const Session& Session::SetCookie(const Cookie& cookie) const {
-	resource_.Post("cookie", JsonObject()
+	resource_->Post("cookie", JsonObject()
 		.With("cookie", ToJson(cookie)).Build());
 	return *this;
 }
 
 inline
 const Session& Session::DeleteCookies() const {
-	resource_.Delete("cookie");
+	resource_->Delete("cookie");
 	return *this;
 }
 
 inline
 const Session& Session::DeleteCookie(const std::string& name) const {
-	resource_.Delete(std::string("cookie/") + name);
+	resource_->Delete(std::string("cookie/") + name);
 	return *this;
 }
 
 inline
 std::string Session::GetAlertText() const {
-	return resource_.GetString("alert_text");
+	return resource_->GetString("alert_text");
 }
 
 inline
 const Session& Session::SendKeysToAlert(const std::string& text) const {
-	resource_.Post("alert_text", "text", text);
+	resource_->Post("alert_text", "text", text);
 	return *this;
 }
 
 inline
 const Session& Session::AcceptAlert() const {
-	resource_.Post("accept_alert");
+	resource_->Post("accept_alert");
 	return *this;
 }
 
 inline
 const Session& Session::DismissAlert() const {
-	resource_.Post("dismiss_alert");
+	resource_->Post("dismiss_alert");
 	return *this;
 }
 
@@ -322,53 +293,11 @@ const Session& Session::SendKeys(const Shortcut& shortcut) const {
 }
 
 inline
-Element Session::FindElement(
-	const By& by,
-	const detail::Resource& context
-	) const {
-	return MakeElement(FromJson<detail::ElementRef>(
-		context.Post("element",
-			JsonObject()
-				.With("using", by.GetStrategy())
-				.With("value", by.GetValue())
-				.Build()
-			)).ref);
-}
-
-inline
-std::vector<Element> Session::FindElements(
-	const By& by,
-	const detail::Resource& context
-	) const {
-	const std::vector<detail::ElementRef> ids =
-		FromJsonArray<detail::ElementRef>(
-			context.Post("elements", JsonObject()
-				.With("using", by.GetStrategy())
-				.With("value", by.GetValue())
-				.Build()
-			));
-	std::vector<Element> result;
-	for (std::vector<detail::ElementRef>::const_iterator it = ids.begin();
-		it != ids.end(); ++it)
-		result.push_back(MakeElement(it->ref));
-	return result;
-}
-
-inline
 Window Session::MakeWindow(const std::string& handle) const {
 	return Window(handle,
-		resource_.GetSubResource("window").GetSubResource(handle)
+		detail::MakeSubResource(resource_, "window", handle)
 		);
 }	
-
-inline
-Element Session::MakeElement(const std::string& id) const {
-	return Element(
-		id,
-		resource_.GetSubResource("element").GetSubResource(id),
-		this
-		);
-}
 
 inline
 detail::Keyboard Session::GetKeyboard() const
@@ -392,7 +321,7 @@ picojson::value Session::InternalEval(
 	const std::string& script,
 	const JsArgs& args
 	) const {
-	return resource_.Post(command,
+	return resource_->Post(command,
 		JsonObject()
 			.With("script", script)
 			.With("args", args.args_)
@@ -402,18 +331,13 @@ picojson::value Session::InternalEval(
 
 inline
 const Session& Session::InternalSetTimeout(const std::string& type, int milliseconds) const {
-	resource_.Post("timeouts",
+	resource_->Post("timeouts",
 		JsonObject()
 			.With("type", type)
 			.With("ms", milliseconds)
 			.Build()
 		);
 	return *this;
-}
-
-inline
-void Session::DeleteSession(const detail::Resource& resource) {
-	resource.Delete();
 }
 
 } // namespace webdriverxx

@@ -16,7 +16,12 @@ struct WidgetMonitor {
 	int deleted; 
 };
 
-class Widget {
+struct Simple : SharedObjectBase {
+	int n;
+	Simple() : n() {}
+};
+
+class Widget : public SharedObjectBase {
 public:
 	Widget(WidgetMonitor& monitor)
 		: monitor(monitor) {
@@ -113,29 +118,25 @@ TEST(Shared, SupportsImplicitTypecasts) {
 }
 
 TEST(Shared, CanBeUsedInBoolContext) {
-	Shared<int> s1;
-	Shared<int> s2(new int);
+	Shared<Simple> s1;
+	Shared<Simple> s2(new Simple);
 	ASSERT_TRUE(!s1);
 	ASSERT_TRUE(!!s2);
 }
 
 TEST(Shared, CanBeDereferenced) {
-	int* pi = new int;
-	Shared<int> i(pi);
-	*i = 123;
-	ASSERT_EQ(123, *pi);
-
-	WidgetMonitor* pm = new WidgetMonitor;
-	Shared<WidgetMonitor> m(pm);
-	m->created = 456;
-	ASSERT_EQ(456, pm->created);
+	Simple* p = new Simple;
+	Shared<Simple> s(p);
+	p->n = 123;
+	ASSERT_EQ(123, (*s).n);
+	ASSERT_EQ(123, s->n);
 }
 
 TEST(Shared, CanBeCompared) {
-	Shared<int> s1;
-	Shared<int> s2(new int);
-	Shared<int> s3 = s2;
-	Shared<int> s4(new int);
+	Shared<Simple> s1;
+	Shared<Simple> s2(new Simple);
+	Shared<Simple> s3 = s2;
+	Shared<Simple> s4(new Simple);
 	ASSERT_TRUE(s1 != s2);
 	ASSERT_TRUE(s1 != s3);
 	ASSERT_TRUE(s2 == s3);

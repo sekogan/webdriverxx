@@ -1,33 +1,8 @@
+#include "detail/resource.h"
 #include "detail/finder.h"
 #include "detail/error_handling.h"
 
 namespace webdriverxx {
-namespace detail {
-
-struct ElementRef {
-	std::string ref;
-};
-
-} // namespace detail
-
-template<>
-struct FromJsonImpl<detail::ElementRef> {
-	static detail::ElementRef Convert(const picojson::value& value) {
-		WEBDRIVERXX_CHECK(value.is<picojson::object>(), "ElementRef is not an object");
-		detail::ElementRef result;
-		result.ref = FromJson<std::string>(value.get("ELEMENT"));
-		return result;
-	}
-};
-
-template<>
-struct ToJsonImpl<detail::ElementRef> {
-	static picojson::value Convert(const detail::ElementRef& ref) {
-		return JsonObject()
-			.With("ELEMENT", ref.ref)
-			.Build();
-	}
-};
 
 template<>
 struct ToJsonImpl<Element> {
@@ -39,98 +14,88 @@ struct ToJsonImpl<Element> {
 inline
 Element::Element(
 	const std::string& ref,
-	const detail::Resource& resource,
-	const detail::Finder* finder
+	const detail::Shared<detail::Resource>& resource,
+	const detail::Shared<detail::IFinderFactory>& factory
 	)
 	: ref_(ref)
 	, resource_(resource)
-	, finder_(finder)
+	, factory_(factory)
 {}
 
 inline
 bool Element::IsDisplayed() const {
-	return resource_.GetBool("displayed");
+	return resource_->GetBool("displayed");
 }
 
 inline
 bool Element::IsEnabled() const {
-	return resource_.GetBool("enabled");
+	return resource_->GetBool("enabled");
 }
 
 inline
 bool Element::IsSelected() const {
-	return resource_.GetBool("selected");
+	return resource_->GetBool("selected");
 }
 
 inline
 Point Element::GetLocation() const {
-	return resource_.GetValue<Point>("location");
+	return resource_->GetValue<Point>("location");
 }
 
 inline
 Point Element::GetLocationInView() const {
-	return resource_.GetValue<Point>("location_in_view");
+	return resource_->GetValue<Point>("location_in_view");
 }
 
 inline
 Size Element::GetSize() const {
-	return resource_.GetValue<Size>("size");
+	return resource_->GetValue<Size>("size");
 }
 
 inline
 std::string Element::GetAttribute(const std::string& name) const {
-	return resource_.GetString(std::string("attribute/") + name);
+	return resource_->GetString(std::string("attribute/") + name);
 }
 
 inline
 std::string Element::GetCssProperty(const std::string& name) const {
-	return resource_.GetString(std::string("css/") + name);
+	return resource_->GetString(std::string("css/") + name);
 }
 
 inline
 std::string Element::GetTagName() const {
-	return resource_.GetString("name");
+	return resource_->GetString("name");
 }
 inline
 std::string Element::GetText() const {
-	return resource_.GetString("text");
+	return resource_->GetString("text");
 }
 
 inline
 Element Element::FindElement(const By& by) const {
-	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return finder_->FindElement(by, resource_);
-	WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(detail::Fmt()
-		<< "strategy: " << by.GetStrategy()
-		<< ", value: " << by.GetValue()
-		)
+	return factory_->MakeFinder(resource_).FindElement(by);
 }
 
 inline
 std::vector<Element> Element::FindElements(const By& by) const {
-	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return finder_->FindElements(by, resource_);
-	WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(detail::Fmt()
-		<< "strategy: " << by.GetStrategy()
-		<< ", value: " << by.GetValue()
-		)
+	return factory_->MakeFinder(resource_).FindElements(by);
 }
 
 inline
 const Element& Element::Clear() const {
-	resource_.Post("clear");
+	resource_->Post("clear");
 	return *this;
 }
 
 inline
 const Element& Element::Click() const {
-	resource_.Post("click");
+	resource_->Post("click");
 	return *this;
 }
 
 inline
 const Element& Element::Submit() const {
-	resource_.Post("submit");
+	resource_->Post("submit");
 	return *this;
 }
 
@@ -148,7 +113,7 @@ const Element& Element::SendKeys(const Shortcut& shortcut) const {
 
 inline
 bool Element::Equals(const Element& other) const {
-	return resource_.GetBool(std::string("equals/") + other.ref_);
+	return resource_->GetBool(std::string("equals/") + other.ref_);
 }
 
 inline

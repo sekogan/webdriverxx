@@ -225,6 +225,25 @@ struct FromJsonImpl<Cookie> {
 	}
 };
 
+template<>
+struct FromJsonImpl<detail::ElementRef> {
+	static detail::ElementRef Convert(const picojson::value& value) {
+		WEBDRIVERXX_CHECK(value.is<picojson::object>(), "ElementRef is not an object");
+		detail::ElementRef result;
+		result.ref = FromJson<std::string>(value.get("ELEMENT"));
+		return result;
+	}
+};
+
+template<>
+struct ToJsonImpl<detail::ElementRef> {
+	static picojson::value Convert(const detail::ElementRef& ref) {
+		return JsonObject()
+			.With("ELEMENT", ref.ref)
+			.Build();
+	}
+};
+
 } // namespace webdriverxx
 
 #endif

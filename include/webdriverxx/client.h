@@ -34,11 +34,11 @@ private:
 	Session MakeSession(
 		const std::string& id,
 		const Capabilities& capabilities,
-		Session::Ownership mode
+		detail::Resource::Ownership mode
 		) const;
 
 private:
-	detail::Resource resource_;
+	detail::Shared<detail::Resource> resource_;
 };
 
 } // namespace webdriverxx

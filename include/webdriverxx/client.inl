@@ -38,17 +38,16 @@ struct FromJsonImpl<detail::SessionRef> {
 
 inline
 Client::Client(const std::string& url)
-	: resource_(
-		detail::Shared<detail::IHttpClient>(new detail::HttpConnection),
+	: resource_(new detail::RootResource(
 		url,
-		detail::Resource::ReturnFullResponse
-		)
+		detail::Shared<detail::IHttpClient>(new detail::HttpConnection)
+		))
 {}
 
 inline
 picojson::object Client::GetStatus() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	const picojson::value value = resource_.Get("status").get("value");
+	const picojson::value value = resource_->Get("status").get("value");
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Value is not an object");
 	return value.get<picojson::object>();
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
@@ -59,12 +58,12 @@ std::vector<Session> Client::GetSessions() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	const std::vector<detail::SessionRef> sessions =
 		FromJsonArray<detail::SessionRef>(
-			resource_.Get("sessions").get("value")
+			resource_->Get("sessions").get("value")
 			);
 	std::vector<Session> result;
 	for (std::vector<detail::SessionRef>::const_iterator it = sessions.begin();
 		it != sessions.end(); ++it)
-		result.push_back(MakeSession(it->id, it->capabilities, Session::IsObserver));
+		result.push_back(MakeSession(it->id, it->capabilities, detail::Resource::IsObserver));
 	return result;
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
@@ -75,7 +74,7 @@ Session Client::CreateSession(
 	const Capabilities& required
 	) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	const picojson::value& response = resource_.Post("session",
+	const picojson::value& response = resource_->Post("session",
 		JsonObject()
 			.With("desiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(desired))
 			.With("requiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(required))
@@ -90,7 +89,7 @@ Session Client::CreateSession(
 		response.get("value").get<picojson::object>()
 		);
 	
-	return MakeSession(sessionId, capabilities, Session::IsOwner);
+	return MakeSession(sessionId, capabilities, detail::Resource::IsOwner);
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 
@@ -98,14 +97,11 @@ inline
 Session Client::MakeSession(
 	const std::string& id,
 	const Capabilities& capabilities,
-	Session::Ownership mode
+	detail::Resource::Ownership mode
 	) const {
 	return Session(
-		resource_
-			.GetSubResource("session", detail::Resource::ReturnResponseValue)
-			.GetSubResource(id),
-		capabilities,
-		mode
+		detail::MakeSubResource(resource_, "session", id, mode),
+		capabilities
 		);
 }
 

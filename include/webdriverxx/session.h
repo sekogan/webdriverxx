@@ -7,10 +7,10 @@
 #include "capabilities.h"
 #include "keys.h"
 #include "js_args.h"
-#include "detail/finder.h"
 #include "detail/resource.h"
 #include "detail/keyboard.h"
 #include "detail/shared.h"
+#include "detail/factories_impl.h"
 #include <picojson.h>
 #include <string>
 
@@ -18,7 +18,7 @@ namespace webdriverxx {
 
 class Client;
 
-class Session : private detail::Finder { // copyable
+class Session { // copyable
 public:	
 	void DeleteSession() const;
 
@@ -81,25 +81,12 @@ public:
 private:
 	friend class Client; // Only Client can create Sessions
 
-	enum Ownership { IsOwner, IsObserver };
-	class Deleter;
-
 	Session(
-		const detail::Resource& resource,
-		const Capabilities& capabilities,
-		Ownership mode
+		const detail::Shared<detail::Resource>& resource,
+		const Capabilities& capabilities
 		);
 
-	Element FindElement(
-		const By& by,
-		const detail::Resource& context
-		) const;
-	std::vector<Element> FindElements(
-		const By& by,
-		const detail::Resource& context
-		) const;
 	Window MakeWindow(const std::string& handle) const;
-	Element MakeElement(const std::string& id) const;
 	detail::Keyboard GetKeyboard() const;
 	picojson::value InternalEval(const std::string& script, const JsArgs& args) const;
 	picojson::value InternalEvalAsync(const std::string& script, const JsArgs& args) const;
@@ -107,12 +94,11 @@ private:
 		const JsArgs& args) const;
 	const Session& InternalSetFocusToFrame(const picojson::value& id) const;
 	const Session& InternalSetTimeout(const std::string& type, int milliseconds) const;
-	static void DeleteSession(const detail::Resource& resource);
 
 private:
-	detail::Resource resource_;
+	detail::Shared<detail::Resource> resource_;
+	detail::Shared<detail::SessionFactory> factory_;
 	Capabilities capabilities_;
-	detail::Shared<Deleter> deleter_;
 };
 
 } // namespace webdriverxx

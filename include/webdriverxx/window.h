@@ -10,7 +10,7 @@ namespace webdriverxx {
 
 class Window { // copyable
 public:
-	Window(const std::string& handle, const detail::Resource& resource)
+	Window(const std::string& handle, const detail::Shared<detail::Resource>& resource)
 		: handle_(handle)
 		, resource_(resource)
 	{}
@@ -20,31 +20,31 @@ public:
 	}
 
 	Size GetSize() const {
-		return resource_.GetValue<Size>("size");
+		return resource_->GetValue<Size>("size");
 	}
 
 	const Window& SetSize(const Size& size) const {
-		resource_.PostValue("size", size);
+		resource_->PostValue("size", size);
 		return *this;
 	}
 
 	Point GetPosition() const {
-		return resource_.GetValue<Point>("position");
+		return resource_->GetValue<Point>("position");
 	}
 
 	const Window& SetPosition(const Point& position) const {
-		resource_.PostValue("position", position);
+		resource_->PostValue("position", position);
 		return *this;
 	}
 
 	const Window& Maximize() const {
-		resource_.Post("maximize");
+		resource_->Post("maximize");
 		return *this;
 	}
 
 private:
 	std::string handle_;
-	detail::Resource resource_;
+	detail::Shared<detail::Resource> resource_;
 };
 
 } // namespace webdriverxx

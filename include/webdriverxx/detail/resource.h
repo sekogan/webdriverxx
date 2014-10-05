@@ -11,42 +11,40 @@
 namespace webdriverxx {
 namespace detail {
 
-class Resource { // copyable
+class Resource : public SharedObjectBase { // noncopyable
 public:
-	typedef picojson::value (*ResponseTransformStrategy)(picojson::value& response);
+	enum Ownership { IsOwner, IsObserver };
 
 	Resource(
-		const Shared<IHttpClient>& http_client,
 		const std::string& url,
-		ResponseTransformStrategy response_transform_strategy = ReturnResponseValue
+		const Shared<IHttpClient>& http_client,
+		Ownership mode = IsObserver
 		)
 		: http_client_(http_client)
 		, url_(url)
-		, response_transform_strategy_(response_transform_strategy)
+		, ownership_(mode)
 	{}
 
-	static picojson::value ReturnFullResponse(picojson::value& response) {
-		picojson::value result;
-		response.swap(result);
-		return result;
-	}
-	
-	static picojson::value ReturnResponseValue(picojson::value& response) {
-		picojson::value result;
-		response.get("value").swap(result);
-		return result;
+	Resource(
+		const Shared<Resource>& parent,
+		const std::string& name,
+		Ownership mode = IsObserver
+		)
+		: http_client_(parent->http_client_)
+		, parent_(parent)
+		, url_(ConcatUrl(parent->url_, name))
+		, ownership_(mode)
+	{}
+
+	virtual ~Resource() {
+		try {
+			if (ownership_ == IsOwner)
+				DeleteResource();
+		} catch (const std::exception&) {}
 	}
 
 	const std::string& GetUrl() const {
 		return url_;
-	}
-
-	Resource GetSubResource(const std::string& name, ResponseTransformStrategy strategy) const {
-		return Resource(http_client_, ConcatUrl(url_, name), strategy);
-	}
-
-	Resource GetSubResource(const std::string& name) const {
-		return GetSubResource(name, response_transform_strategy_);
 	}
 
 	picojson::value Get(const std::string& command = std::string()) const {
@@ -103,6 +101,17 @@ public:
 		const picojson::value& upload_data = picojson::value()
 		) const {
 		return Upload(command, upload_data, &IHttpClient::Put, "PUT");
+	}
+
+protected:
+	virtual picojson::value TransformResponse(picojson::value& response) const {
+		picojson::value result;
+		response.get("value").swap(result);
+		return result;
+	}
+
+	virtual void DeleteResource() {
+		Delete();
 	}
 
 private:
@@ -186,7 +195,7 @@ private:
 		WEBDRIVERXX_CHECK(status == response_status_code::kSuccess, "Non-zero response status code");
 		WEBDRIVERXX_CHECK(http_response.http_code == 200, "Unsupported HTTP code");
 
-		return response_transform_strategy_(response);
+		return TransformResponse(response);
 		WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(Fmt()
 			<< "HTTP code: " << http_response.http_code
 			<< ", body: " << http_response.body
@@ -205,10 +214,47 @@ private:
 	}
 
 private:
-	Shared<IHttpClient> http_client_;
-	std::string url_;
-	ResponseTransformStrategy response_transform_strategy_;
+	const Shared<IHttpClient> http_client_;
+	const Shared<Resource> parent_;
+	const std::string url_;
+	const Ownership ownership_;
 };
+
+class RootResource : public Resource { // noncopyable
+public:
+	RootResource(
+		const std::string& url,
+		const Shared<IHttpClient>& http_client
+		)
+		: Resource(url, http_client, IsObserver)
+	{}
+
+private:
+	virtual picojson::value TransformResponse(picojson::value& response) const {
+		picojson::value result;
+		response.swap(result);
+		return result;
+	}
+};
+
+inline
+Shared<Resource> MakeSubResource(
+	const Shared<Resource>& parent,
+	const std::string& subpath,
+	Resource::Ownership mode = Resource::IsObserver
+	) {
+	return Shared<Resource>(new Resource(parent, subpath, mode));
+}
+
+inline
+Shared<Resource> MakeSubResource(
+	const Shared<Resource>& parent,
+	const std::string& subpath1,
+	const std::string& subpath2,
+	Resource::Ownership mode = Resource::IsObserver
+	) {
+	return Shared<Resource>(new Resource(parent, subpath1 + "/" + subpath2, mode));
+}
 
 } // namespace detail
 } // namespace webdriverxx

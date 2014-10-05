@@ -2,30 +2,56 @@
 #define WEBDRIVERXX_DETAIL_SHARED_H
 
 #include <algorithm>
-#include <new>
 
 namespace webdriverxx {
 namespace detail {
+
+class SharedObjectBase { // noncopyable
+public:
+	SharedObjectBase() : ref_(0) {}
+	virtual ~SharedObjectBase() {}
+
+	void AddRef() {
+		++ref_;
+	}
+
+	void Release() {
+		if (--ref_ == 0)
+			delete this;
+	}
+
+private:
+	SharedObjectBase(SharedObjectBase&);
+	SharedObjectBase& operator = (SharedObjectBase&);
+
+private:
+	unsigned ref_;
+};
 
 // Copyable, not thread safe
 template<typename T>
 class Shared {
 public:
-	explicit Shared(T* ptr = 0)
+	Shared()
+		: ptr_(0)
+		, ref_(0)
+	{}
+
+	template<typename T2>
+	explicit Shared(T2* ptr)
 		: ptr_(ptr)
-		, ref_(ptr ? new (std::nothrow) unsigned(1) : 0)
+		, ref_(ptr)
 	{
-		if (ptr_ && !ref_) {
-			delete ptr_;
-			throw std::bad_alloc();
-		}
+		if (ref_)
+			ref_->AddRef();
 	}
 
 	Shared(const Shared& other)
 		: ptr_(other.ptr_)
 		, ref_(other.ref_)
 	{
-		if (ref_) ++(*ref_);
+		if (ref_)
+			ref_->AddRef();
 	}
 
 	template<typename T2>
@@ -33,14 +59,13 @@ public:
 		: ptr_(other.ptr_)
 		, ref_(other.ref_)
 	{
-		if (ref_) ++(*ref_);
+		if (ref_)
+			ref_->AddRef();
 	}
 
 	~Shared() {
-		if (ref_ && --(*ref_) == 0) {
-			delete ptr_;
-			delete ref_;
-		}
+		if (ref_)
+			ref_->Release();
 	}
 
 	Shared& operator = (const Shared& other) {
@@ -75,7 +100,7 @@ private:
 	friend class Shared;
 
 	T* ptr_;
-	unsigned* ref_;
+	SharedObjectBase* ref_;
 };
 
 } // namespace detail

@@ -5,7 +5,7 @@
 
 namespace webdriverxx {
 
-class By {
+class By { // copyable
 public:
 	By(const std::string& strategy, const std::string& value)
 		: strategy_(strategy)

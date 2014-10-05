@@ -5,8 +5,10 @@
 #include "types.h"
 #include "keys.h"
 #include "conversions.h"
-#include "detail/resource.h"
+#include "detail/shared.h"
 #include "detail/keyboard.h"
+#include "detail/resource.h"
+#include "detail/factories.h"
 #include <picojson.h>
 #include <string>
 #include <vector>
@@ -14,7 +16,8 @@
 namespace webdriverxx {
 namespace detail {
 
-struct Finder;
+class Resource;
+struct IFinderFactory;
 
 } // namespace detail
 
@@ -23,8 +26,8 @@ class Element { // copyable
 public:
 	Element(
 		const std::string& ref,
-		const detail::Resource& resource,
-		const detail::Finder* finder
+		const detail::Shared<detail::Resource>& resource,
+		const detail::Shared<detail::IFinderFactory>& factory
 		);
 
 	bool IsDisplayed() const;
@@ -59,8 +62,8 @@ private:
 
 private:
 	std::string ref_;
-	detail::Resource resource_;
-	const detail::Finder* finder_;
+	detail::Shared<detail::Resource> resource_;
+	detail::Shared<detail::IFinderFactory> factory_;
 };
 
 } // namespace webdriverxx
