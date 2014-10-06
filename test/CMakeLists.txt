@@ -17,14 +17,31 @@ set(SOURCE_FILES
 
 file(COPY pages DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-if (WIN32)
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
-endif()
-
 if (MSVC)
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
 else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -g")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+endif()
+
+# Coverage
+if (UNIX)
+	set(CMAKE_CONFIGURATION_TYPES ${CMAKE_CONFIGURATION_TYPES} Coverage)
+	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+		"Debug" "Release" "MinSizeRel" "RelWithDebInfo" "Coverage")
+	set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
+	set(CMAKE_C_FLAGS_COVERAGE "${CMAKE_C_FLAGS_DEBUG} --coverage")
+
+	find_program(LCOV_EXECUTABLE lcov)
+	find_program(GENHTML_EXECUTABLE genhtml)
+
+	add_custom_target(coverage
+		${LCOV_EXECUTABLE} --directory=. --zerocounters
+		COMMAND ${CMAKE_CTEST_COMMAND} -V
+		COMMAND ${LCOV_EXECUTABLE} --capture --directory=. --output-file coverage.info
+		COMMAND ${GENHTML_EXECUTABLE} coverage.info --output-directory coverage
+		DEPENDS ${PROJECT_NAME}
+		)
 endif()
 
 include(ExternalProject)

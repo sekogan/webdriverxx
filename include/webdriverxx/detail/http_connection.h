@@ -38,13 +38,6 @@ public:
 		return HttpPostRequest(connection_, url, upload_data).Execute();
 	}
 
-	HttpResponse Put(
-		const std::string& url,
-		const std::string& upload_data
-		) const {
-		return HttpPutRequest(connection_, url, upload_data).Execute();
-	}	
-
 private:
 	static
 	CURL* InitCurl() {

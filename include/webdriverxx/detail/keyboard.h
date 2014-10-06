@@ -20,14 +20,9 @@ public:
 	}
 
 	const Keyboard& SendKeys(const Shortcut& shortcut) const {
-		WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 		resource_->Post(command_, JsonObject()
 			.With("value", ToJson(shortcut.keys_)).Build());
 		return *this;
-		WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(Fmt()
-			<< "command: " << command_
-			<< ", resource: " << resource_->GetUrl()
-			)
 	}
 
 private:

@@ -96,13 +96,6 @@ public:
 			)
 	}	
 
-	picojson::value Put(
-		const std::string& command = std::string(),
-		const picojson::value& upload_data = picojson::value()
-		) const {
-		return Upload(command, upload_data, &IHttpClient::Put, "PUT");
-	}
-
 protected:
 	virtual picojson::value TransformResponse(picojson::value& response) const {
 		picojson::value result;

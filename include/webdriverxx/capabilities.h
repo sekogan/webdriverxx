@@ -34,11 +34,6 @@ public:
 		return *this;
 	}
 
-	Capabilities& Add(const std::string& name, const char* value)
-	{
-		return Add(name, std::string(value));
-	}
-
 	Capabilities& Add(const std::string& name, bool value)
 	{
 		object_[name] = picojson::value(value);

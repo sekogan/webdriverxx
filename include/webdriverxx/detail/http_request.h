@@ -130,9 +130,9 @@ private:
 	}
 };
 
-class HttpUploadRequest : public HttpRequest {
+class HttpPostRequest : public HttpRequest {
 public:
-	HttpUploadRequest(
+	HttpPostRequest(
 		CURL* http_connection,
 		const std::string& url,
 		const std::string& upload_data
@@ -155,7 +155,7 @@ protected:
 private:
 	static
 	size_t ReadCallback(void* buffer, size_t size, size_t nmemb, void* userdata) {
-		HttpUploadRequest* that = reinterpret_cast<HttpUploadRequest*>(userdata);
+		HttpPostRequest* that = reinterpret_cast<HttpPostRequest*>(userdata);
 		size_t buffer_size = size * nmemb;
 		size_t copy_size = that->unsent_length_ < buffer_size ? that->unsent_length_ : buffer_size;
 		std::copy(that->unsent_ptr_, that->unsent_ptr_ + copy_size,
@@ -169,25 +169,6 @@ private:
 	const std::string& upload_data_;
 	const char* unsent_ptr_;
 	size_t unsent_length_;
-};
-
-typedef HttpUploadRequest HttpPostRequest;
-
-class HttpPutRequest : public HttpUploadRequest {
-public:
-	HttpPutRequest(
-		CURL* http_connection,
-		const std::string& url,
-		const std::string& upload_data
-		)
-		: HttpUploadRequest(http_connection, url, upload_data)
-	{}
-
-private:
-	void SetCustomRequestOptions() {
-		HttpUploadRequest::SetCustomRequestOptions();
-		SetOption(CURLOPT_CUSTOMREQUEST, "PUT");
-	}
 };
 
 } // namespace detail
