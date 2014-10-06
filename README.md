@@ -4,14 +4,14 @@
 A lightweight C++ client library for [Selenium Webdriver](http://www.seleniumhq.org/).
 
 ## A quick example
-```
+```cpp
 #include <webdriverxx.h>
 using namespace webdriverxx;
 
 WebDriver firefox = StartFirefox();
 firefox
     .Navigate("http://google.com")
-    .FindElement(ByTagName("input"))
+    .FindElement(ByXPath(".//input[@name='q']"))
     .SendKeys("Hello, world!")
     .Submit();
 ```
