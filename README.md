@@ -18,7 +18,9 @@ firefox
 
 ## Features
 
-- Easy to use interface: value-like objects, chainable commands.
+- Chainable commands.
+- All objects are value-like and are compatible with STL containers.
+- All objects are self-contained and can be used independently. No need to think about lifetimes and ownership.
 - Header-only.
 - Lightweight dependencies:
     - [libcurl](http://curl.haxx.se/libcurl/),
