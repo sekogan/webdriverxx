@@ -11,11 +11,11 @@ public:
 	SharedObjectBase() : ref_(0) {}
 	virtual ~SharedObjectBase() {}
 
-	void AddRef() {
+	virtual void AddRef() {
 		++ref_;
 	}
 
-	void Release() {
+	virtual void Release() {
 		if (--ref_ == 0)
 			delete this;
 	}
@@ -42,16 +42,14 @@ public:
 		: ptr_(ptr)
 		, ref_(ptr)
 	{
-		if (ref_)
-			ref_->AddRef();
+		if (ref_) ref_->AddRef();
 	}
 
 	Shared(const Shared& other)
 		: ptr_(other.ptr_)
 		, ref_(other.ref_)
 	{
-		if (ref_)
-			ref_->AddRef();
+		if (ref_) ref_->AddRef();
 	}
 
 	template<typename T2>
@@ -59,13 +57,11 @@ public:
 		: ptr_(other.ptr_)
 		, ref_(other.ref_)
 	{
-		if (ref_)
-			ref_->AddRef();
+		if (ref_) ref_->AddRef();
 	}
 
 	~Shared() {
-		if (ref_)
-			ref_->Release();
+		if (ref_) ref_->Release();
 	}
 
 	Shared& operator = (const Shared& other) {
