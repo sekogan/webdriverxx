@@ -85,16 +85,15 @@ list(APPEND DEPS picojson_project)
 # GMock
 externalproject_add(gmock_project
 	PREFIX gmock
-	URL "http://googlemock.googlecode.com/files/gmock-1.7.0.zip"
+	URL "http://googlemock.googlecode.com/files/gmock-1.6.0.zip"
 	CMAKE_ARGS -Dgtest_force_shared_crt=ON
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
 	)
 externalproject_get_property(gmock_project source_dir binary_dir)
-include_directories("${source_dir}/include")
-include_directories("${source_dir}/gtest/include")
-link_directories("${binary_dir}")
-list(APPEND LIBS gmock)
+include_directories("${source_dir}/include" "${source_dir}/gtest/include")
+link_directories("${binary_dir}" "${binary_dir}/gtest")
+list(APPEND LIBS gmock gtest)
 list(APPEND DEPS gmock_project)
 
 # pthread

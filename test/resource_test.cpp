@@ -23,6 +23,7 @@ struct TestResource : Test {
 		http_response.body = "{\"sessionId\":\"123\",\"status\":0,\"value\":12345}";
 	
 		http_client = Shared<MockHttpClient>(new MockHttpClient);
+		DefaultValue<HttpResponse>::Set(HttpResponse());
 		ON_CALL(*http_client, Get(_)).WillByDefault(ReturnPointee(&http_response));
 		ON_CALL(*http_client, Post(_,_)).WillByDefault(ReturnPointee(&http_response));
 		ON_CALL(*http_client, Delete(_)).WillByDefault(ReturnPointee(&http_response));
