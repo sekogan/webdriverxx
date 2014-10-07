@@ -100,13 +100,6 @@ const char *const BrowserName = "browserName";
 // TODO
 } // namespace browser
 
-namespace detail {
-
-struct ElementRef {
-	std::string ref;
-};
-
-} // namespace detail
 } // namespace webdriverxx
 
 #endif

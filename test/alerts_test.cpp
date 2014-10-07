@@ -18,26 +18,26 @@ protected:
 };
 
 TEST_F(TestAlerts, AcceptsAlert) {
-	if (driver.GetBrowser() == browser::Phantom) return;
+	if (driver.GetCapabilities().GetBrowserName() == browser::Phantom) return;
 	driver.Execute("alert('abc')");
 	driver.AcceptAlert();
 }
 
 TEST_F(TestAlerts, DismissesAlert) {
-	if (driver.GetBrowser() == browser::Phantom) return;
+	if (driver.GetCapabilities().GetBrowserName() == browser::Phantom) return;
 	driver.Execute("alert('abc')");
 	driver.DismissAlert();
 }
 
 TEST_F(TestAlerts, GetsAlertText) {
-	if (driver.GetBrowser() == browser::Phantom) return;
+	if (driver.GetCapabilities().GetBrowserName() == browser::Phantom) return;
 	driver.Execute("alert('abc')");
 	ASSERT_EQ("abc", driver.GetAlertText());
 	driver.DismissAlert();
 }
 
 TEST_F(TestAlerts, SendsKeysToAlert) {
-	if (driver.GetBrowser() == browser::Phantom) return;
+	if (driver.GetCapabilities().GetBrowserName() == browser::Phantom) return;
 	driver.Execute("result = prompt('abc')");
 	driver.SendKeysToAlert("def");
 	driver.AcceptAlert();
@@ -45,7 +45,7 @@ TEST_F(TestAlerts, SendsKeysToAlert) {
 }
 
 TEST_F(TestAlerts, DismissesSendedKeys) {
-	if (driver.GetBrowser() == browser::Phantom) return;
+	if (driver.GetCapabilities().GetBrowserName() == browser::Phantom) return;
 	driver.Execute("result = prompt('abc')");
 	driver.SendKeysToAlert("def");
 	driver.DismissAlert();

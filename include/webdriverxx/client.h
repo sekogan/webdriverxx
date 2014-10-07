@@ -33,7 +33,6 @@ public:
 private:
 	Session MakeSession(
 		const std::string& id,
-		const Capabilities& capabilities,
 		detail::Resource::Ownership mode
 		) const;
 

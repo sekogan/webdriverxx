@@ -26,6 +26,8 @@ public:
 		return it == object_.end() ? std::string() : it->second.to_str();
 	}
 
+	std::string GetBrowserName() const { return GetString("browserName"); }
+
 	Capabilities() {}
 
 	Capabilities& Add(const std::string& name, const std::string& value)

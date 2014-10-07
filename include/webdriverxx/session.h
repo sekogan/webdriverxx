@@ -20,12 +20,7 @@ class Client;
 
 class Session { // copyable
 public:	
-	void DeleteSession() const;
-
 	Capabilities GetCapabilities() const;
-	std::string GetBrowser() const;
-	const Session& SetTimeout(timeout::Type type, int milliseconds);
-
 	std::string GetSource() const;
 	std::string GetTitle() const;
 	std::string GetUrl() const;
@@ -76,15 +71,15 @@ public:
 	const Session& SendKeys(const std::string& keys) const;
 	const Session& SendKeys(const Shortcut& shortcut) const;
 
+	const Session& SetTimeout(timeout::Type type, int milliseconds);
+
+	void DeleteSession() const; // No need to delete sessions created by WebDriver or Client
 	virtual ~Session() {}
 
 private:
 	friend class Client; // Only Client can create Sessions
 
-	Session(
-		const detail::Shared<detail::Resource>& resource,
-		const Capabilities& capabilities
-		);
+	explicit Session(const detail::Shared<detail::Resource>& resource);
 
 	Window MakeWindow(const std::string& handle) const;
 	detail::Keyboard GetKeyboard() const;
@@ -98,7 +93,6 @@ private:
 private:
 	detail::Shared<detail::Resource> resource_;
 	detail::Shared<detail::SessionFactory> factory_;
-	Capabilities capabilities_;
 };
 
 } // namespace webdriverxx

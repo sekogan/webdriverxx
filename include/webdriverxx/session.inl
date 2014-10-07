@@ -1,16 +1,13 @@
 #include "conversions.h"
 #include "detail/error_handling.h"
+#include "detail/types.h"
 
 namespace webdriverxx {
 
 inline
-Session::Session(
-	const detail::Shared<detail::Resource>& resource,
-	const Capabilities& capabilities
-	)
+Session::Session(const detail::Shared<detail::Resource>& resource)
 	: resource_(resource)
 	, factory_(new detail::SessionFactory(resource))
-	, capabilities_(capabilities)
 {}
 
 inline
@@ -20,12 +17,9 @@ void Session::DeleteSession() const {
 
 inline
 Capabilities Session::GetCapabilities() const {
-	return capabilities_;
-}
-
-inline
-std::string Session::GetBrowser() const {
-	return capabilities_.GetString(capabilities::BrowserName);
+	return detail::CapabilitiesAccess::Construct(
+		resource_->Get().get<picojson::object>()
+		);
 }
 
 inline
