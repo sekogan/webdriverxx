@@ -83,9 +83,14 @@ include_directories("${source_dir}")
 list(APPEND DEPS picojson_project)
 
 # GMock
+if (CMAKE_COMPILER_IS_GNUCXX)
+set(GMOCK_VERSION "1.6.0") # To avoid bug in GCC 4.6
+else()
+set(GMOCK_VERSION "1.7.0")
+endif()
 externalproject_add(gmock_project
 	PREFIX gmock
-	URL "http://googlemock.googlecode.com/files/gmock-1.6.0.zip"
+	URL "http://googlemock.googlecode.com/files/gmock-${GMOCK_VERSION}.zip"
 	CMAKE_ARGS -Dgtest_force_shared_crt=ON
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
