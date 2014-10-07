@@ -1,18 +1,14 @@
 #include "environment.h"
 #include <webdriverxx/wait.h>
 #include <gtest/gtest.h>
-#include <type_traits>
 
 using namespace webdriverxx;
 
-template<
-	typename Getter, typename Matcher,
-	typename Result = typename std::result_of<Getter()>::type
-	>
+template<typename Getter, typename Matcher>
 inline
-Result WaitFor(Getter getter, Matcher,
-	int timeoutMilliseconds = 5000, int intervalMilliseconds = 50
-	) {
+auto WaitFor(Getter getter, Matcher//,
+//	int timeoutMilliseconds = 5000, int intervalMilliseconds = 50
+	) -> decltype(getter()) {
 	return getter();
 }
 
