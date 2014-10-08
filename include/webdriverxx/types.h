@@ -3,6 +3,9 @@
 
 namespace webdriverxx {
 
+typedef unsigned long long TimePoint;
+typedef unsigned Duration;
+
 struct Size {
 	int width;
 	int height;
