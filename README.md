@@ -26,8 +26,7 @@ firefox
     - [libcurl](http://curl.haxx.se/libcurl/),
     - [picojson](https://github.com/kazuho/picojson).
 - Linux, Mac and Windows.
-- clang, GCC and Visual Studio.
-- No C++11/14 support is required.
+- clang (3.4), GCC (4.6) and Visual Studio (2010).
 
 ## More examples
 
