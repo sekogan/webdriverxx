@@ -45,6 +45,10 @@ public:
 	}
 
 private:
+	MatcherAdapter(MatcherAdapter&);
+	MatcherAdapter& operator = (MatcherAdapter&);
+
+private:
 	Matcher matcher_;
 };
 

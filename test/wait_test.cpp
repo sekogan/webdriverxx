@@ -42,7 +42,7 @@ TEST(WaitForValue, CallsGetterUntilItSucceeds) {
 	Duration timeout = 1000;
 	Duration interval = 0;
 	int counter = 0;
-	WaitForValue([&counter]{
+	WaitForValue([&counter]() -> int {
 		if (++counter < 10) throw std::exception();
 		return counter;
 	}, timeout, interval);

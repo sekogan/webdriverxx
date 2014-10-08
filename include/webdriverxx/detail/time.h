@@ -22,7 +22,7 @@ TimePoint Now() {
 	#ifdef _WIN32
 		FILETIME time;
 		::GetSystemTimeAsFileTime(&time);
-		return static_cast<TimePoint>(time.dwHighDateTime) << 32
+		return (static_cast<TimePoint>(time.dwHighDateTime) << 32)
 			+ time.dwLowDateTime;
 	#else
 		using namespace std::chrono;
