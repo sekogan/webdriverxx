@@ -10,8 +10,7 @@
 
 #else
 
-#include <chrono>
-#include <thread>
+#include <time.h>
 
 #endif
 
@@ -25,12 +24,9 @@ TimePoint Now() {
 		return (static_cast<TimePoint>(time.dwHighDateTime) << 32)
 			+ time.dwLowDateTime;
 	#else
-		using namespace std::chrono;
-		return static_cast<TimePoint>(
-			std::chrono::duration_cast<std::chrono::milliseconds>(
-				steady_clock::now().time_since_epoch()
-				).count()
-			);
+		timeval time = {};
+		WEBDRIVERXX_CHECK(0 == gettimeofday(&time, nullptr), "gettimeofday failure");
+		return static_cast<TimePoint>(time.tv_sec)*1000 + time.tv_usec/1000;
 	#endif
 }
 
@@ -38,7 +34,9 @@ void Sleep(Duration milliseconds) {
 	#ifdef _WIN32
 		::Sleep(static_cast<DWORD>(milliseconds));
 	#else
-		std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+		timespec time = { static_cast<time_t>(milliseconds/1000),
+			static_cast<long>(milliseconds%1000)*1000000 };
+		while (nanosleep(&time, &time)) {}
 	#endif
 }
 
