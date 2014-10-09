@@ -24,6 +24,12 @@ private:
 	std::ostringstream stream_;
 };
 
+template<typename T>
+inline
+bool BoolCast(T value) {
+	return !!value;
+}
+
 } // namespace detail
 } // namespace webdriverxx
 
@@ -57,7 +63,7 @@ private:
 		)
 
 #define WEBDRIVERXX_CHECK(pred, message) \
-	for (;!(0,(pred));) \
+	for (;!detail::BoolCast(pred);) \
 		WEBDRIVERXX_THROW(message)
 
 #endif

@@ -66,6 +66,7 @@ struct MakeMatcherAdapter {
 namespace detail {
 
 template <class T, class M>
+inline
 auto ApplyMakeMatcherAdapter(M matcher) -> decltype(MakeMatcherAdapter<T,M>::Apply(*static_cast<M*>(nullptr))) {
 	return MakeMatcherAdapter<T,M>::Apply(matcher);
 }
