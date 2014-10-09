@@ -21,8 +21,8 @@ TimePoint Now() {
 	#ifdef _WIN32
 		FILETIME time;
 		::GetSystemTimeAsFileTime(&time);
-		return (static_cast<TimePoint>(time.dwHighDateTime) << 32)
-			+ time.dwLowDateTime;
+		return ((static_cast<TimePoint>(time.dwHighDateTime) << 32)
+			+ time.dwLowDateTime)/10000;
 	#else
 		timeval time = {};
 		WEBDRIVERXX_CHECK(0 == gettimeofday(&time, nullptr), "gettimeofday failure");
