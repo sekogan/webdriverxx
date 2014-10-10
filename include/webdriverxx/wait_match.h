@@ -42,7 +42,7 @@ namespace detail {
 
 template <class T, class M>
 inline
-auto ApplyMakeMatcherAdapter(M matcher) -> decltype(MakeMatcherAdapter<T,M>::Apply(*static_cast<M*>(nullptr))) {
+auto CallMakeMatcherAdapter(M matcher) -> decltype(MakeMatcherAdapter<T,M>::Apply(*static_cast<M*>(nullptr))) {
 	return MakeMatcherAdapter<T,M>::Apply(matcher);
 }
 
@@ -54,7 +54,7 @@ auto WaitForMatch(G getter, M matcher,
 	Duration timeoutMs = 5000, Duration intervalMs = 50
 	) -> decltype(getter()) {
 	typedef decltype(getter()) T;
-	auto adapter = detail::ApplyMakeMatcherAdapter<T>(matcher);
+	auto adapter = detail::CallMakeMatcherAdapter<T>(matcher);
 	return WaitForValue([&getter, &adapter]() -> T {
 			const auto value = getter();
 			if (!adapter.Apply(value))
