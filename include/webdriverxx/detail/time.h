@@ -18,6 +18,7 @@
 namespace webdriverxx {
 namespace detail {
 
+inline
 TimePoint Now() {
 	#ifdef _WIN32
 		FILETIME time;
@@ -31,6 +32,7 @@ TimePoint Now() {
 	#endif
 }
 
+inline
 void Sleep(Duration milliseconds) {
 	#ifdef _WIN32
 		::Sleep(static_cast<DWORD>(milliseconds));

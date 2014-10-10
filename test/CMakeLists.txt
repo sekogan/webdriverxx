@@ -12,6 +12,7 @@ set(SOURCE_FILES
 	resource_test.cpp
 	session_test.cpp
 	shared_test.cpp
+	wait_match_test.cpp
 	wait_test.cpp
 	webdriver_test.cpp
 	)
