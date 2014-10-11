@@ -15,28 +15,50 @@ std::string ToString(char value) {
 	return std::string("'") + value + "'";
 }
 
+std::string ToString(const char* value) {
+	return std::string("\"") + value + '"';
+}
+
+std::string ToString(char* value) {
+	return ToString(static_cast<const char*>(value));
+}
+
+std::string ToString(const std::string& value) {
+	return ToString(value.c_str());
+}
+
+template<typename S, typename T>
+void PrintNonPrintableValue(S& s, const T& /*value*/) {
+	s << "<non-printable>";
+}
+
+}}
+
+namespace webdriverxx_to_string_internal {
+
 template<typename T>
-T& Declval();
+std::ostream& operator << (std::ostream& stream, const T& value) {
+	::webdriverxx::detail::PrintNonPrintableValue(stream, value);
+	return stream;
+}
+
+} // namespace webdriverxx_to_string_internal
+
+namespace webdriverxx {
+namespace detail {
 
 struct ToStringPrintableFilter {
 	template<typename T>
 	static std::string Apply(const T& value) {
-		return Impl(value, 0);
-	}
-
-private:
-	template<typename T>
-	static std::string Impl(const T& value, typename std::add_pointer<decltype(Declval<std::ostream>() << Declval<T>())>::type) {
 		std::ostringstream s;
+		using namespace webdriverxx_to_string_internal;
 		s << value;
 		return s.str();
 	}
-
-	template<typename T>
-	static std::string Impl(const T& /*value*/, ...) {
-		return "<non-printable>";
-	}
 };
+
+template<typename T>
+T& Declval(); // MSVC2010 does not support std::declval
 
 template<typename NextFilter>
 struct ToStringContainerFilter {
@@ -47,7 +69,7 @@ struct ToStringContainerFilter {
 
 private:
 	template<typename T>
-	static std::string Impl(const T& value, typename std::add_pointer<decltype(std::begin(Declval<T>()))>::type) {
+	static std::string Impl(const T& value, decltype(&*std::begin(Declval<T>()))) {
 		auto it = std::begin(value);
 		const auto end = std::end(value);
 		int limit = 20;
@@ -60,25 +82,6 @@ private:
 		}
 		s << "]";
 		return s.str();
-	}
-
-	template<typename T>
-	static std::string Impl(const T& value, ...) {
-		return NextFilter::Apply(value);
-	}
-};
-
-template<typename NextFilter>
-struct ToStringStringFilter {
-	template<typename T>
-	static std::string Apply(const T& value) {
-		return Impl(value, 0);
-	}
-
-private:
-	template<typename T>
-	static std::string Impl(const T& value, typename std::enable_if<std::is_convertible<T,std::string>::value>::type*) {
-		return std::string(1, '"') + std::string(value) + '"';
 	}
 
 	template<typename T>
@@ -113,11 +116,11 @@ private:
 template<typename T>
 std::string ToString(const T& value) {
 	namespace detail = ::webdriverxx::detail;
-	return detail::ToStringStringFilter<
-		detail::ToStringSpecializationFilter<
+	return
 		detail::ToStringContainerFilter<
+		detail::ToStringSpecializationFilter<
 		detail::ToStringPrintableFilter
-		>>>::Apply(value);
+		>>::Apply(value);
 }
 
 } // namespace detail

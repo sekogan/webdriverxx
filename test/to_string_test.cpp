@@ -32,6 +32,10 @@ TEST(ToString, ConvertsCustomTypes) {
 TEST(ToString, ConvertsStrings) {
 	ASSERT_EQ("\"abc\"", ToString("abc"));
 	ASSERT_EQ("\"abc\"", ToString(std::string("abc")));
+	const char* abc = "abc";
+	ASSERT_EQ("\"abc\"", ToString(abc));
+	char a[] = "abc";
+	ASSERT_EQ("\"abc\"", ToString(a));
 }
 
 TEST(ToString, ConvertsPointers) {
