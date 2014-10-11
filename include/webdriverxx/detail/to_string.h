@@ -26,7 +26,7 @@ struct ToStringPrintableFilter {
 
 private:
 	template<typename T>
-	static std::string Impl(const T& value, decltype(Declval<std::ostream>() << Declval<T>())*) {
+	static std::string Impl(const T& value, typename std::add_pointer<decltype(Declval<std::ostream>() << Declval<T>())>::type) {
 		std::ostringstream s;
 		s << value;
 		return s.str();
@@ -47,7 +47,7 @@ struct ToStringContainerFilter {
 
 private:
 	template<typename T>
-	static std::string Impl(const T& value, decltype(std::begin(Declval<T>()))*) {
+	static std::string Impl(const T& value, typename std::add_pointer<decltype(std::begin(Declval<T>()))>::type) {
 		auto it = std::begin(value);
 		const auto end = std::end(value);
 		int limit = 20;
