@@ -9,7 +9,7 @@ protected:
 	static void SetUpTestCase() {
 		WebDriver& driver = Environment::Instance().GetDriver();
 		driver.Navigate(Environment::Instance().GetTestPageUrl("finder.html"));
-		driver.FindElement(ByTagName("body"));
+		driver.FindElement(ById("finder_loaded"));
 		driver.SetTimeout(timeout::ElementFind, 0);
 	}
 
