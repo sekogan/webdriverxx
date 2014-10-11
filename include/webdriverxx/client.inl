@@ -2,6 +2,7 @@
 #include "detail/shared.h"
 #include "detail/error_handling.h"
 #include "detail/types.h"
+#include <algorithm>
 
 namespace webdriverxx {
 
@@ -16,7 +17,7 @@ Client::Client(const std::string& url)
 inline
 picojson::object Client::GetStatus() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	const picojson::value value = resource_->Get("status").get("value");
+	const auto value = resource_->Get("status").get("value");
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Value is not an object");
 	return value.get<picojson::object>();
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
@@ -30,9 +31,11 @@ std::vector<Session> Client::GetSessions() const {
 			resource_->Get("sessions").get("value")
 			);
 	std::vector<Session> result;
-	for (std::vector<detail::SessionRef>::const_iterator it = sessions.begin();
-		it != sessions.end(); ++it)
-		result.push_back(MakeSession(it->id, detail::Resource::IsObserver));
+	result.reserve(sessions.size());
+	std::transform(sessions.begin(), sessions.end(), std::back_inserter(result),
+		[this](const detail::SessionRef& session_ref) {
+			return MakeSession(session_ref.id, detail::Resource::IsObserver);
+		});
 	return result;
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
@@ -43,7 +46,7 @@ Session Client::CreateSession(
 	const Capabilities& required
 	) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	const picojson::value& response = resource_->Post("session",
+	const auto response = resource_->Post("session",
 		JsonObject()
 			.With("desiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(desired))
 			.With("requiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(required))
@@ -53,7 +56,7 @@ Session Client::CreateSession(
 	WEBDRIVERXX_CHECK(response.get("sessionId").is<std::string>(), "Session ID is not a string");
 	WEBDRIVERXX_CHECK(response.get("value").is<picojson::object>(), "Capabilities is not an object");
 	
-	const std::string sessionId = response.get("sessionId").to_str();
+	const auto sessionId = response.get("sessionId").to_str();
 	
 	return MakeSession(sessionId, detail::Resource::IsOwner);
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()

@@ -17,12 +17,12 @@ public:
 	}
 
 	bool GetBool(const std::string& name) const {
-		picojson::object::const_iterator it = object_.find(name);
+		const auto it = object_.find(name);
 		return it == object_.end() ? false : it->second.evaluate_as_boolean();
 	}
 
 	std::string GetString(const std::string& name) const {
-		picojson::object::const_iterator it = object_.find(name);
+		const auto it = object_.find(name);
 		return it == object_.end() ? std::string() : it->second.to_str();
 	}
 

@@ -75,7 +75,7 @@ protected:
 
 	template<typename T>
 	void SetOption(CURLoption option, const T& value) const {
-		const CURLcode result = curl_easy_setopt(http_connection_, option, value);
+		const auto result = curl_easy_setopt(http_connection_, option, value);
 		WEBDRIVERXX_CHECK(result == CURLE_OK, Fmt()
 			<< "Cannot set HTTP session option ("
 			<< "option: " << option
@@ -91,7 +91,7 @@ protected:
 private:
 	long GetHttpCode() const {
 		long http_code = 0;
-		const CURLcode result = curl_easy_getinfo(http_connection_, CURLINFO_RESPONSE_CODE, &http_code);
+		const auto result = curl_easy_getinfo(http_connection_, CURLINFO_RESPONSE_CODE, &http_code);
 		WEBDRIVERXX_CHECK(result == CURLE_OK, Fmt()
 			<< "Cannot get HTTP code (" << curl_easy_strerror(result) << ")"
 			);
@@ -101,7 +101,7 @@ private:
 	static
 	size_t WriteCallback(void* buffer, size_t size, size_t nmemb, void* userdata) {
 		std::string* data_received = reinterpret_cast<std::string*>(userdata);
-		const size_t buffer_size = size * nmemb;
+		const auto buffer_size = size * nmemb;
 		data_received->append(reinterpret_cast<const char*>(buffer), buffer_size);
 		return buffer_size;
 	}
@@ -156,8 +156,8 @@ private:
 	static
 	size_t ReadCallback(void* buffer, size_t size, size_t nmemb, void* userdata) {
 		HttpPostRequest* that = reinterpret_cast<HttpPostRequest*>(userdata);
-		size_t buffer_size = size * nmemb;
-		size_t copy_size = that->unsent_length_ < buffer_size ? that->unsent_length_ : buffer_size;
+		auto buffer_size = size * nmemb;
+		auto copy_size = that->unsent_length_ < buffer_size ? that->unsent_length_ : buffer_size;
 		std::copy(that->unsent_ptr_, that->unsent_ptr_ + copy_size,
 			reinterpret_cast<char*>(buffer));
 		that->unsent_length_ -= copy_size;

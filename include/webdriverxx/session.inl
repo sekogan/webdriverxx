@@ -1,6 +1,7 @@
 #include "conversions.h"
 #include "detail/error_handling.h"
 #include "detail/types.h"
+#include <algorithm>
 
 namespace webdriverxx {
 
@@ -201,9 +202,11 @@ std::vector<Window> Session::GetWindows() const {
 			resource_->Get("window_handles")
 			);
 	std::vector<Window> result;
-	for (std::vector<std::string>::const_iterator it = handles.begin();
-		it != handles.end(); ++it)
-		result.push_back(MakeWindow(*it));
+	result.reserve(handles.size());
+	std::transform(handles.begin(), handles.end(), std::back_inserter(result),
+		[this](const std::string& window_handle){
+			return MakeWindow(window_handle);
+		});
 	return result;
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }

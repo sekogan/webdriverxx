@@ -168,11 +168,11 @@ Cookie FindCookie(
 	const std::string& name,
 	const Cookie& default_value = Cookie()
 	) {
-	std::vector<Cookie>::const_iterator it = cookies.begin();
-	for (; it != cookies.end(); ++it)
-		if (it->name == name)
-			return *it;
-	return default_value;
+	const auto it = std::find_if(cookies.begin(), cookies.end(),
+		[&name](const Cookie& cookie){
+			return cookie.name == name;
+		});
+	return it != cookies.end() ? *it : default_value;
 }
 
 namespace webdriverxx {

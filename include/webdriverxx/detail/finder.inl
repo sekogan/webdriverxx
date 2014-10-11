@@ -1,5 +1,6 @@
 #include "../element.h"
 #include "types.h"
+#include <algorithm>
 
 namespace webdriverxx {
 namespace detail {
@@ -40,9 +41,11 @@ std::vector<Element> Finder::FindElements(const By& by) const {
 				.Build()
 			));
 	std::vector<Element> result;
-	for (std::vector<detail::ElementRef>::const_iterator it = ids.begin();
-		it != ids.end(); ++it)
-		result.push_back(factory_->MakeElement(it->ref));
+	result.reserve(ids.size());
+	std::transform(ids.begin(), ids.end(), std::back_inserter(result),
+		[this](const detail::ElementRef& element_ref) {
+			return factory_->MakeElement(element_ref.ref);
+		});
 	return result;
 	WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(detail::Fmt()
 		<< "context: " << context_->GetUrl()

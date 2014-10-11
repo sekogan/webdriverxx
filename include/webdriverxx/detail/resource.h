@@ -169,10 +169,10 @@ private:
 		WEBDRIVERXX_CHECK(response.is<picojson::object>(), "Server response is not an object");
 		WEBDRIVERXX_CHECK(response.contains("status"), "Server response has no member \"status\"");
 		WEBDRIVERXX_CHECK(response.get("status").is<double>(), "Response status code is not a number");
-		const response_status_code::Value status =
+		const auto status =
 			static_cast<response_status_code::Value>(static_cast<int>(response.get("status").get<double>()));
 		WEBDRIVERXX_CHECK(response.contains("value"), "Server response has no member \"value\"");
-		const picojson::value& value = response.get("value");
+		const auto& value = response.get("value");
 
 		if (http_response.http_code == 500) { // Internal server error
 			WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Server returned HTTP code 500 and \"response.value\" is not an object");
@@ -197,7 +197,7 @@ private:
 
 	static
 	std::string ConcatUrl(const std::string& a, const std::string& b, const char delim = '/') {
-		std::string result = a.empty() ? b : a;
+		auto result = a.empty() ? b : a;
 		if (!a.empty() && !b.empty()) {
 			if (result[result.length()-1] != delim)
 				result += delim;
