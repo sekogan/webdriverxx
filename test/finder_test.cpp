@@ -13,6 +13,11 @@ protected:
 		driver.SetTimeout(timeout::ElementFind, 0);
 	}
 
+	static void TearDownTestCase() {
+		WebDriver& driver = Environment::Instance().GetDriver();
+		driver.SetTimeout(timeout::ElementFind, 1000);
+	}
+
 	TestFinder() : driver(Environment::Instance().GetDriver()) {}
 
 	WebDriver driver;
