@@ -11,8 +11,7 @@ protected:
 
 	void StopNavigation() { // Workaround for Firefox unable to navigate right after Submit()
 		WaitForMatch([this] {
-			driver.Navigate(Environment::Instance().GetTestPageUrl("non_existing.html"));
-			return driver.GetUrl();
+			return driver.Navigate(Environment::Instance().GetTestPageUrl("non_existing.html")).GetUrl();
 		}, ::testing::HasSubstr("non_existing"));
 	}
 

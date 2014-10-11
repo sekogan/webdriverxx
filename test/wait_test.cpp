@@ -73,7 +73,7 @@ TEST(WaitUntil, CallsGetterOnce) {
 
 TEST(WaitUntil, ThrowsExceptionOnTimeout) {
 	Duration timeout = 0;
-	ASSERT_THROW(WaitUntil([]{ throw std::exception(); return true; }, timeout), WebDriverException);
+	ASSERT_THROW(WaitUntil([]() -> bool { throw std::exception(); }, timeout), WebDriverException);
 }
 
 TEST(WaitUntil, ThrowsExceptionOnTimeout2) {
