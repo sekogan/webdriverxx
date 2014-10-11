@@ -3,11 +3,11 @@
 
 #include "wait.h"
 
-#ifdef USE_GMOCK_MATCHERS
+#ifdef WEBDRIVERXX_ENABLE_GMOCK_MATCHERS
 #include <gmock/gmock-matchers.h>
 #include <type_traits>
 #include <sstream>
-#endif // USE_GMOCK_MATCHERS
+#endif // WEBDRIVERXX_ENABLE_GMOCK_MATCHERS
 
 namespace webdriverxx {
 namespace detail {
@@ -63,7 +63,7 @@ auto WaitForMatch(G getter, M matcher,
 		}, timeoutMs, intervalMs);
 }
 
-#ifdef USE_GMOCK_MATCHERS
+#ifdef WEBDRIVERXX_ENABLE_GMOCK_MATCHERS
 
 namespace detail {
 
@@ -95,7 +95,7 @@ struct MakeMatcherAdapter<T, M, typename std::enable_if<std::is_convertible<M,::
 	}
 };
 
-#endif // USE_GMOCK_MATCHERS
+#endif // WEBDRIVERXX_ENABLE_GMOCK_MATCHERS
 
 } // namespace webdriverxx
 

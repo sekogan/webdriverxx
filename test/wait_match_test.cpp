@@ -1,5 +1,3 @@
-#define USE_GMOCK_MATCHERS
-
 #include <webdriverxx/wait_match.h>
 #include <gtest/gtest.h>
 

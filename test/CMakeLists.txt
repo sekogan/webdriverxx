@@ -3,6 +3,7 @@ set(SOURCE_FILES
 	client_test.cpp
 	element_test.cpp
 	environment.h
+	examples_test.cpp
 	finder_test.cpp
 	frames_test.cpp
 	http_connection_test.cpp
@@ -18,6 +19,8 @@ set(SOURCE_FILES
 	)
 
 file(COPY pages DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+add_definitions(-DWEBDRIVERXX_ENABLE_GMOCK_MATCHERS)
 
 if (MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
