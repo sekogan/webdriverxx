@@ -10,23 +10,31 @@ TEST(ToString, ConvertsIntegralTypes) {
 }
 
 namespace custom {
-	struct A {};
 
-	struct B {};
-	std::ostream& operator << (std::ostream& s, const B&) {
-		return s << "B";
-	}
+struct A {};
 
-	struct C {};
-	std::string ToString(const C&) {
-		return "C";
-	}
+struct B {};
+std::ostream& operator << (std::ostream& s, const B&) {
+	return s << "B";
+}
+
+struct C {};
+std::string ToString(const C&) {
+	return "C";
+}
+
+struct G {};
+void PrintTo(const G&, std::ostream* s) {
+	*s << "G";
+}
+
 } // namespace custom
 
 TEST(ToString, ConvertsCustomTypes) {
 	ASSERT_EQ("<non-printable>", ToString(custom::A()));
 	ASSERT_EQ("B", ToString(custom::B()));
 	ASSERT_EQ("C", ToString(custom::C()));
+	ASSERT_EQ("G", ToString(custom::G()));
 }
 
 TEST(ToString, ConvertsStrings) {
@@ -64,6 +72,8 @@ TEST(ToString, ConvertsContainersOfCustomTypes) {
 	ASSERT_EQ("[B]", ToString(bs));
 	std::vector<custom::C> cs(1);
 	ASSERT_EQ("[C]", ToString(cs));
+	std::vector<custom::G> gs(1);
+	ASSERT_EQ("[G]", ToString(gs));
 }
 
 TEST(ToString, ConvertsContainersOfStrings) {

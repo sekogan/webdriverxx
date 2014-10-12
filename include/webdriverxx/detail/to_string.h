@@ -11,47 +11,31 @@ namespace detail {
 template<typename T>
 std::string ToString(const T& value);
 
-std::string ToString(char value) {
-	return std::string("'") + value + "'";
-}
-
-std::string ToString(const char* value) {
-	return std::string("\"") + value + '"';
-}
-
-std::string ToString(char* value) {
-	return ToString(static_cast<const char*>(value));
-}
-
-std::string ToString(const std::string& value) {
-	return ToString(value.c_str());
-}
-
 template<typename S, typename T>
-void PrintNonPrintableValue(S& s, const T& /*value*/) {
+void WriteNonStreamableValue(S& s, const T& /*value*/) {
 	s << "<non-printable>";
 }
 
 }}
 
-namespace webdriverxx_to_string_internal {
+namespace webdriverxx_to_string_streamable_filter {
 
 template<typename T>
 std::ostream& operator << (std::ostream& stream, const T& value) {
-	::webdriverxx::detail::PrintNonPrintableValue(stream, value);
+	::webdriverxx::detail::WriteNonStreamableValue(stream, value);
 	return stream;
 }
 
-} // namespace webdriverxx_to_string_internal
+} // namespace webdriverxx_to_string_streamable_filter
 
 namespace webdriverxx {
 namespace detail {
 
-struct ToStringPrintableFilter {
+struct ToStringStreamableFilter {
 	template<typename T>
 	static std::string Apply(const T& value) {
 		std::ostringstream s;
-		using namespace webdriverxx_to_string_internal;
+		using namespace webdriverxx_to_string_streamable_filter;
 		s << value;
 		return s.str();
 	}
@@ -114,13 +98,36 @@ private:
 };
 
 template<typename T>
-std::string ToString(const T& value) {
+void PrintTo(const T& value, ::std::ostream* stream) {
 	namespace detail = ::webdriverxx::detail;
-	return
+	*stream <<
 		detail::ToStringContainerFilter<
 		detail::ToStringSpecializationFilter<
-		detail::ToStringPrintableFilter
-		>>::Apply(value);
+		detail::ToStringStreamableFilter
+			>>::Apply(value);
+}
+
+void PrintTo(char value, ::std::ostream* stream) {
+	*stream << "'" << value << "'";
+}
+
+void PrintTo(const char* value, ::std::ostream* stream) {
+	*stream << '"' << value << '"';
+}
+
+void PrintTo(char* value, ::std::ostream* stream) {
+	PrintTo(static_cast<const char*>(value), stream);
+}
+
+void PrintTo(const std::string& value, ::std::ostream* stream) {
+	PrintTo(value.c_str(), stream);
+}
+
+template<typename T>
+std::string ToString(const T& value) {
+	std::ostringstream s;
+	PrintTo(value, &s);
+	return s.str();
 }
 
 } // namespace detail
