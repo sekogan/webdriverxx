@@ -83,3 +83,26 @@ TEST(WaitForMatch, ExplainsGMockMatcherMismatch) {
 		ASSERT_NE(npos, message.find("imeout"));
 	}
 }
+
+struct type1 {};
+struct type2 {};
+
+int foo(type1)
+{
+	return 1;
+}
+
+template<typename T>
+int bar() {
+	return foo(T());
+}
+
+TEST(WaitForMatch, ADL) {
+	ASSERT_EQ(1, bar<type1>());
+	ASSERT_EQ(2, bar<type2>());
+}
+
+int foo(type2)
+{
+	return 2;
+}
