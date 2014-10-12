@@ -53,8 +53,10 @@ TEST(WaitForValue, PassesErrorMessageFromGetter) {
 		WaitForValue([]{ throw std::runtime_error("abc"); }, timeout);
 		FAIL();
 	} catch (const WebDriverException& e) {
-		ASSERT_TRUE(std::string(e.what()).find("abc") != std::string::npos);
-		ASSERT_TRUE(std::string(e.what()).find("Timeout") != std::string::npos);
+		std::string message = e.what();
+		const auto npos = std::string::npos;
+		ASSERT_NE(npos, message.find("abc"));
+		ASSERT_NE(npos, message.find("imeout"));
 	}
 }
 

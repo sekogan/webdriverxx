@@ -2,6 +2,7 @@
 #define WEBDRIVERXX_WAIT_MATCH_H
 
 #include "wait.h"
+#include "detail/to_string.h"
 
 #ifdef WEBDRIVERXX_ENABLE_GMOCK_MATCHERS
 #include <gmock/gmock-matchers.h>
@@ -72,11 +73,23 @@ class GMockMatcherAdapter {
 public:
 	explicit GMockMatcherAdapter(::testing::Matcher<T> matcher) : matcher_(matcher) {}
 
-	bool Apply(T value) const {
+	bool Apply(const T& value) const {
 		return matcher_.Matches(value);
 	}
 
-	std::string DescribeMismatch(T value) const {
+	std::string DescribeMismatch(const T& value) const {
+		std::ostringstream s;
+		s << "Expected: ";
+		matcher_.DescribeTo(&s);
+		s << ", actual: " << ToString(value);
+		const auto mismatch_details = GetMismatchDetails(value);
+		if (!mismatch_details.empty())
+			 s << ", " << mismatch_details;
+		return s.str();
+	}
+
+private:
+	std::string GetMismatchDetails(const T& value) const {
 		std::ostringstream s;
 		matcher_.ExplainMatchResultTo(value, &s);
 		return s.str();

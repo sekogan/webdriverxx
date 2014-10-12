@@ -42,6 +42,18 @@ TEST(WaitForMatch, ThrowsExceptionOnTimeout) {
 	ASSERT_THROW(WaitForMatch([]{ return 0; }, [](int){ return false; }, timeout), WebDriverException);
 }
 
+TEST(WaitForMatch, ExplainsTimeout) {
+	try {
+		Duration timeout = 0;
+		WaitForMatch([]{ return 0; }, [](int){ return false; }, timeout);
+		FAIL();
+	} catch (const std::exception& e) {
+		std::string message = e.what();
+		const auto npos = std::string::npos;
+		ASSERT_NE(npos, message.find("imeout"));
+	}
+}
+
 TEST(WaitForMatch, CanUseGMockMatchers) {
 	using namespace ::testing;
 	ASSERT_EQ(123, WaitForMatch([]{ return 123; }, Eq(123)));
@@ -55,4 +67,19 @@ TEST(WaitForMatch, CanUseGMockMatchers) {
 	ASSERT_EQ(v, WaitForMatch([&v]{ return v; }, Not(Contains(456))));
 	Duration timeout = 0;
 	ASSERT_THROW(WaitForMatch([&v]{ return v; }, Not(Contains(123)), timeout), WebDriverException);
+}
+
+TEST(WaitForMatch, ExplainsGMockMatcherMismatch) {
+	try {
+		Duration timeout = 0;
+		using namespace ::testing;
+		WaitForMatch([]{ return 123; }, Eq(456), timeout);
+		FAIL();
+	} catch (const std::exception& e) {
+		std::string message = e.what();
+		const auto npos = std::string::npos;
+		ASSERT_NE(npos, message.find("123"));
+		ASSERT_NE(npos, message.find("456"));
+		ASSERT_NE(npos, message.find("imeout"));
+	}
 }

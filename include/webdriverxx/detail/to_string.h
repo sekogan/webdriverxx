@@ -9,9 +9,11 @@ namespace webdriverxx {
 namespace detail {
 
 template<typename T>
+inline
 std::string ToString(const T& value);
 
 template<typename S, typename T>
+inline
 void WriteNonStreamableValue(S& s, const T& /*value*/) {
 	s << "<non-printable>";
 }
@@ -21,6 +23,7 @@ void WriteNonStreamableValue(S& s, const T& /*value*/) {
 namespace webdriverxx_to_string_streamable_filter {
 
 template<typename T>
+inline
 std::ostream& operator << (std::ostream& stream, const T& value) {
 	::webdriverxx::detail::WriteNonStreamableValue(stream, value);
 	return stream;
@@ -42,6 +45,7 @@ struct ToStringStreamableFilter {
 };
 
 template<typename T>
+inline
 T& Declval(); // MSVC2010 does not support std::declval
 
 template<typename NextFilter>
@@ -98,6 +102,7 @@ private:
 };
 
 template<typename T>
+inline
 void PrintTo(const T& value, ::std::ostream* stream) {
 	namespace detail = ::webdriverxx::detail;
 	*stream <<
@@ -107,23 +112,28 @@ void PrintTo(const T& value, ::std::ostream* stream) {
 			>>::Apply(value);
 }
 
+inline
 void PrintTo(char value, ::std::ostream* stream) {
 	*stream << "'" << value << "'";
 }
 
+inline
 void PrintTo(const char* value, ::std::ostream* stream) {
 	*stream << '"' << value << '"';
 }
 
+inline
 void PrintTo(char* value, ::std::ostream* stream) {
 	PrintTo(static_cast<const char*>(value), stream);
 }
 
+inline
 void PrintTo(const std::string& value, ::std::ostream* stream) {
 	PrintTo(value.c_str(), stream);
 }
 
 template<typename T>
+inline
 std::string ToString(const T& value) {
 	std::ostringstream s;
 	PrintTo(value, &s);
