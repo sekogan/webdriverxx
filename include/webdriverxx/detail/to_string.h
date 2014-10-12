@@ -1,6 +1,7 @@
 #ifndef WEBDRIVERXX_TO_STRING_H
 #define WEBDRIVERXX_TO_STRING_H
 
+#include "meta.h"
 #include <string>
 #include <sstream>
 #include <type_traits>
@@ -44,10 +45,6 @@ struct ToStringStreamableFilter {
 	}
 };
 
-template<typename T>
-inline
-T& Declval(); // MSVC2010 does not support std::declval
-
 template<typename NextFilter>
 struct ToStringContainerFilter {
 	template<typename T>
@@ -57,7 +54,7 @@ struct ToStringContainerFilter {
 
 private:
 	template<typename T>
-	static std::string Impl(const T& value, decltype(&*std::begin(Declval<T>()))) {
+	static std::string Impl(const T& value, decltype(&*std::begin(ValueRef<T>()))) {
 		auto it = std::begin(value);
 		const auto end = std::end(value);
 		int limit = 20;

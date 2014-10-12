@@ -3,6 +3,7 @@
 
 #include "wait.h"
 #include "detail/to_string.h"
+#include "detail/meta.h"
 
 #ifdef WEBDRIVERXX_ENABLE_GMOCK_MATCHERS
 #include <gmock/gmock-matchers.h>
@@ -43,7 +44,7 @@ namespace detail {
 
 template <class T, class M>
 inline
-auto CallMakeMatcherAdapter(M matcher) -> decltype(MakeMatcherAdapter<T,M>::Apply(*static_cast<M*>(nullptr))) {
+auto CallMakeMatcherAdapter(M matcher) -> decltype(MakeMatcherAdapter<T,M>::Apply(ValueRef<M>())) {
 	return MakeMatcherAdapter<T,M>::Apply(matcher);
 }
 
