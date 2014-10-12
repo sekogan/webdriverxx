@@ -69,18 +69,7 @@ TEST_F(TestJsExecutor, CanPassArray) {
 	ASSERT_EQ("444", driver.GetTitle());
 }
 
-namespace webdriverxx {
-
-template<typename T>
-struct ToJsonImpl< std::list<T> > {
-	static picojson::value Convert(const std::list<T>& value) {
-		return ToJsonArray<T>(value);
-	}
-};
-
-} // namespace webdriverxx
-
-TEST_F(TestJsExecutor, CanPassCustomArray) {
+TEST_F(TestJsExecutor, CanPassOtherContainers) {
 	std::list<int> numbers;
 	numbers.push_back(123);
 	numbers.push_back(321);
@@ -94,19 +83,12 @@ struct CustomObject {
 	int number;
 };
 
-namespace webdriverxx {
-
-template<>
-struct ToJsonImpl<CustomObject> {
-	static picojson::value Convert(const CustomObject& value) {
-		return JsonObject()
-			.With("string", value.string)
-			.With("number", value.number)
-			.Build();
-	}
-};
-
-} // namespace webdriverxx
+picojson::value ToJson(const CustomObject& value) {
+return JsonObject()
+	.With("string", value.string)
+	.With("number", value.number)
+	.Build();
+}
 
 TEST_F(TestJsExecutor, CanPassCustomObject) {
 	CustomObject o = { "abc", 123 };

@@ -4,12 +4,10 @@
 
 namespace webdriverxx {
 
-template<>
-struct ToJsonImpl<Element> {
-	static picojson::value Convert(const Element& element) {
-		return element.ToJson();
-	}
-};
+inline
+picojson::value ToJson(const Element& element) {
+	return element.ToJson();
+}
 
 inline
 Element::Element(
@@ -129,7 +127,7 @@ bool Element::operator == (const Element& other) const {
 inline
 picojson::value Element::ToJson() const {
 	detail::ElementRef ref = { ref_ };
-	return ::webdriverxx::ToJson(ref);
+	return detail::ToJson(ref);
 }
 
 inline

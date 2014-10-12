@@ -3,62 +3,91 @@
 
 #include "types.h"
 #include "detail/error_handling.h"
+#include "detail/meta.h"
 #include <picojson.h>
 #include <algorithm>
+#include <iterator>
 
 namespace webdriverxx {
 
 template<typename T>
-struct ToJsonImpl {
-	static picojson::value Convert(const T& value) {
+picojson::value ToJson(const T& value);
+
+inline
+picojson::value ToJson(const char* value) {
+	return picojson::value(value);
+}
+
+inline
+picojson::value ToJson(char* value) {
+	return ToJson(static_cast<const char*>(value));
+}
+
+inline
+picojson::value ToJson(const std::string& value) {
+	return ToJson(value.c_str());
+}
+
+inline
+picojson::value ToJson(const picojson::value& value) {
+	return value;
+}
+
+inline
+picojson::value ToJson(const picojson::object& value) {
+	return picojson::value(value);
+}
+
+inline
+picojson::value ToJson(int value) {
+	return picojson::value(static_cast<double>(value));
+}
+
+namespace detail2 { // Should be different from detail to prevent detail::ToJson overloads from hiding webdriverxx::ToJson
+
+struct ToJsonDefaultFilter {
+	template<typename T>
+	static picojson::value Apply(const T& value) {
 		return picojson::value(value);
 	}
 };
 
-// Do not specialize or overload ToJson(). Add specializations
-// for ToJsonImpl instead.
+template<typename NextFilter>
+struct ToJsonContainerFilter {
+	template<typename T>
+	static picojson::value Apply(const T& value) {
+		return Impl(value, 0);
+	}
+
+private:
+	template<typename T>
+	static picojson::value Impl(const T& value, decltype(&*std::begin(detail::ValueRef<T>()))) {
+		typedef typename std::iterator_traits<decltype(std::begin(value))>::value_type Item;
+		picojson::value result = picojson::value(picojson::array());
+		picojson::array& dst = result.get<picojson::array>();
+		std::transform(std::begin(value), std::end(value), std::back_inserter(dst), [](const Item& item) {
+			return ToJson(item);
+		});
+		return result;
+	}
+
+	template<typename T>
+	static picojson::value Impl(const T& value, ...) {
+		return NextFilter::Apply(value);
+	}
+};
+
+} // detail2
+
 template<typename T>
 inline
 picojson::value ToJson(const T& value) {
-	return ToJsonImpl<T>::Convert(value);
+	namespace detail = ::webdriverxx::detail2;
+	return
+		detail::ToJsonContainerFilter<
+		detail::ToJsonDefaultFilter
+		>::Apply(value);
 }
-
-template<typename Item, class Iterable>
-inline
-picojson::value ToJsonArray(const Iterable& src) {
-	picojson::value result = picojson::value(picojson::array());
-	picojson::array& dst = result.get<picojson::array>();
-	std::transform(src.begin(), src.end(), std::back_inserter(dst), ToJson<Item>);
-	return result;
-}
-
-template<typename T>
-struct ToJsonImpl< std::vector<T> > {
-	static picojson::value Convert(const std::vector<T>& value) {
-		return ToJsonArray<T>(value);
-	}
-};
-
-template<>
-struct ToJsonImpl<picojson::value> {
-	static picojson::value Convert(const picojson::value& value) {
-		return value;
-	}
-};
-
-template<>
-struct ToJsonImpl<int> {
-	static picojson::value Convert(int value) {
-		return picojson::value(static_cast<double>(value));
-	}
-};
-
-template<>
-struct ToJsonImpl<unsigned> {
-	static picojson::value Convert(unsigned value) {
-		return picojson::value(static_cast<double>(value));
-	}
-};
 
 class JsonObject { // copyable
 public:
@@ -152,15 +181,13 @@ void OptionalFromJson(const picojson::value& json, T& value) {
 
 ///////////////////////////////////////////////////////////////////
 
-template<>
-struct ToJsonImpl<Size> {
-	static picojson::value Convert(const Size& size) {
-		return JsonObject()
-			.With("width", size.width)
-			.With("height", size.height)
-			.Build();
-	}
-};
+inline
+picojson::value ToJson(const Size& size) {
+	return JsonObject()
+		.With("width", size.width)
+		.With("height", size.height)
+		.Build();
+}
 
 template<>
 struct FromJsonImpl<Size> {
@@ -173,15 +200,13 @@ struct FromJsonImpl<Size> {
 	}
 };
 
-template<>
-struct ToJsonImpl<Point> {
-	static picojson::value Convert(const Point& position) {
-		return JsonObject()
-			.With("x", position.x)
-			.With("y", position.y)
-			.Build();
-	}
-};
+inline
+picojson::value ToJson(const Point& position) {
+	return JsonObject()
+		.With("x", position.x)
+		.With("y", position.y)
+		.Build();
+}
 
 template<>
 struct FromJsonImpl<Point> {
@@ -194,20 +219,18 @@ struct FromJsonImpl<Point> {
 	}
 };
 
-template<>
-struct ToJsonImpl<Cookie> {
-	static picojson::value Convert(const Cookie& cookie) {
-		JsonObject result;
-		result.With("name", cookie.name);
-		result.With("value", cookie.value);
-		if (!cookie.path.empty()) result.With("path", cookie.path);
-		if (!cookie.domain.empty()) result.With("domain", cookie.domain);
-		if (cookie.secure) result.With("secure", true);
-		if (cookie.http_only) result.With("httpOnly", true);
-		if (cookie.expiry != Cookie::NoExpiry) result.With("expiry", cookie.expiry);
-		return result.Build();
-	}
-};
+inline
+picojson::value ToJson(const Cookie& cookie) {
+	JsonObject result;
+	result.With("name", cookie.name);
+	result.With("value", cookie.value);
+	if (!cookie.path.empty()) result.With("path", cookie.path);
+	if (!cookie.domain.empty()) result.With("domain", cookie.domain);
+	if (cookie.secure) result.With("secure", true);
+	if (cookie.http_only) result.With("httpOnly", true);
+	if (cookie.expiry != Cookie::NoExpiry) result.With("expiry", cookie.expiry);
+	return result.Build();
+}
 
 template<>
 struct FromJsonImpl<Cookie> {

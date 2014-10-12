@@ -30,6 +30,13 @@ struct ElementRef {
 	std::string ref;
 };
 
+inline
+picojson::value ToJson(const ElementRef& ref) {
+	return JsonObject()
+		.With("ELEMENT", ref.ref)
+		.Build();
+}
+
 } // namespace detail
 
 template<>
@@ -51,15 +58,6 @@ struct FromJsonImpl<detail::ElementRef> {
 		detail::ElementRef result;
 		result.ref = FromJson<std::string>(value.get("ELEMENT"));
 		return result;
-	}
-};
-
-template<>
-struct ToJsonImpl<detail::ElementRef> {
-	static picojson::value Convert(const detail::ElementRef& ref) {
-		return JsonObject()
-			.With("ELEMENT", ref.ref)
-			.Build();
 	}
 };
 
