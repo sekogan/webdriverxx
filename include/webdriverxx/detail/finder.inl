@@ -33,8 +33,8 @@ Element Finder::FindElement(const By& by) const {
 inline
 std::vector<Element> Finder::FindElements(const By& by) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	const std::vector<detail::ElementRef> ids =
-		FromJsonArray<detail::ElementRef>(
+	const auto ids =
+		FromJson<std::vector<detail::ElementRef>>(
 			context_->Post("elements", JsonObject()
 				.With("using", by.GetStrategy())
 				.With("value", by.GetValue())

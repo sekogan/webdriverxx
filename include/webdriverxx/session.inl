@@ -197,8 +197,8 @@ const Session& Session::InternalSetFocusToFrame(const picojson::value& id) const
 inline
 std::vector<Window> Session::GetWindows() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	const std::vector<std::string> handles =
-		FromJsonArray<std::string>(
+	const auto handles =
+		FromJson<std::vector<std::string>>(
 			resource_->Get("window_handles")
 			);
 	std::vector<Window> result;

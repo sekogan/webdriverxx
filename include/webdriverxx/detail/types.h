@@ -40,26 +40,24 @@ picojson::value ToJson(const ElementRef& ref) {
 } // namespace detail
 
 template<>
-struct FromJsonImpl<detail::SessionRef> {
-	static detail::SessionRef Convert(const picojson::value& value) {
-		WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Session information is not an object");
-		detail::SessionRef result;
-		result.id = value.get("sessionId").to_str();
-		if (value.get("capabilities").is<picojson::object>())
-			result.capabilities = detail::CapabilitiesAccess::Construct(value.get("capabilities").get<picojson::object>());
-		return result;
-	}
-};
+inline
+detail::ElementRef FromJson<detail::ElementRef>(const picojson::value& value) {
+	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "ElementRef is not an object");
+	detail::ElementRef result;
+	result.ref = FromJson<std::string>(value.get("ELEMENT"));
+	return result;
+}
 
 template<>
-struct FromJsonImpl<detail::ElementRef> {
-	static detail::ElementRef Convert(const picojson::value& value) {
-		WEBDRIVERXX_CHECK(value.is<picojson::object>(), "ElementRef is not an object");
-		detail::ElementRef result;
-		result.ref = FromJson<std::string>(value.get("ELEMENT"));
-		return result;
-	}
-};
+inline
+detail::SessionRef FromJson<detail::SessionRef>(const picojson::value& value) {
+	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Session information is not an object");
+	detail::SessionRef result;
+	result.id = value.get("sessionId").to_str();
+	if (value.get("capabilities").is<picojson::object>())
+		result.capabilities = detail::CapabilitiesAccess::Construct(value.get("capabilities").get<picojson::object>());
+	return result;
+}
 
 } // namespace webdriverxx
 

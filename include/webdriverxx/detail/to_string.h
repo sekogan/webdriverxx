@@ -72,7 +72,7 @@ private:
 
 	template<typename T>
 	static std::string Impl(const T& value, ...) {
-		return NextFilter::Apply(value);
+		return NextFilter::template Apply(value);
 	}
 };
 
@@ -87,7 +87,7 @@ private:
 	template<typename T>
 	struct Impl {
 		static std::string Apply(const T& value) {
-			return NextFilter::Apply(value);
+			return NextFilter::template Apply(value);
 		}
 	};
 
@@ -107,7 +107,7 @@ void PrintTo(const T& value, ::std::ostream* stream) {
 		detail::ToStringContainerFilter<
 		detail::ToStringSpecializationFilter<
 		detail::ToStringStreamableFilter
-			>>::Apply(value);
+			>>::template Apply(value);
 }
 
 inline

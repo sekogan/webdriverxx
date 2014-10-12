@@ -121,15 +121,13 @@ TEST_F(TestJsExecutor, EvalsElement) {
 namespace webdriverxx {
 
 template<>
-struct FromJsonImpl<CustomObject> {
-	static CustomObject Convert(const picojson::value& value) {
-		WEBDRIVERXX_CHECK(value.is<picojson::object>(), "CustomObject is not an object");
-		CustomObject result;
-		result.string = FromJson<std::string>(value.get("string"));
-		result.number = FromJson<int>(value.get("number"));
-		return result;
-	}
-};
+CustomObject FromJson<CustomObject>(const picojson::value& value) {
+	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "CustomObject is not an object");
+	CustomObject result;
+	result.string = FromJson<std::string>(value.get("string"));
+	result.number = FromJson<int>(value.get("number"));
+	return result;
+}
 
 } // namespace webdriverxx
 

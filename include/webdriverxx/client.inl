@@ -26,8 +26,8 @@ picojson::object Client::GetStatus() const {
 inline
 std::vector<Session> Client::GetSessions() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	const std::vector<detail::SessionRef> sessions =
-		FromJsonArray<detail::SessionRef>(
+	const auto sessions =
+		FromJson<std::vector<detail::SessionRef>>(
 			resource_->Get("sessions").get("value")
 			);
 	std::vector<Session> result;
