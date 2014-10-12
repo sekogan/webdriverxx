@@ -4,10 +4,10 @@
 #include "wait.h"
 #include "detail/to_string.h"
 #include "detail/meta.h"
+#include <type_traits>
 
 #ifdef WEBDRIVERXX_ENABLE_GMOCK_MATCHERS
 #include <gmock/gmock-matchers.h>
-#include <type_traits>
 #include <sstream>
 #endif // WEBDRIVERXX_ENABLE_GMOCK_MATCHERS
 
@@ -17,10 +17,10 @@ namespace detail {
 template<typename T, typename P>
 class PredicateMatcherAdapter {
 public:
-	explicit PredicateMatcherAdapter(P predicate) : predicate_(predicate) {}
+	explicit PredicateMatcherAdapter(P& predicate) : predicate_(&predicate) {}
 
 	bool Apply(const T& value) const {
-		return predicate_(value);
+		return (*predicate_)(value);
 	}
 
 	std::string DescribeMismatch(const T& value) const {
@@ -28,35 +28,37 @@ public:
 	}
 
 private:
-	P predicate_;
+	P* predicate_;
 };
 
 } // detail
 
-template<class T, class M, class Enable = void>
-struct MakeMatcherAdapter {
-	static detail::PredicateMatcherAdapter<T,M> Apply(M predicate) {
-		return detail::PredicateMatcherAdapter<T,M>(predicate);
-	}
-};
+template<typename T>
+void MakeMatcherAdapter(...);
 
 namespace detail {
 
-template <class T, class M>
+template<typename T, typename M>
 inline
-auto CallMakeMatcherAdapter(M matcher) -> decltype(MakeMatcherAdapter<T,M>::Apply(ValueRef<M>())) {
-	return MakeMatcherAdapter<T,M>::Apply(matcher);
+PredicateMatcherAdapter<T,M> SelectMakeMatcherAdapter(M& matcher, std::true_type /*no_custom_adapters*/) {
+	return PredicateMatcherAdapter<T,M>(matcher);
+}
+
+template<typename T, typename M>
+inline
+auto SelectMakeMatcherAdapter(const M& matcher, std::false_type /*no_custom_adapters*/) -> decltype(MakeMatcherAdapter<T>(matcher)) {
+	return MakeMatcherAdapter<T>(matcher);
 }
 
 } // detail
 
 template<typename G, typename M>
 inline
-auto WaitForMatch(G getter, M matcher,
+auto WaitForMatch(const G& getter, const M& matcher,
 	Duration timeoutMs = 5000, Duration intervalMs = 50
 	) -> decltype(getter()) {
 	typedef decltype(getter()) T;
-	auto adapter = detail::CallMakeMatcherAdapter<T>(matcher);
+	const auto& adapter = detail::SelectMakeMatcherAdapter<T>(matcher, typename std::is_same<void,decltype(MakeMatcherAdapter<T>(matcher))>::type());
 	return WaitForValue([&getter, &adapter]() -> T {
 			const auto value = getter();
 			if (!adapter.Apply(value))
@@ -103,10 +105,10 @@ private:
 } // detail
 
 template<class T, class M>
-struct MakeMatcherAdapter<T, M, typename std::enable_if<std::is_convertible<M,::testing::Matcher<T>>::value>::type> {
-	static detail::GMockMatcherAdapter<T,M> Apply(M matcher) {
-		return detail::GMockMatcherAdapter<T,M>(matcher);
-	}
+inline
+typename std::enable_if<std::is_convertible<M,::testing::Matcher<T>>::value, detail::GMockMatcherAdapter<T,M>>::type
+	MakeMatcherAdapter(const M& matcher) {
+	return detail::GMockMatcherAdapter<T,M>(matcher);
 };
 
 #endif // WEBDRIVERXX_ENABLE_GMOCK_MATCHERS

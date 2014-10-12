@@ -19,7 +19,8 @@ void WriteNonStreamableValue(S& s, const T& /*value*/) {
 	s << "<non-printable>";
 }
 
-}}
+} // detail
+} // webdriverxx
 
 namespace webdriverxx_to_string_streamable_filter {
 
