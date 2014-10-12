@@ -7,8 +7,54 @@
 #include <type_traits>
 
 #ifdef WEBDRIVERXX_ENABLE_GMOCK_MATCHERS
+
 #include <gmock/gmock-matchers.h>
 #include <sstream>
+
+namespace webdriverxx {
+namespace detail {
+
+template<typename T, typename M>
+class GMockMatcherAdapter {
+public:
+	explicit GMockMatcherAdapter(::testing::Matcher<T> matcher) : matcher_(matcher) {}
+
+	bool Apply(const T& value) const {
+		return matcher_.Matches(value);
+	}
+
+	std::string DescribeMismatch(const T& value) const {
+		std::ostringstream s;
+		s << "Expected: ";
+		matcher_.DescribeTo(&s);
+		s << ", actual: " << ToString(value);
+		const auto mismatch_details = GetMismatchDetails(value);
+		if (!mismatch_details.empty())
+			 s << ", " << mismatch_details;
+		return s.str();
+	}
+
+private:
+	std::string GetMismatchDetails(const T& value) const {
+		std::ostringstream s;
+		matcher_.ExplainMatchResultTo(value, &s);
+		return s.str();
+	}
+
+private:
+	::testing::Matcher<T> matcher_;
+};
+
+} // detail
+
+template<class T, class M>
+inline
+detail::GMockMatcherAdapter<T,M> MakeMatcherAdapter(const M& matcher, typename std::enable_if<std::is_convertible<M,::testing::Matcher<T>>::value>::type* = 0) {
+	return detail::GMockMatcherAdapter<T,M>(matcher);
+};
+
+} // namespace webdriverxx
+
 #endif // WEBDRIVERXX_ENABLE_GMOCK_MATCHERS
 
 namespace webdriverxx {
@@ -66,52 +112,6 @@ auto WaitForMatch(const G& getter, const M& matcher,
 			return value;
 		}, timeoutMs, intervalMs);
 }
-
-#ifdef WEBDRIVERXX_ENABLE_GMOCK_MATCHERS
-
-namespace detail {
-
-template<typename T, typename M>
-class GMockMatcherAdapter {
-public:
-	explicit GMockMatcherAdapter(::testing::Matcher<T> matcher) : matcher_(matcher) {}
-
-	bool Apply(const T& value) const {
-		return matcher_.Matches(value);
-	}
-
-	std::string DescribeMismatch(const T& value) const {
-		std::ostringstream s;
-		s << "Expected: ";
-		matcher_.DescribeTo(&s);
-		s << ", actual: " << ToString(value);
-		const auto mismatch_details = GetMismatchDetails(value);
-		if (!mismatch_details.empty())
-			 s << ", " << mismatch_details;
-		return s.str();
-	}
-
-private:
-	std::string GetMismatchDetails(const T& value) const {
-		std::ostringstream s;
-		matcher_.ExplainMatchResultTo(value, &s);
-		return s.str();
-	}
-
-private:
-	::testing::Matcher<T> matcher_;
-};
-
-} // detail
-
-template<class T, class M>
-inline
-typename std::enable_if<std::is_convertible<M,::testing::Matcher<T>>::value, detail::GMockMatcherAdapter<T,M>>::type
-	MakeMatcherAdapter(const M& matcher) {
-	return detail::GMockMatcherAdapter<T,M>(matcher);
-};
-
-#endif // WEBDRIVERXX_ENABLE_GMOCK_MATCHERS
 
 } // namespace webdriverxx
 
