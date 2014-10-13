@@ -35,7 +35,7 @@ Explanation of implicit/explicit waits can be found [here](http://selenium-pytho
 
 ```cpp
 driver.SetImplicitTimeoutMs(5000);
-Element element = driver.FindElement(ByName("akela")); // Should poll DOM for 5 seconds before throwing exception
+Element element = driver.FindElement(ByName("akela")); // Should poll DOM for 5 seconds before throwing an exception
 ```
 
 ### Wait explicitly for asynchronous operations
@@ -62,8 +62,8 @@ WaitUntil(element_is_selected);
 #define WEBDRIVERXX_ENABLE_GMOCK_MATCHERS
 #include <webdriverxx/wait_match.h> // or <webdriverxx.h>
 
-driver.Navigate("http://initial_url.host.net")
-auto get_url = [&]{ return driver.GetUrl(); }
+driver.Navigate("http://initial_url.host.net");
+auto get_url = [&]{ return driver.GetUrl(); };
 using namespace ::testing;
 WaitForMatch(get_url, HasSubstr("some_substring_of_an_url_after_redirects"));
 ```
@@ -72,7 +72,7 @@ WaitForMatch(get_url, HasSubstr("some_substring_of_an_url_after_redirects"));
 
 ### All platforms
 
-Prerequisites:
+Prerequisites for building and running tests:
 - [CMake](http://www.cmake.org/)
 - [PhantomJS](http://phantomjs.org/)
 - [node.js](http://nodejs.org/)
