@@ -89,7 +89,12 @@ selenium-server -p 4444 &
 
 ### Unicode
 
-All interfaces use UTF-8 strings through std::string or char*.
+The library is designed to be encoding-agnostic. It doesn't make
+any assumptions about encodings. All strings are transferred
+as is, without modifications.
+
+The WebDriver protocol is based on UTF-8 encoding,
+so all strings passed to the library should be encoded using UTF-8.
 
 ### Thread safety
 
