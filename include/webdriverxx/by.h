@@ -25,7 +25,7 @@ private:
 	std::string value_;
 };
 
-inline By ByClassName(const std::string& value) {
+inline By ByClass(const std::string& value) {
 	return By("class name", value);
 }
 
@@ -49,7 +49,7 @@ inline By ByPartialLinkText(const std::string& value) {
 	return By("partial link text", value);
 }
 
-inline By ByTagName(const std::string& value) {
+inline By ByTag(const std::string& value) {
 	return By("tag name", value);
 }
 

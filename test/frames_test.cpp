@@ -35,7 +35,7 @@ TEST_F(TestFrames, CanSwitchToFrameByName) {
 }
 
 TEST_F(TestFrames, CanSwitchToFrameByElement) {
-	std::vector<Element> frames = driver.FindElements(ByTagName("iframe"));
+	std::vector<Element> frames = driver.FindElements(ByTag("iframe"));
 	ASSERT_EQ(2u, frames.size());
 	driver.SetFocusToFrame(frames[1]);
 	ASSERT_EQ("frame3", driver.FindElement(ById("tag")).GetAttribute("value"));

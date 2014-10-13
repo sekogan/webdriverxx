@@ -54,7 +54,7 @@ TEST(WebDriver, AndSatelliteObjectsHasNoLifetimeIssues) {
 	WebDriver& driver = Environment::Instance().GetDriver();
 	driver.Navigate(Environment::Instance().GetTestPageUrl("webdriver.html"));
 
-	Element body = driver.FindElement(ByTagName("body"));
+	Element body = driver.FindElement(ByTag("body"));
 	{
 		Window window = driver.GetCurrentWindow();
 		{
@@ -66,14 +66,14 @@ TEST(WebDriver, AndSatelliteObjectsHasNoLifetimeIssues) {
 					Environment::Instance().GetFreshDriver(); // Destroy global instance
 					ASSERT_NO_THROW(local_driver.GetSessions());
 					ASSERT_NO_THROW(local_driver.GetWindows());
-					ASSERT_NO_THROW(local_driver.FindElement(ByTagName("input")));
+					ASSERT_NO_THROW(local_driver.FindElement(ByTag("input")));
 				}
 				ASSERT_NO_THROW(client.GetSessions());
 			}
 			ASSERT_NO_THROW(session.GetWindows());
-			ASSERT_NO_THROW(session.FindElement(ByTagName("input")));
+			ASSERT_NO_THROW(session.FindElement(ByTag("input")));
 		}
 		ASSERT_NO_THROW(window.GetSize());
 	}
-	ASSERT_NO_THROW(body.FindElement(ByTagName("input")));
+	ASSERT_NO_THROW(body.FindElement(ByTag("input")));
 }

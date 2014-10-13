@@ -32,7 +32,7 @@ TEST_F(TestFinder, ThrowsIfElementNotFound) {
 }
 
 TEST_F(TestFinder, CanFindMoreThanOneElement) {
-	ASSERT_TRUE(0u < driver.FindElements(ByTagName("div")).size());
+	ASSERT_TRUE(0u < driver.FindElements(ByTag("div")).size());
 }
 
 TEST_F(TestFinder, ReturnsZeroIfElementsNotFound) {
@@ -45,8 +45,8 @@ TEST_F(TestFinder, FindsElementById) {
 }
 
 TEST_F(TestFinder, FindsElementByClassName) {
-	driver.FindElement(ByClassName("test_class"));
-	ASSERT_EQ(0u, driver.FindElements(ByClassName("non_existing")).size());
+	driver.FindElement(ByClass("test_class"));
+	ASSERT_EQ(0u, driver.FindElements(ByClass("non_existing")).size());
 }
 
 TEST_F(TestFinder, FindsElementByCssSelector) {
@@ -70,8 +70,8 @@ TEST_F(TestFinder, FindsElementByPartialLinkText) {
 }
 
 TEST_F(TestFinder, FindsElementByTagName) {
-	driver.FindElement(ByTagName("body"));
-	ASSERT_EQ(0u, driver.FindElements(ByTagName("non_existing")).size());
+	driver.FindElement(ByTag("body"));
+	ASSERT_EQ(0u, driver.FindElements(ByTag("non_existing")).size());
 }
 
 TEST_F(TestFinder, FindsElementByXPath) {
@@ -97,5 +97,5 @@ TEST_F(TestFinder, OfElementDoesNotFindNonExistingInnerElements) {
 }
 
 TEST_F(TestFinder, OfElementFindsMoreThanOneInnerElement) {
-	ASSERT_EQ(2u, driver.FindElement(ById("outer")).FindElements(ByTagName("div")).size());
+	ASSERT_EQ(2u, driver.FindElement(ById("outer")).FindElements(ByTag("div")).size());
 }

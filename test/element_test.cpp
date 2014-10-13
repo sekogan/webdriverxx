@@ -18,7 +18,7 @@ protected:
 };
 
 TEST_F(TestElement, CanBeClicked) {
-	driver.FindElement(ByTagName("input")).Click();
+	driver.FindElement(ByTag("input")).Click();
 }
 
 // TODO: Submit
@@ -28,7 +28,7 @@ TEST_F(TestElement, GetsText) {
 }
 
 TEST_F(TestElement, CanBeCleared) {
-	Element e = driver.FindElement(ByTagName("input"));
+	Element e = driver.FindElement(ByTag("input"));
 	e.SendKeys("abc");
 	ASSERT_NE("", e.GetAttribute("value"));
 	e.Clear();
@@ -36,7 +36,7 @@ TEST_F(TestElement, CanBeCleared) {
 }
 
 TEST_F(TestElement, GetsTagName) {
-	ASSERT_EQ("div", driver.FindElement(ByTagName("div")).GetTagName());
+	ASSERT_EQ("div", driver.FindElement(ByTag("div")).GetTagName());
 }
 
 // TODO: IsEnabled

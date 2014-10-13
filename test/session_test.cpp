@@ -118,11 +118,11 @@ TEST_F(TestSession, GoesForward) {
 
 TEST_F(TestSession, DoesRefresh) {
 	const std::string page = Environment::Instance().GetTestPageUrl("navigation1.html");
-	driver.Navigate(page).FindElement(ByTagName("input")).Click().SendKeys("abc");
-	ASSERT_EQ("abc", driver.FindElement(ByTagName("input")).GetAttribute("value"));
+	driver.Navigate(page).FindElement(ByTag("input")).Click().SendKeys("abc");
+	ASSERT_EQ("abc", driver.FindElement(ByTag("input")).GetAttribute("value"));
 	driver.Refresh();
 	ASSERT_EQ(page, driver.GetUrl());
-	ASSERT_EQ("", driver.FindElement(ByTagName("input")).GetAttribute("value"));
+	ASSERT_EQ("", driver.FindElement(ByTag("input")).GetAttribute("value"));
 }
 
 TEST_F(TestSession, GetsPageSource) {
@@ -158,7 +158,7 @@ TEST_F(TestSession, SetsImplicitTimeout) {
 
 TEST_F(TestSession, GetsActiveElement) {
 	driver.Navigate(Environment::Instance().GetTestPageUrl("session.html"));
-	Element e = driver.FindElement(ByTagName("input"));
+	Element e = driver.FindElement(ByTag("input"));
 	e.Click();
 	ASSERT_EQ(e, driver.GetActiveElement());
 }

@@ -29,6 +29,43 @@ firefox
 
 ## More examples
 
+### Navigate browser
+
+```cpp
+driver
+	.Navigate("http://facebook.com")
+	.Navigate("http://twitter.com")
+	.Back()
+	.Forward()
+	.Refresh();
+```
+
+### Find elements
+
+```cpp
+Element list = driver.FindElement(ById("list")); // Throws exception if no such element
+std::vector<Element> items = list.FindElements(ByClass("item")); // Does not throw
+if (!items.empty())
+	items[0].FindElement(ByTag("input")).Click(); // Elements are also searchable
+```
+
+### Send keyboard input
+
+Both simple text input and shortcuts can be sent to an element or to the active window.
+
+```cpp
+driver.FindElement(ByTag("input")).SendKeys("Hello, world!");
+driver.SendKeys(Shortcut() << keys::Control << "t"); // Opens a new tab on Windows or Linux
+```
+
+### Execute Javascript
+
+TODO
+
+### Get something from Javascript
+
+TODO
+
 ### Wait implicitly for asynchronous operations
 
 Explanation of implicit/explicit waits can be found [here](http://selenium-python.readthedocs.org/en/latest/waits.html).
@@ -45,14 +82,16 @@ Explanation of implicit/explicit waits can be found [here](http://selenium-pytho
 ```cpp
 #include <webdriverxx/wait.h> // or <webdriverxx.h>
 
-auto find_element = [&]{ return driver.FindElement(ById("asynchronously_loaded_element")); };
+auto find_element = [&]{ return driver.FindElement(ById("async_element")); };
 Element element = WaitForValue(find_element);
 ```
 
 ```cpp
 #include <webdriverxx/wait.h> // or <webdriverxx.h>
 
-auto element_is_selected = [&]{ return driver.FindElement(ById("asynchronously_loaded_element")).IsSelected(); };
+auto element_is_selected = [&]{
+	return driver.FindElement(ById("asynchronously_loaded_element")).IsSelected();
+	};
 WaitUntil(element_is_selected);
 ```
 
@@ -63,9 +102,9 @@ WaitUntil(element_is_selected);
 #include <webdriverxx/wait_match.h> // or <webdriverxx.h>
 
 driver.Navigate("http://initial_url.host.net");
-auto get_url = [&]{ return driver.GetUrl(); };
+auto url = [&]{ return driver.GetUrl(); };
 using namespace ::testing;
-WaitForMatch(get_url, HasSubstr("some_substring_of_an_url_after_redirects"));
+WaitForMatch(url, HasSubstr("some_substring_of_an_url_after_redirects"));
 ```
 
 ## How to build and run tests

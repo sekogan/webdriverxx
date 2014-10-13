@@ -53,7 +53,7 @@ TEST_F(TestJsExecutor, CanPassMoreThanOneArgument) {
 }
 
 TEST_F(TestJsExecutor, CanPassElement) {
-	Element e = driver.FindElement(ByTagName("input")).Clear();
+	Element e = driver.FindElement(ByTag("input")).Clear();
 	ASSERT_EQ("", e.GetAttribute("value"));
 	driver.Execute("arguments[0].value = arguments[1]",
 		JsArgs() << e << "abc");
@@ -124,7 +124,7 @@ TEST_F(TestJsExecutor, EvalsBoolean) {
 }
 
 TEST_F(TestJsExecutor, EvalsElement) {
-	Element e = driver.FindElement(ByTagName("input"));
+	Element e = driver.FindElement(ByTag("input"));
 	ASSERT_EQ(e, driver.EvalElement("return document.getElementsByTagName('input')[0]"));
 }
 
@@ -186,7 +186,7 @@ TEST_F(TestJsExecutor, ReturnsValueFromAsyncScript) {
 
 TEST_F(TestJsExecutor, ReturnsElementFromAsyncScript) {
 	if (driver.GetCapabilities().GetBrowserName() == browser::Phantom) return; // Crashes PhantomJS 1.9.7
-	Element e = driver.FindElement(ByTagName("input"));
+	Element e = driver.FindElement(ByTag("input"));
 	ASSERT_EQ(e, driver.EvalElementAsync(AsyncScript(
 		"return document.getElementsByTagName('input')[0]")));
 }

@@ -12,7 +12,7 @@ class TestExamples : public ::testing::Test {
 protected:
 	TestExamples() : driver(Environment::Instance().GetDriver()) {}
 
-	void StopNavigation() { // Workaround for Firefox unable to navigate right after Submit()
+	void StopNavigation() {
 		WaitForMatch([this] {
 			return driver.Navigate(Environment::Instance().GetTestPageUrl("non_existing.html")).GetUrl();
 		}, ::testing::HasSubstr("non_existing"));
@@ -28,7 +28,7 @@ TEST_F(TestExamples, QuickExample) {
 		.SendKeys("Hello, world!")
 		.Submit();
 
-	StopNavigation();
+	StopNavigation(); // Firefox doesn't perform navigation right after Submit.
 }
 
 TEST_F(TestExamples, ImplicitWait) {
@@ -40,7 +40,7 @@ TEST_F(TestExamples, ImplicitWait) {
 }
 
 TEST_F(TestExamples, ExplicitWait1) {
-	auto find_element = [&]{ return driver.FindElement(ById("asynchronously_loaded_element")); };
+	auto find_element = [&]{ return driver.FindElement(ById("async_loaded")); };
 	try {
 		int timeout = 0;
 		Element element = WaitForValue(find_element, timeout);
@@ -49,7 +49,9 @@ TEST_F(TestExamples, ExplicitWait1) {
 }
 
 TEST_F(TestExamples, ExplicitWait2) {
-	auto element_is_selected = [&]{ return driver.FindElement(ById("asynchronously_loaded_element")).IsSelected(); };
+	auto element_is_selected = [&]{
+		return driver.FindElement(ById("async_loaded")).IsSelected();
+	};
 	try {
 		int timeout = 0;
 		WaitUntil(element_is_selected, timeout);
@@ -59,8 +61,8 @@ TEST_F(TestExamples, ExplicitWait2) {
 
 TEST_F(TestExamples, UseGmockMatchers) {
 	driver.Navigate(Environment::Instance().GetTestPageUrl("redirect.html"));
-	auto get_url = [&]{ return driver.GetUrl(); };
+	auto url = [&]{ return driver.GetUrl(); };
 	using namespace ::testing;
-	WaitForMatch(get_url, HasSubstr("target"));
+	WaitForMatch(url, HasSubstr("target"));
 	StopNavigation();	
 }
