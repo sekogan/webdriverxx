@@ -78,20 +78,30 @@ TEST_F(TestJsExecutor, CanPassOtherContainers) {
 	ASSERT_EQ("444", driver.GetTitle());
 }
 
-struct CustomObject {
+namespace custom {
+
+struct Object {
 	std::string string;
 	int number;
 };
 
-picojson::value ToJson(const CustomObject& value) {
+picojson::value ToJson(const Object& value) {
 return JsonObject()
 	.With("string", value.string)
 	.With("number", value.number)
 	.Build();
 }
 
+void FromJson2(const picojson::value& value, Object& result) {
+	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "custom::Object is not an object");
+	result.string = FromJson<std::string>(value.get("string"));
+	result.number = FromJson<int>(value.get("number"));
+}
+
+} // custom
+
 TEST_F(TestJsExecutor, CanPassCustomObject) {
-	CustomObject o = { "abc", 123 };
+	custom::Object o = { "abc", 123 };
 	driver.Execute("o = arguments[0]; document.title = (o.string + 'def') + (o.number + 1)",
 		JsArgs() << o);
 	ASSERT_EQ("abcdef124", driver.GetTitle());
@@ -118,21 +128,8 @@ TEST_F(TestJsExecutor, EvalsElement) {
 	ASSERT_EQ(e, driver.EvalElement("return document.getElementsByTagName('input')[0]"));
 }
 
-namespace webdriverxx {
-
-template<>
-CustomObject FromJson<CustomObject>(const picojson::value& value) {
-	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "CustomObject is not an object");
-	CustomObject result;
-	result.string = FromJson<std::string>(value.get("string"));
-	result.number = FromJson<int>(value.get("number"));
-	return result;
-}
-
-} // namespace webdriverxx
-
 TEST_F(TestJsExecutor, EvalsCustomObject) {
-	CustomObject o = driver.Eval<CustomObject>("return { string: 'abc', number: 123 }");
+	custom::Object o = driver.Eval<custom::Object>("return { string: 'abc', number: 123 }");
 	ASSERT_EQ("abc", o.string);
 	ASSERT_EQ(123, o.number);
 }

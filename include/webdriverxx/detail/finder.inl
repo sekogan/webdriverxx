@@ -1,3 +1,4 @@
+#include "../conversions.h"
 #include "../element.h"
 #include "types.h"
 #include <algorithm>
@@ -17,13 +18,13 @@ Finder::Finder(
 inline
 Element Finder::FindElement(const By& by) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return factory_->MakeElement(FromJson<detail::ElementRef>(
+	return factory_->MakeElement(FromJson<ElementRef>(
 		context_->Post("element", JsonObject()
 			.With("using", by.GetStrategy())
 			.With("value", by.GetValue())
 			.Build()
 		)).ref);
-	WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(detail::Fmt()
+	WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(Fmt()
 		<< "context: " << context_->GetUrl()
 		<< ", strategy: " << by.GetStrategy()
 		<< ", value: " << by.GetValue()
@@ -34,7 +35,7 @@ inline
 std::vector<Element> Finder::FindElements(const By& by) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	const auto ids =
-		FromJson<std::vector<detail::ElementRef>>(
+		FromJson<std::vector<ElementRef>>(
 			context_->Post("elements", JsonObject()
 				.With("using", by.GetStrategy())
 				.With("value", by.GetValue())
@@ -43,11 +44,11 @@ std::vector<Element> Finder::FindElements(const By& by) const {
 	std::vector<Element> result;
 	result.reserve(ids.size());
 	std::transform(ids.begin(), ids.end(), std::back_inserter(result),
-		[this](const detail::ElementRef& element_ref) {
+		[this](const ElementRef& element_ref) {
 			return factory_->MakeElement(element_ref.ref);
 		});
 	return result;
-	WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(detail::Fmt()
+	WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(Fmt()
 		<< "context: " << context_->GetUrl()
 		<< ", strategy: " << by.GetStrategy()
 		<< ", value: " << by.GetValue()

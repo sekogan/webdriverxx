@@ -116,78 +116,78 @@ namespace detail {
 
 struct FromJsonDefaultFilter {
 	template<typename T>
-	static T Apply(const picojson::value& value) {
-		return value.get<T>();
+	static void Apply(const picojson::value& value, T& result) {
+		result = value.get<T>();
 	}
 };
 
 template<typename NextFilter>
 struct FromJsonContainerFilter {
 	template<typename T>
-	static T Apply(const picojson::value& value) {
-		return Impl<T>(value, 0);
+	static void Apply(const picojson::value& value, T& result) {
+		Impl<T>(value, result, 0);
 	}
 
 private:
 	template<typename T>
-	static T Impl(const picojson::value& value, decltype(&*std::begin(detail::ValueRef<T>()))) {
+	static void Impl(const picojson::value& value, T& result, decltype(&*std::begin(detail::ValueRef<T>()))) {
 		WEBDRIVERXX_CHECK(value.is<picojson::array>(), "Value is not an array");
 		const picojson::array& array = value.get<picojson::array>();
-		T result;
 		typedef typename std::iterator_traits<decltype(std::begin(result))>::value_type Item;
 		std::transform(array.begin(), array.end(), std::back_inserter(result), FromJson<Item>);
-		return result;
 	}
 
 	template<typename T>
-	static T Impl(const picojson::value& value, ...) {
-		return NextFilter::template Apply<T>(value);
+	static void Impl(const picojson::value& value, T& result, ...) {
+		return NextFilter::template Apply(value, result);
 	}
 };
 
 } // detail
 
+inline
+void FromJson2(const picojson::value& value, std::string& result) {
+	result = value.to_str();
+}
+
+inline
+void FromJson2(const picojson::value& value, bool& result) {
+	result = value.evaluate_as_boolean();
+}
+
+inline
+void FromJson2(const picojson::value& value, int& result) {
+	WEBDRIVERXX_CHECK(value.is<double>(), "Value is not a number");
+	result = static_cast<int>(value.get<double>());
+}
+
+inline
+void FromJson2(const picojson::value& value, unsigned& result) {
+	WEBDRIVERXX_CHECK(value.is<double>(), "Value is not a number");
+	result = static_cast<unsigned>(value.get<double>());
+}
+
+template<typename T>
+inline
+void FromJson2(const picojson::value& value, T& result) {
+	namespace detail = ::webdriverxx::detail;
+	detail::FromJsonContainerFilter<
+	detail::FromJsonDefaultFilter
+	>::template Apply(value, result);
+}
+
 template<typename T>
 inline
 T FromJson(const picojson::value& value) {
-	namespace detail = ::webdriverxx::detail;
-	return
-		detail::FromJsonContainerFilter<
-		detail::FromJsonDefaultFilter
-		>::template Apply<T>(value);
-}
-
-template<>
-inline
-std::string FromJson<std::string>(const picojson::value& value) {
-	return value.to_str();
-}
-
-template<>
-inline
-bool FromJson<bool>(const picojson::value& value) {
-	return value.evaluate_as_boolean();
-}
-
-template<>
-inline
-int FromJson<int>(const picojson::value& value) {
-	WEBDRIVERXX_CHECK(value.is<double>(), "Value is not a number");
-	return static_cast<int>(value.get<double>());
-}
-
-template<>
-inline
-unsigned FromJson<unsigned>(const picojson::value& value) {
-	WEBDRIVERXX_CHECK(value.is<double>(), "Value is not a number");
-	return static_cast<unsigned>(value.get<double>());
+	T result = T();
+	FromJson2(value, result);
+	return result;
 }
 
 template<typename T>
 inline
-void OptionalFromJson(const picojson::value& json, T& value) {
-	if (!json.is<picojson::null>())
-		value = FromJson<T>(json);
+T OptionalFromJson(const picojson::value& value, const T& default_value = T()) {
+	return value.is<picojson::null>() ? default_value : FromJson<T>(value);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -200,14 +200,11 @@ picojson::value ToJson(const Size& size) {
 		.Build();
 }
 
-template<>
 inline
-Size FromJson<Size>(const picojson::value& value) {
+void FromJson2(const picojson::value& value, Size& result) {
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Size is not an object");
-	Size result;
 	result.width = FromJson<int>(value.get("width"));
 	result.height = FromJson<int>(value.get("height"));
-	return result;
 }
 
 inline
@@ -218,14 +215,11 @@ picojson::value ToJson(const Point& position) {
 		.Build();
 }
 
-template<>
 inline
-Point FromJson<Point>(const picojson::value& value) {
+void FromJson2(const picojson::value& value, Point& result) {
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Point is not an object");
-	Point result;
 	result.x = FromJson<int>(value.get("x"));
 	result.y = FromJson<int>(value.get("y"));
-	return result;
 }
 
 inline
@@ -241,19 +235,16 @@ picojson::value ToJson(const Cookie& cookie) {
 	return result.Build();
 }
 
-template<>
 inline
-Cookie FromJson<Cookie>(const picojson::value& value) {
+void FromJson2(const picojson::value& value, Cookie& result) {
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Cookie is not an object");
-	Cookie result;
 	result.name = FromJson<std::string>(value.get("name"));
 	result.value = FromJson<std::string>(value.get("value"));
-	OptionalFromJson(value.get("path"), result.path);
-	OptionalFromJson(value.get("domain"), result.domain);
-	OptionalFromJson(value.get("secure"), result.secure);
-	OptionalFromJson(value.get("httpOnly"), result.http_only);
-	OptionalFromJson(value.get("expiry"), result.expiry);
-	return result;
+	result.path = OptionalFromJson<std::string>(value.get("path"));
+	result.domain = OptionalFromJson<std::string>(value.get("domain"));
+	result.secure = OptionalFromJson<bool>(value.get("secure"), false);
+	result.http_only = OptionalFromJson<bool>(value.get("httpOnly"), false);
+	result.expiry = OptionalFromJson<int>(value.get("expiry"), Cookie::NoExpiry);
 }
 
 } // namespace webdriverxx
