@@ -63,13 +63,13 @@ struct Cookie {
 };
 
 namespace timeout {
-enum Type {
-	ImplicitWait,
-	PageLoad,
-	Script,
-	AsyncScript,
-	ElementFind
-};
+
+typedef const char* Type;
+
+Type const Implicit = "implicit";
+Type const PageLoad = "page load";
+Type const Script = "script";
+
 } // namespace timeout
 
 namespace browser {

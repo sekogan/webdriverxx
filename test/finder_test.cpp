@@ -10,12 +10,12 @@ protected:
 		WebDriver& driver = Environment::Instance().GetDriver();
 		driver.Navigate(Environment::Instance().GetTestPageUrl("finder.html"));
 		driver.FindElement(ById("finder_loaded"));
-		driver.SetTimeout(timeout::ElementFind, 0);
+		driver.SetImplicitTimeoutMs(0);
 	}
 
 	static void TearDownTestCase() {
 		WebDriver& driver = Environment::Instance().GetDriver();
-		driver.SetTimeout(timeout::ElementFind, 1000);
+		driver.SetImplicitTimeoutMs(1000);
 	}
 
 	TestFinder() : driver(Environment::Instance().GetDriver()) {}

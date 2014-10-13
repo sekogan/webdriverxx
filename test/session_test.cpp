@@ -143,17 +143,17 @@ TEST_F(TestSession, GetsScreenshot) {
 }
 
 TEST_F(TestSession, SetsTimeouts) {
-	driver.SetTimeout(timeout::ImplicitWait, 1000);
-	driver.SetTimeout(timeout::PageLoad, 1000);
-	driver.SetTimeout(timeout::Script, 1000);
+	driver.SetTimeoutMs(timeout::Implicit, 1000);
+	driver.SetTimeoutMs(timeout::PageLoad, 1000);
+	driver.SetTimeoutMs(timeout::Script, 1000);
 }
 
 TEST_F(TestSession, SetsAsyncScriptTimeout) {
-	driver.SetTimeout(timeout::AsyncScript, 1000);
+	driver.SetAsyncScriptTimeoutMs(1000);
 }
 
-TEST_F(TestSession, SetsElementFindTimeout) {
-	driver.SetTimeout(timeout::ElementFind, 1000);
+TEST_F(TestSession, SetsImplicitTimeout) {
+	driver.SetImplicitTimeoutMs(1000);
 }
 
 TEST_F(TestSession, GetsActiveElement) {

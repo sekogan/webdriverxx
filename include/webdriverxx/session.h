@@ -71,7 +71,9 @@ public:
 	const Session& SendKeys(const std::string& keys) const;
 	const Session& SendKeys(const Shortcut& shortcut) const;
 
-	const Session& SetTimeout(timeout::Type type, int milliseconds);
+	const Session& SetTimeoutMs(timeout::Type type, int milliseconds);
+	const Session& SetImplicitTimeoutMs(int milliseconds);
+	const Session& SetAsyncScriptTimeoutMs(int milliseconds);
 
 	void DeleteSession() const; // No need to delete sessions created by WebDriver or Client
 	virtual ~Session() {}
@@ -88,7 +90,6 @@ private:
 	picojson::value InternalEval(const std::string& command, const std::string& script,
 		const JsArgs& args) const;
 	const Session& InternalSetFocusToFrame(const picojson::value& id) const;
-	const Session& InternalSetTimeout(const std::string& type, int milliseconds) const;
 
 private:
 	detail::Shared<detail::Resource> resource_;
