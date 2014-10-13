@@ -22,7 +22,7 @@ TEST_F(TestExamples, QuickExample)
 {
 	driver
 		.Navigate("http://google.com")
-		.FindElement(ByXPath(".//input[@name='q']"))
+		.FindElement(ByCss("input[name=q]"))
 		.SendKeys("Hello, world!")
 		.Submit();
 

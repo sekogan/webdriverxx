@@ -11,7 +11,7 @@ using namespace webdriverxx;
 WebDriver firefox = StartFirefox();
 firefox
     .Navigate("http://google.com")
-    .FindElement(ByXPath(".//input[@name='q']"))
+    .FindElement(ByCss("input[name=q]"))
     .SendKeys("Hello, world!")
     .Submit();
 ```

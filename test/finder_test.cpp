@@ -50,8 +50,8 @@ TEST_F(TestFinder, FindsElementByClassName) {
 }
 
 TEST_F(TestFinder, FindsElementByCssSelector) {
-	driver.FindElement(ByCssSelector("body div#css_selectable"));
-	ASSERT_EQ(0u, driver.FindElements(ByCssSelector("non_existing")).size());
+	driver.FindElement(ByCss("body div#css_selectable"));
+	ASSERT_EQ(0u, driver.FindElements(ByCss("non_existing")).size());
 }
 
 TEST_F(TestFinder, FindsElementByName) {

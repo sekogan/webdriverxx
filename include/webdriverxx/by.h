@@ -29,7 +29,7 @@ inline By ByClassName(const std::string& value) {
 	return By("class name", value);
 }
 
-inline By ByCssSelector(const std::string& value) {
+inline By ByCss(const std::string& value) {
 	return By("css selector", value);
 }
 
