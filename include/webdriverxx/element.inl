@@ -10,6 +10,9 @@ picojson::value CustomToJson(const Element& element) {
 }
 
 inline
+Element::Element() {}
+
+inline
 Element::Element(
 	const std::string& ref,
 	const detail::Shared<detail::Resource>& resource,

@@ -185,7 +185,7 @@ void CustomFromJson(const picojson::value& value, T& result) {
 template<typename T>
 inline
 T FromJson(const picojson::value& value) {
-	T result = T();
+	T result;
 	CustomFromJson(value, result);
 	return result;
 }

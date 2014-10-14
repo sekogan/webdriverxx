@@ -78,6 +78,13 @@ TEST_F(TestJsExecutor, CanPassOtherContainers) {
 	ASSERT_EQ("444", driver.GetTitle());
 }
 
+TEST_F(TestJsExecutor, CanPassCArray) {
+	const char* colors[] = { "red", "green", "blue" };
+	driver.Execute("document.title = arguments[0].reverse().join(', ')",
+		JsArgs() << colors);
+	ASSERT_EQ("blue, green, red", driver.GetTitle());
+}
+
 namespace custom {
 
 struct Object {
@@ -125,7 +132,7 @@ TEST_F(TestJsExecutor, EvalsBoolean) {
 
 TEST_F(TestJsExecutor, EvalsElement) {
 	Element e = driver.FindElement(ByTag("input"));
-	ASSERT_EQ(e, driver.EvalElement("return document.getElementsByTagName('input')[0]"));
+	ASSERT_EQ(e, driver.Eval<Element>("return document.getElementsByTagName('input')[0]"));
 }
 
 TEST_F(TestJsExecutor, EvalsCustomObject) {
@@ -135,7 +142,7 @@ TEST_F(TestJsExecutor, EvalsCustomObject) {
 }
 
 TEST_F(TestJsExecutor, EvalsArrayOfStrings) {
-	std::vector<std::string> v = driver.Eval< std::vector<std::string> >(
+	std::vector<std::string> v = driver.Eval<std::vector<std::string>>(
 		"return [ 'abc', 'def' ]"
 		);
 	ASSERT_EQ(2u, v.size());
@@ -144,7 +151,7 @@ TEST_F(TestJsExecutor, EvalsArrayOfStrings) {
 }
 
 TEST_F(TestJsExecutor, EvalsArrayOfNumbers) {
-	std::vector<int> v = driver.Eval< std::vector<int> >(
+	std::vector<int> v = driver.Eval<std::vector<int>>(
 		"return [ 123, 456 ]"
 		);
 	ASSERT_EQ(2u, v.size());
@@ -187,6 +194,6 @@ TEST_F(TestJsExecutor, ReturnsValueFromAsyncScript) {
 TEST_F(TestJsExecutor, ReturnsElementFromAsyncScript) {
 	if (driver.GetCapabilities().GetBrowserName() == browser::Phantom) return; // Crashes PhantomJS 1.9.7
 	Element e = driver.FindElement(ByTag("input"));
-	ASSERT_EQ(e, driver.EvalElementAsync(AsyncScript(
+	ASSERT_EQ(e, driver.EvalAsync<Element>(AsyncScript(
 		"return document.getElementsByTagName('input')[0]")));
 }

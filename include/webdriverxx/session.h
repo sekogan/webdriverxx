@@ -35,11 +35,9 @@ public:
 	const Session& Execute(const std::string& script, const JsArgs& args = JsArgs()) const;
 	template<typename T>
 	T Eval(const std::string& script, const JsArgs& args = JsArgs()) const;
-	Element EvalElement(const std::string& script, const JsArgs& args = JsArgs()) const;
 	const Session& ExecuteAsync(const std::string& script, const JsArgs& args = JsArgs()) const;
 	template<typename T>
 	T EvalAsync(const std::string& script, const JsArgs& args = JsArgs()) const;
-	Element EvalElementAsync(const std::string& script, const JsArgs& args = JsArgs()) const;
 
 	const Session& SetFocusToFrame(const Element& frame) const;
 	const Session& SetFocusToFrame(const std::string& id) const;
@@ -85,10 +83,15 @@ private:
 
 	Window MakeWindow(const std::string& handle) const;
 	detail::Keyboard GetKeyboard() const;
-	picojson::value InternalEval(const std::string& script, const JsArgs& args) const;
-	picojson::value InternalEvalAsync(const std::string& script, const JsArgs& args) const;
-	picojson::value InternalEval(const std::string& command, const std::string& script,
-		const JsArgs& args) const;
+	template<typename T>
+	void InternalEval(const std::string& webdriver_command,
+		const std::string& script, const JsArgs& args,
+		T& result) const;
+	void InternalEval(const std::string& webdriver_command,
+		const std::string& script, const JsArgs& args,
+		Element& result) const;
+	picojson::value InternalEvalJsonValue(const std::string& command,
+		const std::string& script, const JsArgs& args) const;
 	const Session& InternalSetFocusToFrame(const picojson::value& id) const;
 
 private:

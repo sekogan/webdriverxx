@@ -24,10 +24,14 @@ firefox
 - Lightweight dependencies:
     - [libcurl](http://curl.haxx.se/libcurl/),
     - [picojson](https://github.com/kazuho/picojson).
+- Can be used with any testing framework.
 - Linux, Mac and Windows.
 - clang (3.4), GCC (4.6) and Visual Studio (2010).
 
 ## More examples
+
+`#include <webdriverxx/webdriver.h>` and `using namespace webdriverxx`
+are assumed in all examples.
 
 ### Navigate browser
 
@@ -43,51 +47,84 @@ driver
 ### Find elements
 
 ```cpp
-Element list = driver.FindElement(ById("list")); // Throws exception if no such element
-std::vector<Element> items = list.FindElements(ByClass("item")); // Does not throw
-if (!items.empty())
-	items[0].FindElement(ByTag("input")).Click(); // Elements are also searchable
+// Throws exception if no match is found in the document
+Element list = driver.FindElement(ById("list"));
+
+// Returns empty vector if no such elements
+// The search is performed inside the list
+std::vector<Element> items = list.FindElements(ByClass("item"));
 ```
 
 ### Send keyboard input
 
-Both simple text input and shortcuts can be sent to an element or to the active window.
-
 ```cpp
+// Sends text input or a shortcut to the element
 driver.FindElement(ByTag("input")).SendKeys("Hello, world!");
-driver.SendKeys(Shortcut() << keys::Control << "t"); // Opens a new tab on Windows or Linux
+
+// Sends text input or a shortcut to the active window
+driver.SendKeys(Shortcut() << keys::Control << "t");
 ```
 
 ### Execute Javascript
 
-TODO
+```cpp
+// Simple script, no parameters
+driver.Execute("console.log('Hi there!')");
+
+// A script with one parameter
+driver.Execute("document.title = arguments[0]", JsArgs() << "Cowabunga!");
+
+// A script with more than one parameter
+driver.Execute("document.title = arguments[0] + '-' + arguments[1]",
+		JsArgs() << "Beep" << "beep");
+
+// Arrays or containers can also be used as parameters
+const char* ss[] = { "Yabba", "dabba", "doo" };
+driver.Execute("document.title = arguments[0].join(', ')", JsArgs() << ss);
+
+// Even an Element can be passed to a script
+auto element = driver.FindElement(ByTag("input"));
+driver.Execute("arguments[0].value = 'That was nuts!'", JsArgs() << element);
+```
 
 ### Get something from Javascript
 
-TODO
+```cpp
+// Scalar types
+auto title = driver.Eval<std::string>("return document.title")
+auto number = driver.Eval<int>("return 123");
+auto another_number = driver.Eval<double>("return 123.5");
+auto flag = driver.Eval<bool>("return true");
 
-### Wait implicitly for asynchronous operations
+// Containers (all std::back_inserter compatible)
+std::vector<std::string> v = driver.Eval<std::vector<std::string>>(
+		"return [ 'abc', 'def' ]"
+		);
 
-Explanation of implicit/explicit waits can be found [here](http://selenium-python.readthedocs.org/en/latest/waits.html).
+// Elements!
+Element document_element = driver.Eval<Element>("return document.documentElement");
+```
+
+### [Wait implicitly](http://selenium-python.readthedocs.org/en/latest/waits.html) for asynchronous operations
 
 ```cpp
 driver.SetImplicitTimeoutMs(5000);
-Element element = driver.FindElement(ByName("akela")); // Should poll DOM for 5 seconds before throwing an exception
+
+// Should poll the DOM for 5 seconds before throwing an exception.
+auto element = driver.FindElement(ByName("async_element"));
 ```
 
-### Wait explicitly for asynchronous operations
-
-Explanation of implicit/explicit waits can be found [here](http://selenium-python.readthedocs.org/en/latest/waits.html).
+### [Wait explicitly](http://selenium-python.readthedocs.org/en/latest/waits.html) for asynchronous operations
 
 ```cpp
-#include <webdriverxx/wait.h> // or <webdriverxx.h>
+#include <webdriverxx/wait.h>
 
 auto find_element = [&]{ return driver.FindElement(ById("async_element")); };
 Element element = WaitForValue(find_element);
 ```
 
 ```cpp
-#include <webdriverxx/wait.h> // or <webdriverxx.h>
+#include <webdriverxx/wait.h>
 
 auto element_is_selected = [&]{
 	return driver.FindElement(ById("asynchronously_loaded_element")).IsSelected();
@@ -99,12 +136,12 @@ WaitUntil(element_is_selected);
 
 ```cpp
 #define WEBDRIVERXX_ENABLE_GMOCK_MATCHERS
-#include <webdriverxx/wait_match.h> // or <webdriverxx.h>
+#include <webdriverxx/wait_match.h>
 
 driver.Navigate("http://initial_url.host.net");
 auto url = [&]{ return driver.GetUrl(); };
 using namespace ::testing;
-WaitForMatch(url, HasSubstr("some_substring_of_an_url_after_redirects"));
+auto final_url = WaitForMatch(url, HasSubstr("some_magic"));
 ```
 
 ## How to build and run tests
@@ -195,15 +232,16 @@ struct Object {
 	int number;
 };
 
-picojson::value CustomToJson(const Object& value) { // should be in the same namespace
+// Conversion functions should be in the same namespace as the object
+picojson::value CustomToJson(const Object& value) {
 	return JsonObject()
 		.With("string", value.string)
 		.With("number", value.number)
 		.Build();
 }
 
-void CustomFromJson(const picojson::value& value, Object& result) { // should be in the same namespace
-	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "custom::Object is not an object");
+void CustomFromJson(const picojson::value& value, Object& result) {
+	assert(value.is<picojson::object>());
 	result.string = FromJson<std::string>(value.get("string"));
 	result.number = FromJson<int>(value.get("number"));
 }

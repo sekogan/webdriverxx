@@ -24,6 +24,8 @@ struct IFinderFactory;
 // An element from DOM
 class Element { // copyable
 public:
+	Element();
+	
 	Element(
 		const std::string& ref,
 		const detail::Shared<detail::Resource>& resource,

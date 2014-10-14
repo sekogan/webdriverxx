@@ -112,7 +112,7 @@ const Session& Session::Refresh() const {
 
 inline
 const Session& Session::Execute(const std::string& script, const JsArgs& args) const {
-	InternalEval(script, args);
+	InternalEvalJsonValue("execute", script, args);
 	return *this;
 }
 
@@ -120,20 +120,17 @@ template<typename T>
 inline
 T Session::Eval(const std::string& script, const JsArgs& args) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return FromJson<T>(InternalEval(script, args));
+	T result = T();
+	InternalEval("execute", script, args, result);
+	return result;
 	WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(detail::Fmt()
 		<< "script: " << script
 		)
 }
 
 inline
-Element Session::EvalElement(const std::string& script, const JsArgs& args) const {
-	return factory_->MakeElement(Eval<detail::ElementRef>(script, args).ref);
-}
-
-inline
 const Session& Session::ExecuteAsync(const std::string& script, const JsArgs& args) const {
-	InternalEvalAsync(script, args);
+	InternalEvalJsonValue("execute_async", script, args);
 	return *this;
 }
 
@@ -141,15 +138,12 @@ template<typename T>
 inline
 T Session::EvalAsync(const std::string& script, const JsArgs& args) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return FromJson<T>(InternalEvalAsync(script, args));
+	T result;
+	InternalEval("execute_async", script, args, result);
+	return result;
 	WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(detail::Fmt()
 		<< "script: " << script
 		)
-}
-
-inline
-Element Session::EvalElementAsync(const std::string& script, const JsArgs& args) const {
-	return factory_->MakeElement(EvalAsync<detail::ElementRef>(script, args).ref);
 }
 
 inline
@@ -304,23 +298,30 @@ detail::Keyboard Session::GetKeyboard() const
 	return detail::Keyboard(resource_, "keys");
 }
 
+template<typename T>
 inline
-picojson::value Session::InternalEval(const std::string& script, const JsArgs& args) const {
-	return InternalEval("execute", script, args);
+void Session::InternalEval(const std::string& webdriver_command,
+	const std::string& script, const JsArgs& args,
+	T& result) const {
+	result = FromJson<T>(InternalEvalJsonValue(webdriver_command, script, args));
 }
 
 inline
-picojson::value Session::InternalEvalAsync(const std::string& script, const JsArgs& args) const {
-	return InternalEval("execute_async", script, args);
+void Session::InternalEval(const std::string& webdriver_command,
+	const std::string& script, const JsArgs& args,
+	Element& result) const {
+	detail::ElementRef element_ref;
+	InternalEval(webdriver_command, script, args, element_ref);
+	result = factory_->MakeElement(element_ref.ref);
 }
 
 inline
-picojson::value Session::InternalEval(
-	const std::string& command,
+picojson::value Session::InternalEvalJsonValue(
+	const std::string& webdriver_command,
 	const std::string& script,
 	const JsArgs& args
 	) const {
-	return resource_->Post(command,
+	return resource_->Post(webdriver_command,
 		JsonObject()
 			.With("script", script)
 			.With("args", args.args_)
