@@ -13,37 +13,7 @@ namespace webdriverxx {
 template<typename T>
 picojson::value ToJson(const T& value);
 
-inline
-picojson::value ToJson(const char* value) {
-	return picojson::value(value);
-}
-
-inline
-picojson::value ToJson(char* value) {
-	return ToJson(static_cast<const char*>(value));
-}
-
-inline
-picojson::value ToJson(const std::string& value) {
-	return ToJson(value.c_str());
-}
-
-inline
-picojson::value ToJson(const picojson::value& value) {
-	return value;
-}
-
-inline
-picojson::value ToJson(const picojson::object& value) {
-	return picojson::value(value);
-}
-
-inline
-picojson::value ToJson(int value) {
-	return picojson::value(static_cast<double>(value));
-}
-
-namespace detail2 { // Should be different from detail to prevent detail::ToJson overloads from hiding webdriverxx::ToJson
+namespace detail {
 
 struct ToJsonDefaultFilter {
 	template<typename T>
@@ -77,16 +47,52 @@ private:
 	}
 };
 
-} // detail2
+} // detail
+
+inline
+picojson::value CustomToJson(const char* value) {
+	return picojson::value(value);
+}
+
+inline
+picojson::value CustomToJson(char* value) {
+	return ToJson(static_cast<const char*>(value));
+}
+
+inline
+picojson::value CustomToJson(const std::string& value) {
+	return ToJson(value.c_str());
+}
+
+inline
+picojson::value CustomToJson(const picojson::value& value) {
+	return value;
+}
+
+inline
+picojson::value CustomToJson(const picojson::object& value) {
+	return picojson::value(value);
+}
+
+inline
+picojson::value CustomToJson(int value) {
+	return picojson::value(static_cast<double>(value));
+}
 
 template<typename T>
 inline
-picojson::value ToJson(const T& value) {
-	namespace detail = ::webdriverxx::detail2;
+picojson::value CustomToJson(const T& value) {
+	namespace detail = ::webdriverxx::detail;
 	return
 		detail::ToJsonContainerFilter<
 		detail::ToJsonDefaultFilter
 		>::template Apply(value);
+}
+
+template<typename T>
+inline
+picojson::value ToJson(const T& value) {
+	return CustomToJson(value);
 }
 
 class JsonObject { // copyable
@@ -146,30 +152,30 @@ private:
 } // detail
 
 inline
-void FromJson2(const picojson::value& value, std::string& result) {
+void CustomFromJson(const picojson::value& value, std::string& result) {
 	result = value.to_str();
 }
 
 inline
-void FromJson2(const picojson::value& value, bool& result) {
+void CustomFromJson(const picojson::value& value, bool& result) {
 	result = value.evaluate_as_boolean();
 }
 
 inline
-void FromJson2(const picojson::value& value, int& result) {
+void CustomFromJson(const picojson::value& value, int& result) {
 	WEBDRIVERXX_CHECK(value.is<double>(), "Value is not a number");
 	result = static_cast<int>(value.get<double>());
 }
 
 inline
-void FromJson2(const picojson::value& value, unsigned& result) {
+void CustomFromJson(const picojson::value& value, unsigned& result) {
 	WEBDRIVERXX_CHECK(value.is<double>(), "Value is not a number");
 	result = static_cast<unsigned>(value.get<double>());
 }
 
 template<typename T>
 inline
-void FromJson2(const picojson::value& value, T& result) {
+void CustomFromJson(const picojson::value& value, T& result) {
 	namespace detail = ::webdriverxx::detail;
 	detail::FromJsonContainerFilter<
 	detail::FromJsonDefaultFilter
@@ -180,7 +186,7 @@ template<typename T>
 inline
 T FromJson(const picojson::value& value) {
 	T result = T();
-	FromJson2(value, result);
+	CustomFromJson(value, result);
 	return result;
 }
 
@@ -193,7 +199,7 @@ T OptionalFromJson(const picojson::value& value, const T& default_value = T()) {
 ///////////////////////////////////////////////////////////////////
 
 inline
-picojson::value ToJson(const Size& size) {
+picojson::value CustomToJson(const Size& size) {
 	return JsonObject()
 		.With("width", size.width)
 		.With("height", size.height)
@@ -201,14 +207,14 @@ picojson::value ToJson(const Size& size) {
 }
 
 inline
-void FromJson2(const picojson::value& value, Size& result) {
+void CustomFromJson(const picojson::value& value, Size& result) {
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Size is not an object");
 	result.width = FromJson<int>(value.get("width"));
 	result.height = FromJson<int>(value.get("height"));
 }
 
 inline
-picojson::value ToJson(const Point& position) {
+picojson::value CustomToJson(const Point& position) {
 	return JsonObject()
 		.With("x", position.x)
 		.With("y", position.y)
@@ -216,14 +222,14 @@ picojson::value ToJson(const Point& position) {
 }
 
 inline
-void FromJson2(const picojson::value& value, Point& result) {
+void CustomFromJson(const picojson::value& value, Point& result) {
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Point is not an object");
 	result.x = FromJson<int>(value.get("x"));
 	result.y = FromJson<int>(value.get("y"));
 }
 
 inline
-picojson::value ToJson(const Cookie& cookie) {
+picojson::value CustomToJson(const Cookie& cookie) {
 	JsonObject result;
 	result.With("name", cookie.name);
 	result.With("value", cookie.value);
@@ -236,7 +242,7 @@ picojson::value ToJson(const Cookie& cookie) {
 }
 
 inline
-void FromJson2(const picojson::value& value, Cookie& result) {
+void CustomFromJson(const picojson::value& value, Cookie& result) {
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Cookie is not an object");
 	result.name = FromJson<std::string>(value.get("name"));
 	result.value = FromJson<std::string>(value.get("value"));

@@ -85,14 +85,14 @@ struct Object {
 	int number;
 };
 
-picojson::value ToJson(const Object& value) {
+picojson::value CustomToJson(const Object& value) {
 return JsonObject()
 	.With("string", value.string)
 	.With("number", value.number)
 	.Build();
 }
 
-void FromJson2(const picojson::value& value, Object& result) {
+void CustomFromJson(const picojson::value& value, Object& result) {
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "custom::Object is not an object");
 	result.string = FromJson<std::string>(value.get("string"));
 	result.number = FromJson<int>(value.get("number"));

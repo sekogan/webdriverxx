@@ -195,14 +195,14 @@ struct Object {
 	int number;
 };
 
-picojson::value ToJson(const Object& value) { // should be in the same namespace
+picojson::value CustomToJson(const Object& value) { // should be in the same namespace
 	return JsonObject()
 		.With("string", value.string)
 		.With("number", value.number)
 		.Build();
 }
 
-void FromJson2(const picojson::value& value, Object& result) { // should be in the same namespace
+void CustomFromJson(const picojson::value& value, Object& result) { // should be in the same namespace
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "custom::Object is not an object");
 	result.string = FromJson<std::string>(value.get("string"));
 	result.number = FromJson<int>(value.get("number"));

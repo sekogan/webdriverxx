@@ -5,7 +5,7 @@
 namespace webdriverxx {
 
 inline
-picojson::value ToJson(const Element& element) {
+picojson::value CustomToJson(const Element& element) {
 	return element.ToJson();
 }
 
@@ -127,7 +127,7 @@ bool Element::operator == (const Element& other) const {
 inline
 picojson::value Element::ToJson() const {
 	detail::ElementRef ref = { ref_ };
-	return detail::ToJson(ref);
+	return ::webdriverxx::ToJson(ref);
 }
 
 inline
