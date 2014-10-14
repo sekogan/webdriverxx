@@ -50,7 +50,7 @@ template<typename NextFilter>
 struct ToStringContainerFilter {
 	template<typename T>
 	static std::string Apply(const T& value) {
-		return Impl(value, 0);
+		return Impl(value, nullptr);
 	}
 
 private:

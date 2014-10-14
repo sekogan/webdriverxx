@@ -13,7 +13,7 @@ const char *const kContentTypeJson = "application/json;charset=UTF-8";
 
 class HttpHeaders {
 public:
-	HttpHeaders() : head_(0) {}
+	HttpHeaders() : head_(nullptr) {}
 
 	~HttpHeaders() {
 		curl_slist_free_all(head_);

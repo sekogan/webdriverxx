@@ -26,7 +26,7 @@ template<typename NextFilter>
 struct ToJsonContainerFilter {
 	template<typename T>
 	static picojson::value Apply(const T& value) {
-		return Impl(value, 0);
+		return Impl(value, nullptr);
 	}
 
 private:
@@ -131,7 +131,7 @@ template<typename NextFilter>
 struct FromJsonContainerFilter {
 	template<typename T>
 	static void Apply(const picojson::value& value, T& result) {
-		Impl<T>(value, result, 0);
+		Impl<T>(value, result, nullptr);
 	}
 
 private:

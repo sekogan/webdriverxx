@@ -33,8 +33,8 @@ template<typename T>
 class Shared {
 public:
 	Shared()
-		: ptr_(0)
-		, ref_(0)
+		: ptr_(nullptr)
+		, ref_(nullptr)
 	{}
 
 	template<typename T2>

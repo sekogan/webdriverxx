@@ -227,7 +227,7 @@ std::vector<Element> Session::FindElements(const By& by) const {
 inline
 std::vector<Cookie> Session::GetCookies() const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
-	return FromJson< std::vector<Cookie> >(resource_->Get("cookie"));
+	return FromJson<std::vector<Cookie>>(resource_->Get("cookie"));
 	WEBDRIVERXX_FUNCTION_CONTEXT_END()
 }
 

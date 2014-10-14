@@ -49,7 +49,7 @@ private:
 
 template<class T, class M>
 inline
-detail::GMockMatcherAdapter<T,M> MakeMatcherAdapter(const M& matcher, typename std::enable_if<std::is_convertible<M,::testing::Matcher<T>>::value>::type* = 0) {
+detail::GMockMatcherAdapter<T,M> MakeMatcherAdapter(const M& matcher, typename std::enable_if<std::is_convertible<M,::testing::Matcher<T>>::value>::type* = nullptr) {
 	return detail::GMockMatcherAdapter<T,M>(matcher);
 };
 
