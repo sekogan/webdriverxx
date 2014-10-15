@@ -117,6 +117,11 @@ picojson::value CustomToJson(const picojson::object& value) {
 }
 
 inline
+picojson::value CustomToJson(const JsonObject& value) {
+	return static_cast<picojson::value>(value);
+}
+
+inline
 picojson::value CustomToJson(int value) {
 	return picojson::value(static_cast<double>(value));
 }
@@ -192,6 +197,23 @@ inline
 void CustomFromJson(const picojson::value& value, unsigned& result) {
 	WEBDRIVERXX_CHECK(value.is<double>(), "Value is not a number");
 	result = static_cast<unsigned>(value.get<double>());
+}
+
+inline
+void CustomFromJson(const picojson::value& value, picojson::value& result) {
+	result = value;
+}
+
+inline
+void CustomFromJson(const picojson::value& value, picojson::object& result) {
+	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Value is not an object");
+	result = value.get<picojson::object>();
+}
+
+inline
+void CustomFromJson(const picojson::value& value, JsonObject& result) {
+	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Value is not an object");
+	result = JsonObject(value.get<picojson::object>());
 }
 
 template<typename T>

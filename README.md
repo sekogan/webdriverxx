@@ -8,7 +8,7 @@ A lightweight C++ client library for [Selenium Webdriver](http://www.seleniumhq.
 #include <webdriverxx.h>
 using namespace webdriverxx;
 
-WebDriver firefox = StartFirefox();
+WebDriver firefox = Firefox().Start();
 firefox
     .Navigate("http://google.com")
     .FindElement(ByCss("input[name=q]"))
@@ -32,6 +32,21 @@ firefox
 
 `#include <webdriverxx/webdriver.h>` and `using namespace webdriverxx`
 are assumed in all examples.
+
+### Use proxy
+
+```cpp
+WebDriver ie = InternetExplorer().SetProxy(
+	SocksProxy("127.0.0.1:3128")
+		.SetUsername("user")
+		.SetPassword("12345")
+		.SetNoProxyFor("custom.host")
+	).Start();
+```
+
+```cpp
+WebDriver ff = Firefox().SetProxy(DirectConnection()).Start();
+```
 
 ### Navigate browser
 
