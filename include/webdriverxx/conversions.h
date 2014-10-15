@@ -13,6 +13,48 @@ namespace webdriverxx {
 template<typename T>
 picojson::value ToJson(const T& value);
 
+template<typename T>
+T FromJson(const picojson::value& value);
+
+class JsonObject { // copyable
+public:
+	JsonObject() : value_(picojson::object()) {}
+	explicit JsonObject(const picojson::object& object) : value_(object) {}
+
+	template<typename T>
+	T Get(const std::string& name) const {
+		const auto& map = value_.get<picojson::object>();
+		const auto it = map.find(name);
+		WEBDRIVERXX_CHECK(it != map.end(), detail::Fmt() << "No \"" << name << "\" in JsonObject");
+		return FromJson<T>(it->second);
+	}
+
+	template<typename T>
+	T GetOptional(const std::string& name, const T& default_value = T()) const {
+		const auto& map = value_.get<picojson::object>();
+		const auto it = map.find(name);
+		return it != map.end() ? FromJson<T>(it->second) : default_value;
+	}
+
+	template<typename T>
+	JsonObject& Set(const std::string& name, const T& value) {
+		value_.get<picojson::object>()[name] = ToJson(value);
+		return *this;
+	}
+
+	bool Has(const std::string& name) const {
+		const auto& map = value_.get<picojson::object>();
+		return map.find(name) != map.end();
+	}
+
+	operator const picojson::value& () const {
+		return value_;
+	}
+
+private:
+	picojson::value value_;
+};
+
 namespace detail {
 
 struct ToJsonDefaultFilter {
@@ -95,28 +137,7 @@ picojson::value ToJson(const T& value) {
 	return CustomToJson(value);
 }
 
-class JsonObject { // copyable
-public:
-	JsonObject() : value_(picojson::object()) {}
-
-	template<typename T>
-	JsonObject& With(const std::string& name, const T& value) {
-		value_.get<picojson::object>()[name] = ToJson(value);
-		return *this;
-	}
-
-	const picojson::value& Build() const {
-		return value_;
-	}
-
-private:
-	picojson::value value_;
-};
-
 ///////////////////////////////////////////////////////////////////
-
-template<typename T>
-T FromJson(const picojson::value& value);
 
 namespace detail {
 
@@ -201,9 +222,9 @@ T OptionalFromJson(const picojson::value& value, const T& default_value = T()) {
 inline
 picojson::value CustomToJson(const Size& size) {
 	return JsonObject()
-		.With("width", size.width)
-		.With("height", size.height)
-		.Build();
+		.Set("width", size.width)
+		.Set("height", size.height)
+		;
 }
 
 inline
@@ -216,9 +237,9 @@ void CustomFromJson(const picojson::value& value, Size& result) {
 inline
 picojson::value CustomToJson(const Point& position) {
 	return JsonObject()
-		.With("x", position.x)
-		.With("y", position.y)
-		.Build();
+		.Set("x", position.x)
+		.Set("y", position.y)
+		;
 }
 
 inline
@@ -231,14 +252,14 @@ void CustomFromJson(const picojson::value& value, Point& result) {
 inline
 picojson::value CustomToJson(const Cookie& cookie) {
 	JsonObject result;
-	result.With("name", cookie.name);
-	result.With("value", cookie.value);
-	if (!cookie.path.empty()) result.With("path", cookie.path);
-	if (!cookie.domain.empty()) result.With("domain", cookie.domain);
-	if (cookie.secure) result.With("secure", true);
-	if (cookie.http_only) result.With("httpOnly", true);
-	if (cookie.expiry != Cookie::NoExpiry) result.With("expiry", cookie.expiry);
-	return result.Build();
+	result.Set("name", cookie.name);
+	result.Set("value", cookie.value);
+	if (!cookie.path.empty()) result.Set("path", cookie.path);
+	if (!cookie.domain.empty()) result.Set("domain", cookie.domain);
+	if (cookie.secure) result.Set("secure", true);
+	if (cookie.http_only) result.Set("httpOnly", true);
+	if (cookie.expiry != Cookie::NoExpiry) result.Set("expiry", cookie.expiry);
+	return result;
 }
 
 inline

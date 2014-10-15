@@ -48,9 +48,8 @@ Session Client::CreateSession(
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	const auto response = resource_->Post("session",
 		JsonObject()
-			.With("desiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(desired))
-			.With("requiredCapabilities", detail::CapabilitiesAccess::GetJsonObject(required))
-			.Build()
+			.Set("desiredCapabilities", static_cast<picojson::value>(desired))
+			.Set("requiredCapabilities", static_cast<picojson::value>(required))
 			);
 
 	WEBDRIVERXX_CHECK(response.get("sessionId").is<std::string>(), "Session ID is not a string");

@@ -9,18 +9,6 @@
 namespace webdriverxx {
 namespace detail {
 
-struct CapabilitiesAccess {
-	static
-	Capabilities Construct(const picojson::object& object) {
-		return Capabilities(object);
-	}
-
-	static
-	const picojson::object& GetJsonObject(const Capabilities& capabilities) {
-		return capabilities.GetJsonObject();
-	}
-};
-
 struct SessionRef {
 	std::string id;
 	Capabilities capabilities;
@@ -33,8 +21,8 @@ struct ElementRef {
 inline
 picojson::value CustomToJson(const ElementRef& ref) {
 	return JsonObject()
-		.With("ELEMENT", ref.ref)
-		.Build();
+		.Set("ELEMENT", ref.ref)
+		;
 }
 
 inline
@@ -48,7 +36,7 @@ void CustomFromJson(const picojson::value& value, SessionRef& result) {
 	WEBDRIVERXX_CHECK(value.is<picojson::object>(), "Session information is not an object");
 	result.id = value.get("sessionId").to_str();
 	if (value.get("capabilities").is<picojson::object>())
-		result.capabilities = CapabilitiesAccess::Construct(value.get("capabilities").get<picojson::object>());
+		result.capabilities = Capabilities(value.get("capabilities").get<picojson::object>());
 }
 
 } // namespace detail

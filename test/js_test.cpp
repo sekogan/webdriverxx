@@ -93,10 +93,9 @@ struct Object {
 };
 
 picojson::value CustomToJson(const Object& value) {
-return JsonObject()
-	.With("string", value.string)
-	.With("number", value.number)
-	.Build();
+	return JsonObject()
+		.Set("string", value.string)
+		.Set("number", value.number);
 }
 
 void CustomFromJson(const picojson::value& value, Object& result) {

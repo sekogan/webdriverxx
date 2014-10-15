@@ -1,5 +1,6 @@
 set(SOURCE_FILES
 	alerts_test.cpp
+	capabilities_test.cpp
 	client_test.cpp
 	element_test.cpp
 	environment.h

@@ -20,9 +20,8 @@ Element Finder::FindElement(const By& by) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	return factory_->MakeElement(FromJson<ElementRef>(
 		context_->Post("element", JsonObject()
-			.With("using", by.GetStrategy())
-			.With("value", by.GetValue())
-			.Build()
+			.Set("using", by.GetStrategy())
+			.Set("value", by.GetValue())
 		)).ref);
 	WEBDRIVERXX_FUNCTION_CONTEXT_END_EX(Fmt()
 		<< "context: " << context_->GetUrl()
@@ -37,9 +36,8 @@ std::vector<Element> Finder::FindElements(const By& by) const {
 	const auto ids =
 		FromJson<std::vector<ElementRef>>(
 			context_->Post("elements", JsonObject()
-				.With("using", by.GetStrategy())
-				.With("value", by.GetValue())
-				.Build()
+				.Set("using", by.GetStrategy())
+				.Set("value", by.GetValue())
 			));
 	std::vector<Element> result;
 	result.reserve(ids.size());

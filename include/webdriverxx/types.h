@@ -1,6 +1,8 @@
 #ifndef WEBDRIVERXX_TYPES_H
 #define WEBDRIVERXX_TYPES_H
 
+#include <string>
+
 namespace webdriverxx {
 
 typedef unsigned long long TimePoint;
@@ -71,37 +73,6 @@ Type const PageLoad = "page load";
 Type const Script = "script";
 
 } // namespace timeout
-
-namespace browser {
-const char *const Android = "android";
-const char *const Chrome = "chrome";
-const char *const GC = Chrome;
-const char *const GoogleChrome = "googlechrome";
-const char *const Firefox = "firefox";
-const char *const FF = Firefox;
-const char *const Firefox2 = "firefox2";
-const char *const Firefox3 = "firefox3";
-const char *const FirefoxChrome = "firefoxchrome";
-const char *const FirefoxProxy = "firefoxproxy";
-const char *const HtmlUnit = "htmlunit";
-const char *const IE = "internet explorer";
-const char *const IE_HTA="iehta";
-const char *const IExplore = "iexplore";
-const char *const IExploreProxy= "iexploreproxy";
-const char *const IPad = "iPad";
-const char *const IPhone = "iPhone";
-const char *const Mock = "mock";
-const char *const Opera = "opera";
-const char *const PhantomJS = "phantomjs";
-const char *const Phantom = PhantomJS;
-const char *const Safari = "safari";
-const char *const SafariProxy = "safariproxy";
-} // namespace browser
-
-namespace capabilities {
-const char *const BrowserName = "browserName";
-// TODO
-} // namespace browser
 
 } // namespace webdriverxx
 

@@ -18,9 +18,7 @@ void Session::DeleteSession() const {
 
 inline
 Capabilities Session::GetCapabilities() const {
-	return detail::CapabilitiesAccess::Construct(
-		resource_->Get().get<picojson::object>()
-		);
+	return Capabilities(resource_->Get().get<picojson::object>());
 }
 
 inline
@@ -47,9 +45,8 @@ inline
 const Session& Session::SetTimeoutMs(timeout::Type type, int milliseconds) {
 	resource_->Post("timeouts",
 		JsonObject()
-			.With("type", type)
-			.With("ms", milliseconds)
-			.Build()
+			.Set("type", type)
+			.Set("ms", milliseconds)
 		);
 	return *this;
 }
@@ -57,14 +54,14 @@ const Session& Session::SetTimeoutMs(timeout::Type type, int milliseconds) {
 inline
 const Session& Session::SetImplicitTimeoutMs(int milliseconds) {
 	resource_->Post("timeouts/implicit_wait",
-		JsonObject().With("ms", milliseconds).Build());
+		JsonObject().Set("ms", milliseconds));
 	return *this;	
 }
 
 inline
 const Session& Session::SetAsyncScriptTimeoutMs(int milliseconds) {
 	resource_->Post("timeouts/async_script",
-		JsonObject().With("ms", milliseconds).Build());
+		JsonObject().Set("ms", milliseconds));
 	return *this;
 }
 
@@ -186,7 +183,7 @@ const Session& Session::SetFocusToParentFrame() const {
 
 inline
 const Session& Session::InternalSetFocusToFrame(const picojson::value& id) const {
-	resource_->Post("frame", JsonObject().With("id", id).Build());
+	resource_->Post("frame", JsonObject().Set("id", id));
 	return *this;
 }
 
@@ -234,7 +231,7 @@ std::vector<Cookie> Session::GetCookies() const {
 inline
 const Session& Session::SetCookie(const Cookie& cookie) const {
 	resource_->Post("cookie", JsonObject()
-		.With("cookie", ToJson(cookie)).Build());
+		.Set("cookie", ToJson(cookie)));
 	return *this;
 }
 
@@ -323,9 +320,8 @@ picojson::value Session::InternalEvalJsonValue(
 	) const {
 	return resource_->Post(webdriver_command,
 		JsonObject()
-			.With("script", script)
-			.With("args", args.args_)
-			.Build()
+			.Set("script", script)
+			.Set("args", args.args_)
 		);
 }
 

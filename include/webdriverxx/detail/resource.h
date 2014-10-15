@@ -84,7 +84,7 @@ public:
 		const std::string& arg_name,
 		const std::string& arg_value
 		) const {
-		Post(command, JsonObject().With(arg_name, arg_value).Build());
+		Post(command, JsonObject().Set(arg_name, arg_value));
 	}	
 
 	template<typename T>

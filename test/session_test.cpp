@@ -19,10 +19,10 @@ protected:
 TEST_F(TestSession, GetsCapabilities)
 {
 	Capabilities c = driver.GetCapabilities();
-	ASSERT_TRUE(c.Contains("browserName"));
-	ASSERT_TRUE(c.Contains("version"));
-	ASSERT_TRUE(c.Contains("platform"));
-	ASSERT_NE("", c.GetString("browserName"));
+	ASSERT_TRUE(c.Has("browserName"));
+	ASSERT_TRUE(c.Has("version"));
+	ASSERT_TRUE(c.Has("platform"));
+	ASSERT_NE("", c.GetBrowserName());
 }
 
 TEST_F(TestSession, StartsSecondBrowser) {
@@ -73,7 +73,7 @@ TEST_F(TestSession, SetsWindowPosition) {
 	position1.x = 101;
 	position1.y = 102;
 	window.SetPosition(position1);
-	if (driver.GetCapabilities().GetString("browserName") != "phantomjs")
+	if (driver.GetCapabilities().GetBrowserName() != browser::Phantom)
 	{
 		Point position2 = window.GetPosition();
 		ASSERT_EQ(101, position2.x);

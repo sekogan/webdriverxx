@@ -20,8 +20,8 @@ Parameters ParseParameters(int argc, char **argv) {
 		if (IsCommandLineArgument(arg, "browser")) {
 			result.url = webdriverxx::kDefaultUrl;
 			const std::string browser_name = GetCommandLineArgumentValue(arg);
-			result.required.Add("browserName", browser_name);
-			result.desired.Add("browserName", browser_name);
+			result.required.Set("browserName", browser_name);
+			result.desired.Set("browserName", browser_name);
 		} else if (IsCommandLineArgument(arg, "pages")) {
 			result.pages_url = GetCommandLineArgumentValue(arg);
 		} else if (IsCommandLineArgument(arg, "webdriver")) {

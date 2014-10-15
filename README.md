@@ -235,9 +235,8 @@ struct Object {
 // Conversion functions should be in the same namespace as the object
 picojson::value CustomToJson(const Object& value) {
 	return JsonObject()
-		.With("string", value.string)
-		.With("number", value.number)
-		.Build();
+		.Set("string", value.string)
+		.Set("number", value.number);
 }
 
 void CustomFromJson(const picojson::value& value, Object& result) {
