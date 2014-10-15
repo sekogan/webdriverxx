@@ -63,11 +63,11 @@ driver
 
 ```cpp
 // Throws exception if no match is found in the document
-Element list = driver.FindElement(ById("list"));
+Element menu = driver.FindElement(ById("menu"));
 
 // Returns empty vector if no such elements
-// The search is performed inside the list
-std::vector<Element> items = list.FindElements(ByClass("item"));
+// The search is performed inside the the menu element
+std::vector<Element> items = menu.FindElements(ByClass("item"));
 ```
 
 ### Send keyboard input
@@ -260,7 +260,7 @@ void CustomFromJson(const picojson::value& value, Object& result) {
 	result.number = FromJson<int>(value.get("number"));
 }
 
-} // custom
+} // namespace custom
 
 custom::Object o1 = { "abc", 123 };
 driver.Execute("var o1 = arguments[0];", JsArgs() << o1);
