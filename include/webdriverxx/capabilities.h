@@ -74,7 +74,7 @@ ConstValue System = "system"; // Use system settings
 	WEBDRIVERXX_CAPABILITY_RONLY(name, id, type) \
 	Self& Set##name(const type& value) { Set(id, value); return *this; }
 
-struct Proxy : JsonObject {
+struct Proxy : JsonObject { // copyable
 	Proxy() {}
 	explicit Proxy(const picojson::object& object) : JsonObject(object) {}
 
@@ -82,47 +82,47 @@ struct Proxy : JsonObject {
 	WEBDRIVERXX_CAPABILITY(ProxyType, "proxyType", proxy_type::Value)
 };
 
-struct DirectConnection : Proxy {
+struct DirectConnection : Proxy { // copyable
 	DirectConnection() { SetProxyType(proxy_type::Direct); }
 };
 
-struct AutodetectProxy : Proxy {
+struct AutodetectProxy : Proxy { // copyable
 	AutodetectProxy() { SetProxyType(proxy_type::Autodetect); }
 };
 
-struct SystemProxy : Proxy {
+struct SystemProxy : Proxy { // copyable
 	SystemProxy() { SetProxyType(proxy_type::System); }
 };
 
-struct ManualProxy : Proxy {
+struct ManualProxy : Proxy { // copyable
 	ManualProxy() { SetProxyType(proxy_type::Manual); }
 
 	typedef ManualProxy Self;
 	WEBDRIVERXX_CAPABILITY(NoProxyFor, "noProxy", std::string)
 };
 
-struct FtpProxy : ManualProxy {
+struct FtpProxy : ManualProxy { // copyable
 	explicit FtpProxy(const std::string& address) { SetProxyAddress(address); }
 
 	typedef FtpProxy Self;
 	WEBDRIVERXX_CAPABILITY(ProxyAddress, "ftpProxy", std::string)
 };
 
-struct HttpProxy : ManualProxy {
+struct HttpProxy : ManualProxy { // copyable
 	explicit HttpProxy(const std::string& address) { SetProxyAddress(address); }
 
 	typedef HttpProxy Self;
 	WEBDRIVERXX_CAPABILITY(ProxyAddress, "httpProxy", std::string)
 };
 
-struct SslProxy : ManualProxy {
+struct SslProxy : ManualProxy { // copyable
 	explicit SslProxy(const std::string& address) { SetProxyAddress(address); }
 
 	typedef SslProxy Self;
 	WEBDRIVERXX_CAPABILITY(ProxyAddress, "sslProxy", std::string)
 };
 
-struct SocksProxy : ManualProxy {
+struct SocksProxy : ManualProxy { // copyable
 	explicit SocksProxy(const std::string& address) { SetProxyAddress(address); }
 
 	typedef SocksProxy Self;
@@ -131,7 +131,7 @@ struct SocksProxy : ManualProxy {
 	WEBDRIVERXX_CAPABILITY(Password, "socksPassword", std::string)
 };
 
-struct AutomaticProxyFromUrl : Proxy {
+struct AutomaticProxyFromUrl : Proxy { // copyable
 	explicit AutomaticProxyFromUrl(const std::string& url) {
 		SetProxyType(proxy_type::Pac);
 		SetAutoconfigUrl(url);
