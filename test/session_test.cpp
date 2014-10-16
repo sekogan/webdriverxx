@@ -3,14 +3,16 @@
 #include <gtest/gtest.h>
 #include <algorithm>
 
+namespace test {
+
 using namespace webdriverxx;
 
 class TestSession : public ::testing::Test {
 protected:
-	TestSession() : driver(Environment::Instance().GetDriver()) {}
+	TestSession() : driver(GetDriver()) {}
 
 	void ReplaceSpoiledSession() {
-		driver = Environment::Instance().GetFreshDriver();
+		driver = GetFreshDriver();
 	}
 
 	WebDriver driver;
@@ -26,7 +28,7 @@ TEST_F(TestSession, GetsCapabilities)
 }
 
 TEST_F(TestSession, StartsSecondBrowser) {
-	WebDriver second = Environment::Instance().CreateDriver();
+	WebDriver second = CreateDriver();
 }
 
 TEST_F(TestSession, GetsCurrentWindow) {
@@ -91,33 +93,33 @@ TEST_F(TestSession, GetsWindows) {
 }
 
 TEST_F(TestSession, Navigates) {
-	std::string url = std::string(Environment::Instance().GetUrl()) + "status";
+	std::string url = GetWebDriverUrl() + "status";
 	driver.Navigate(url);
 	ASSERT_EQ(url, driver.GetUrl());
 }
 
 TEST_F(TestSession, NavigatesToTestPage) {
-	const std::string url = Environment::Instance().GetTestPageUrl("session.html");
+	const std::string url = GetTestPageUrl("session.html");
 	driver.Navigate(url);
 	ASSERT_EQ(url, driver.GetUrl());
 }
 
 TEST_F(TestSession, GoesBack) {
-	const std::string page1 = Environment::Instance().GetTestPageUrl("navigation1.html");
-	const std::string page2 = Environment::Instance().GetTestPageUrl("navigation2.html");
+	const std::string page1 = GetTestPageUrl("navigation1.html");
+	const std::string page2 = GetTestPageUrl("navigation2.html");
 	driver.Navigate(page1).Navigate(page2).Back();
 	ASSERT_EQ(page1, driver.GetUrl());
 }
 
 TEST_F(TestSession, GoesForward) {
-	const std::string page1 = Environment::Instance().GetTestPageUrl("navigation1.html");
-	const std::string page2 = Environment::Instance().GetTestPageUrl("navigation2.html");
+	const std::string page1 = GetTestPageUrl("navigation1.html");
+	const std::string page2 = GetTestPageUrl("navigation2.html");
 	driver.Navigate(page1).Navigate(page2).Back().Forward();
 	ASSERT_EQ(page2, driver.GetUrl());
 }
 
 TEST_F(TestSession, DoesRefresh) {
-	const std::string page = Environment::Instance().GetTestPageUrl("navigation1.html");
+	const std::string page = GetTestPageUrl("navigation1.html");
 	driver.Navigate(page).FindElement(ByTag("input")).Click().SendKeys("abc");
 	ASSERT_EQ("abc", driver.FindElement(ByTag("input")).GetAttribute("value"));
 	driver.Refresh();
@@ -126,19 +128,19 @@ TEST_F(TestSession, DoesRefresh) {
 }
 
 TEST_F(TestSession, GetsPageSource) {
-	driver.Navigate(Environment::Instance().GetTestPageUrl("session.html"));
+	driver.Navigate(GetTestPageUrl("session.html"));
 	std::string source = driver.GetSource();
 	ASSERT_NE(std::string::npos, source.find("<html"));
 	ASSERT_NE(std::string::npos, source.find("</html>"));
 }
 
 TEST_F(TestSession, GetsPageTitle) {
-	driver.Navigate(Environment::Instance().GetTestPageUrl("session.html"));
+	driver.Navigate(GetTestPageUrl("session.html"));
 	ASSERT_EQ("Test title", driver.GetTitle());
 }
 
 TEST_F(TestSession, GetsScreenshot) {
-	driver.Navigate(Environment::Instance().GetTestPageUrl("session.html"));
+	driver.Navigate(GetTestPageUrl("session.html"));
 	ASSERT_TRUE(!driver.GetScreenshot().empty());
 }
 
@@ -157,7 +159,7 @@ TEST_F(TestSession, SetsImplicitTimeout) {
 }
 
 TEST_F(TestSession, GetsActiveElement) {
-	driver.Navigate(Environment::Instance().GetTestPageUrl("session.html"));
+	driver.Navigate(GetTestPageUrl("session.html"));
 	Element e = driver.FindElement(ByTag("input"));
 	e.Click();
 	ASSERT_EQ(e, driver.GetActiveElement());
@@ -184,7 +186,7 @@ void PrintTo(const Cookie& c, ::std::ostream* os) {
 } // namespace webdriverxx
 
 TEST_F(TestSession, SetsAndGetsCookies) {
-	driver.Navigate(Environment::Instance().GetTestPageUrl("session.html"));
+	driver.Navigate(GetTestPageUrl("session.html"));
 	driver.SetCookie(Cookie("name1", "value1")).SetCookie(Cookie("name2", "value2"));
 	std::vector<Cookie> cookies = driver.GetCookies();
 	ASSERT_TRUE(cookies.size() >= 2u);
@@ -200,17 +202,19 @@ TEST_F(TestSession, SetsAllFieldsOfACookie) {
 }
 
 TEST_F(TestSession, DeletesCookies) {
-	driver.Navigate(Environment::Instance().GetTestPageUrl("session.html"));
+	driver.Navigate(GetTestPageUrl("session.html"));
 	driver.SetCookie(Cookie("name1", "value1")).SetCookie(Cookie("name2", "value2"));
 	driver.DeleteCookies();
 	ASSERT_EQ(0u, driver.GetCookies().size());
 }
 
 TEST_F(TestSession, DeletesACookie) {
-	driver.Navigate(Environment::Instance().GetTestPageUrl("session.html"));
+	driver.Navigate(GetTestPageUrl("session.html"));
 	driver.SetCookie(Cookie("name1", "value1")).SetCookie(Cookie("name2", "value2"));
 	driver.DeleteCookie("name1");
 	std::vector<Cookie> cookies = driver.GetCookies();
 	ASSERT_EQ("", FindCookie(cookies, "name1").value);
 	ASSERT_EQ("value2", FindCookie(cookies, "name2").value);
 }
+
+} // namespace test

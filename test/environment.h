@@ -7,18 +7,22 @@
 #include <string>
 #include <algorithm>
 
-const char* const kDefaultUrl = "http://localhost:7777/";
-const char* const kDefaultPagesUrl = "http://localhost:8080/";
+namespace test {
+
+const char* const kDefaultTestWebDriverUrl = "http://localhost:7777/";
+const char* const kDefaultTestPagesUrl = "http://localhost:8080/";
 
 struct Parameters {
-	std::string url;
+	std::string web_driver_url;
 	webdriverxx::Capabilities required;
 	webdriverxx::Capabilities desired;
-	std::string pages_url;
+	std::string test_pages_url;
+	bool test_real_browsers;
 
 	Parameters()
-		: url(kDefaultUrl)
-		, pages_url(kDefaultPagesUrl)
+		: web_driver_url(kDefaultTestWebDriverUrl)
+		, test_pages_url(kDefaultTestPagesUrl)
+		, test_real_browsers(false)
 	{}
 };
 
@@ -47,20 +51,16 @@ public:
 		return webdriverxx::WebDriver(
 			parameters_.desired,
 			parameters_.required,
-			parameters_.url
+			parameters_.web_driver_url
 			);
 	}
 
-	std::string GetUrl() const {
-		return parameters_.url;
-	}
+	std::string GetWebDriverUrl() const { return parameters_.web_driver_url; }
 
-	Parameters GetParameters() const {
-		return parameters_;
-	}
+	Parameters GetParameters() const { return parameters_; }
 
 	std::string GetTestPageUrl(const std::string& page_name) const {
-		std::string url = parameters_.pages_url;
+		std::string url = parameters_.test_pages_url;
 		if (!url.empty() && url[url.length() - 1] != '/')
 			url += "/";
 		url += page_name;
@@ -87,5 +87,15 @@ private:
 	webdriverxx::WebDriver* driver_;
 	Parameters parameters_;
 };
+
+inline Parameters GetParameters() { return Environment::Instance().GetParameters(); }
+inline std::string GetWebDriverUrl() { return Environment::Instance().GetWebDriverUrl(); }
+inline std::string GetTestPageUrl(const std::string& page_name) { return Environment::Instance().GetTestPageUrl(page_name); }
+inline webdriverxx::WebDriver& GetDriver() { return Environment::Instance().GetDriver(); }
+inline webdriverxx::WebDriver& GetFreshDriver() { return Environment::Instance().GetFreshDriver(); }
+inline webdriverxx::WebDriver CreateDriver() { return Environment::Instance().CreateDriver(); }
+inline bool TestRealBrowsers() { return GetParameters().test_real_browsers; }
+
+} // namespace test
 
 #endif

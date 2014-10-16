@@ -2,6 +2,8 @@
 #include <gtest/gtest.h>
 #include <cassert>
 
+namespace test {
+
 using namespace webdriverxx::detail;
 
 struct WidgetMonitor {
@@ -148,3 +150,5 @@ TEST(Shared, CanBeCompared) {
 	ASSERT_TRUE(s1 == 0);
 	ASSERT_TRUE(s2 != 0);
 }
+
+} // namespace test

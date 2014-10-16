@@ -3,17 +3,17 @@
 #include <webdriverxx/keys.h>
 #include <gtest/gtest.h>
 
+namespace test {
+
 using namespace webdriverxx;
 
 class TestKeyboard : public ::testing::Test {
 protected:
 	static void SetUpTestCase() {
-		Environment::Instance().GetDriver().Navigate(
-			Environment::Instance().GetTestPageUrl("keyboard.html")
-			);
+		GetDriver().Navigate(GetTestPageUrl("keyboard.html"));
 	}
 
-	TestKeyboard() : driver(Environment::Instance().GetDriver()) {}
+	TestKeyboard() : driver(GetDriver()) {}
 
 	WebDriver driver;
 };
@@ -47,3 +47,5 @@ TEST_F(TestKeyboard, SendsKeysToActiveElement) {
 	ASSERT_EQ("abc", first.GetAttribute("value"));
 	ASSERT_EQ("def", second.GetAttribute("value"));
 }
+
+} // namespace test

@@ -2,17 +2,17 @@
 #include <webdriverxx/webdriver.h>
 #include <gtest/gtest.h>
 
+namespace test {
+
 using namespace webdriverxx;
 
 class TestElement : public ::testing::Test {
 protected:
 	static void SetUpTestCase() {
-		Environment::Instance().GetDriver().Navigate(
-			Environment::Instance().GetTestPageUrl("element.html")
-			);
+		GetDriver().Navigate(GetTestPageUrl("element.html"));
 	}
 
-	TestElement() : driver(Environment::Instance().GetDriver()) {}
+	TestElement() : driver(GetDriver()) {}
 
 	WebDriver driver;
 };
@@ -81,3 +81,5 @@ TEST_F(TestElement, GetsSize) {
 TEST_F(TestElement, GetsCssProperty) {
 	ASSERT_EQ("none", driver.FindElement(ById("hidden")).GetCssProperty("display"));
 }
+
+} // namespace test

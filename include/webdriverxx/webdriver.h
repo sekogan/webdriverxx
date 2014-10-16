@@ -15,12 +15,28 @@ public:
 	explicit WebDriver(
 		const Capabilities& desired = Capabilities(),
 		const Capabilities& required = Capabilities(),
-		const std::string& url = kDefaultUrl
+		const std::string& url = kDefaultWebDriverUrl
 		)
 		: Client(url)
 		, Session(CreateSession(desired, required))
 	{}
 };
+
+inline
+WebDriver Start(
+	const Capabilities& desired, 
+	const Capabilities& required = Capabilities(),
+	const std::string& url = kDefaultWebDriverUrl
+	)
+{
+	return WebDriver(desired, required, url);
+}
+
+inline
+WebDriver Start(const Capabilities& desired, const std::string& url)
+{
+	return Start(desired, Capabilities(), url);
+}
 
 } // namespace webdriverxx
 

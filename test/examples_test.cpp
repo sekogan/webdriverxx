@@ -6,15 +6,17 @@
 #include <webdriverxx/wait_match.h>
 #include <gtest/gtest.h>
 
+namespace test {
+
 using namespace webdriverxx;
 
 class TestExamples : public ::testing::Test {
 protected:
-	TestExamples() : driver(Environment::Instance().GetDriver()) {}
+	TestExamples() : driver(GetDriver()) {}
 
 	void StopNavigation() {
 		WaitForMatch([this] {
-			return driver.Navigate(Environment::Instance().GetTestPageUrl("non_existing.html")).GetUrl();
+			return driver.Navigate(GetTestPageUrl("non_existing.html")).GetUrl();
 		}, ::testing::HasSubstr("non_existing"));
 	}
 
@@ -60,9 +62,11 @@ TEST_F(TestExamples, ExplicitWait2) {
 }
 
 TEST_F(TestExamples, UseGmockMatchers) {
-	driver.Navigate(Environment::Instance().GetTestPageUrl("redirect.html"));
+	driver.Navigate(GetTestPageUrl("redirect.html"));
 	auto url = [&]{ return driver.GetUrl(); };
 	using namespace ::testing;
 	WaitForMatch(url, HasSubstr("target"));
 	StopNavigation();	
 }
+
+} // namespace test

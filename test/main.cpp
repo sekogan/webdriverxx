@@ -2,6 +2,8 @@
 #include <gtest/gtest.h>
 #include <string>
 
+namespace test {
+
 Environment* Environment::instance_ = 0;
 
 bool IsCommandLineArgument(const std::string& arg, const char* name) {
@@ -18,23 +20,26 @@ Parameters ParseParameters(int argc, char **argv) {
 	for(int i = 1; i < argc; ++i) {
 		const std::string arg = argv[i];
 		if (IsCommandLineArgument(arg, "browser")) {
-			result.url = webdriverxx::kDefaultUrl;
+			result.web_driver_url = webdriverxx::kDefaultWebDriverUrl;
 			const std::string browser_name = GetCommandLineArgumentValue(arg);
-			result.required.Set("browserName", browser_name);
 			result.desired.Set("browserName", browser_name);
 		} else if (IsCommandLineArgument(arg, "pages")) {
-			result.pages_url = GetCommandLineArgumentValue(arg);
+			result.test_pages_url = GetCommandLineArgumentValue(arg);
 		} else if (IsCommandLineArgument(arg, "webdriver")) {
-			result.url = GetCommandLineArgumentValue(arg);
+			result.web_driver_url = GetCommandLineArgumentValue(arg);
+		} else if (IsCommandLineArgument(arg, "test_real_browsers")) {
+			result.test_real_browsers = true;
 		}
 	}
 	return result;
 }
 
+} // namespace test
+
 int main(int argc, char **argv) {
 	::testing::InitGoogleTest(&argc, argv);
 	::testing::AddGlobalTestEnvironment(
-		new Environment(ParseParameters(argc, argv))
+		new test::Environment(test::ParseParameters(argc, argv))
 		);
 	return RUN_ALL_TESTS();
 }

@@ -1,6 +1,8 @@
 #include <webdriverxx/wait.h>
 #include <gtest/gtest.h>
 
+namespace test {
+
 using namespace webdriverxx;
 using namespace webdriverxx::detail;
 
@@ -82,3 +84,5 @@ TEST(WaitUntil, ThrowsExceptionOnTimeout2) {
 	Duration timeout = 0;
 	ASSERT_THROW(WaitUntil([]{ return false; }, timeout), WebDriverException);
 }
+
+} // namespace test

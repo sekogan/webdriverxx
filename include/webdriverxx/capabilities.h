@@ -12,27 +12,15 @@ typedef std::string Value;
 typedef const char* const ConstValue;
 ConstValue Android = "android";
 ConstValue Chrome = "chrome";
-ConstValue GC = Chrome;
-ConstValue GoogleChrome = "googlechrome";
 ConstValue Firefox = "firefox";
-ConstValue FF = Firefox;
-ConstValue Firefox2 = "firefox2";
-ConstValue Firefox3 = "firefox3";
-ConstValue FirefoxChrome = "firefoxchrome";
-ConstValue FirefoxProxy = "firefoxproxy";
 ConstValue HtmlUnit = "htmlunit";
-ConstValue IE = "internet explorer";
-ConstValue IE_HTA="iehta";
-ConstValue IExplore = "iexplore";
-ConstValue IExploreProxy= "iexploreproxy";
-ConstValue IPad = "iPad";
+ConstValue InternetExplorer = "internet explorer";
 ConstValue IPhone = "iPhone";
+ConstValue IPad = "iPad";
 ConstValue Mock = "mock";
 ConstValue Opera = "opera";
-ConstValue PhantomJS = "phantomjs";
-ConstValue Phantom = PhantomJS;
 ConstValue Safari = "safari";
-ConstValue SafariProxy = "safariproxy";
+ConstValue Phantom = "phantomjs";
 } // namespace browser
 
 namespace platform {
@@ -66,12 +54,12 @@ ConstValue Autodetect = "autodetect"; // Proxy autodetection, probably with WPAD
 ConstValue System = "system"; // Use system settings
 } // namespace proxy_type
 
-#define WEBDRIVERXX_CAPABILITY_RONLY(name, id, type) \
+#define WEBDRIVERXX_PROPERTY_RONLY(name, id, type) \
 	type Get##name() const { return GetOptional<type>(id); } \
 	bool Has##name() { return Has(id); }
 
-#define WEBDRIVERXX_CAPABILITY(name, id, type) \
-	WEBDRIVERXX_CAPABILITY_RONLY(name, id, type) \
+#define WEBDRIVERXX_PROPERTY(name, id, type) \
+	WEBDRIVERXX_PROPERTY_RONLY(name, id, type) \
 	Self& Set##name(const type& value) { Set(id, value); return *this; }
 
 struct Proxy : JsonObject { // copyable
@@ -79,7 +67,7 @@ struct Proxy : JsonObject { // copyable
 	explicit Proxy(const picojson::object& object) : JsonObject(object) {}
 
 	typedef Proxy Self;
-	WEBDRIVERXX_CAPABILITY(ProxyType, "proxyType", proxy_type::Value)
+	WEBDRIVERXX_PROPERTY(ProxyType, "proxyType", proxy_type::Value)
 };
 
 struct DirectConnection : Proxy { // copyable
@@ -98,37 +86,37 @@ struct ManualProxy : Proxy { // copyable
 	ManualProxy() { SetProxyType(proxy_type::Manual); }
 
 	typedef ManualProxy Self;
-	WEBDRIVERXX_CAPABILITY(NoProxyFor, "noProxy", std::string)
+	WEBDRIVERXX_PROPERTY(NoProxyFor, "noProxy", std::string)
 };
 
 struct FtpProxy : ManualProxy { // copyable
 	explicit FtpProxy(const std::string& address) { SetProxyAddress(address); }
 
 	typedef FtpProxy Self;
-	WEBDRIVERXX_CAPABILITY(ProxyAddress, "ftpProxy", std::string)
+	WEBDRIVERXX_PROPERTY(ProxyAddress, "ftpProxy", std::string)
 };
 
 struct HttpProxy : ManualProxy { // copyable
 	explicit HttpProxy(const std::string& address) { SetProxyAddress(address); }
 
 	typedef HttpProxy Self;
-	WEBDRIVERXX_CAPABILITY(ProxyAddress, "httpProxy", std::string)
+	WEBDRIVERXX_PROPERTY(ProxyAddress, "httpProxy", std::string)
 };
 
 struct SslProxy : ManualProxy { // copyable
 	explicit SslProxy(const std::string& address) { SetProxyAddress(address); }
 
 	typedef SslProxy Self;
-	WEBDRIVERXX_CAPABILITY(ProxyAddress, "sslProxy", std::string)
+	WEBDRIVERXX_PROPERTY(ProxyAddress, "sslProxy", std::string)
 };
 
 struct SocksProxy : ManualProxy { // copyable
 	explicit SocksProxy(const std::string& address) { SetProxyAddress(address); }
 
 	typedef SocksProxy Self;
-	WEBDRIVERXX_CAPABILITY(ProxyAddress, "socksProxy", std::string)
-	WEBDRIVERXX_CAPABILITY(Username, "socksUsername", std::string)
-	WEBDRIVERXX_CAPABILITY(Password, "socksPassword", std::string)
+	WEBDRIVERXX_PROPERTY(ProxyAddress, "socksProxy", std::string)
+	WEBDRIVERXX_PROPERTY(Username, "socksUsername", std::string)
+	WEBDRIVERXX_PROPERTY(Password, "socksPassword", std::string)
 };
 
 struct AutomaticProxyFromUrl : Proxy { // copyable
@@ -138,7 +126,7 @@ struct AutomaticProxyFromUrl : Proxy { // copyable
 	}
 
 	typedef AutomaticProxyFromUrl Self;
-	WEBDRIVERXX_CAPABILITY(AutoconfigUrl, "proxyAutoconfigUrl", std::string)
+	WEBDRIVERXX_PROPERTY(AutoconfigUrl, "proxyAutoconfigUrl", std::string)
 };
 
 // List of keys and values indicating features that server can or should provide.
@@ -150,29 +138,29 @@ struct Capabilities : JsonObject { // copyable
 	// If a capability is not listed below use Get/Set/Has public members.
 
 	typedef Capabilities Self;
-	WEBDRIVERXX_CAPABILITY(BrowserName, "browserName", browser::Value)
-	WEBDRIVERXX_CAPABILITY(Version, "version", std::string)
-	WEBDRIVERXX_CAPABILITY(Platform, "platform", platform::Value)
+	WEBDRIVERXX_PROPERTY(BrowserName, "browserName", browser::Value)
+	WEBDRIVERXX_PROPERTY(Version, "version", std::string)
+	WEBDRIVERXX_PROPERTY(Platform, "platform", platform::Value)
 
-	WEBDRIVERXX_CAPABILITY_RONLY(TakesScreenshot, "takesScreenshot", bool)
-	WEBDRIVERXX_CAPABILITY_RONLY(HandlesAlerts, "handlesAlerts", bool)
-	WEBDRIVERXX_CAPABILITY_RONLY(CssSelectorsEnabled, "cssSelectorsEnabled", bool)
+	WEBDRIVERXX_PROPERTY_RONLY(TakesScreenshot, "takesScreenshot", bool)
+	WEBDRIVERXX_PROPERTY_RONLY(HandlesAlerts, "handlesAlerts", bool)
+	WEBDRIVERXX_PROPERTY_RONLY(CssSelectorsEnabled, "cssSelectorsEnabled", bool)
 
-	WEBDRIVERXX_CAPABILITY(JavascriptEnabled, "javascriptEnabled", bool)
-	WEBDRIVERXX_CAPABILITY(DatabaseEnabled, "databaseEnabled", bool)
-	WEBDRIVERXX_CAPABILITY(LocationContextEnabled, "locationContextEnabled", bool)
-	WEBDRIVERXX_CAPABILITY(ApplicationCacheEnabled, "applicationCacheEnabled", bool)
-	WEBDRIVERXX_CAPABILITY(BrowserConnectionEnabled, "browserConnectionEnabled", bool)
-	WEBDRIVERXX_CAPABILITY(WebStorageEnabled, "webStorageEnabled", bool)
-	WEBDRIVERXX_CAPABILITY(AcceptSslCerts, "acceptSslCerts", bool)
-	WEBDRIVERXX_CAPABILITY(Rotatable, "rotatable", bool)
-	WEBDRIVERXX_CAPABILITY(NativeEvents, "nativeEvents", bool)
-	WEBDRIVERXX_CAPABILITY(Proxy, "proxy", Proxy)
-	WEBDRIVERXX_CAPABILITY(UnexpectedAlertBehaviour, "unexpectedAlertBehaviour", unexpected_alert_behaviour::Value)
-	WEBDRIVERXX_CAPABILITY(ElementScrollBehavior, "elementScrollBehavior", int)
+	WEBDRIVERXX_PROPERTY(JavascriptEnabled, "javascriptEnabled", bool)
+	WEBDRIVERXX_PROPERTY(DatabaseEnabled, "databaseEnabled", bool)
+	WEBDRIVERXX_PROPERTY(LocationContextEnabled, "locationContextEnabled", bool)
+	WEBDRIVERXX_PROPERTY(ApplicationCacheEnabled, "applicationCacheEnabled", bool)
+	WEBDRIVERXX_PROPERTY(BrowserConnectionEnabled, "browserConnectionEnabled", bool)
+	WEBDRIVERXX_PROPERTY(WebStorageEnabled, "webStorageEnabled", bool)
+	WEBDRIVERXX_PROPERTY(AcceptSslCerts, "acceptSslCerts", bool)
+	WEBDRIVERXX_PROPERTY(Rotatable, "rotatable", bool)
+	WEBDRIVERXX_PROPERTY(NativeEvents, "nativeEvents", bool)
+	WEBDRIVERXX_PROPERTY(Proxy, "proxy", Proxy)
+	WEBDRIVERXX_PROPERTY(UnexpectedAlertBehaviour, "unexpectedAlertBehaviour", unexpected_alert_behaviour::Value)
+	WEBDRIVERXX_PROPERTY(ElementScrollBehavior, "elementScrollBehavior", int)
 
-	WEBDRIVERXX_CAPABILITY_RONLY(SessionId, "webdriver.remote.sessionid", std::string)
-	WEBDRIVERXX_CAPABILITY(QuietExceptions, "webdriver.remote.quietExceptions", bool)
+	WEBDRIVERXX_PROPERTY_RONLY(SessionId, "webdriver.remote.sessionid", std::string)
+	WEBDRIVERXX_PROPERTY(QuietExceptions, "webdriver.remote.quietExceptions", bool)
 };
 
 inline

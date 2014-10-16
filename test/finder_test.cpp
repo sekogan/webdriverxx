@@ -2,23 +2,25 @@
 #include <webdriverxx/webdriver.h>
 #include <gtest/gtest.h>
 
+namespace test {
+
 using namespace webdriverxx;
 
 class TestFinder : public ::testing::Test {
 protected:
 	static void SetUpTestCase() {
-		WebDriver& driver = Environment::Instance().GetDriver();
-		driver.Navigate(Environment::Instance().GetTestPageUrl("finder.html"));
+		WebDriver& driver = GetDriver();
+		driver.Navigate(GetTestPageUrl("finder.html"));
 		driver.FindElement(ById("finder_loaded"));
 		driver.SetImplicitTimeoutMs(0);
 	}
 
 	static void TearDownTestCase() {
-		WebDriver& driver = Environment::Instance().GetDriver();
+		WebDriver& driver = GetDriver();
 		driver.SetImplicitTimeoutMs(1000);
 	}
 
-	TestFinder() : driver(Environment::Instance().GetDriver()) {}
+	TestFinder() : driver(GetDriver()) {}
 
 	WebDriver driver;
 };
@@ -99,3 +101,5 @@ TEST_F(TestFinder, OfElementDoesNotFindNonExistingInnerElements) {
 TEST_F(TestFinder, OfElementFindsMoreThanOneInnerElement) {
 	ASSERT_EQ(2u, driver.FindElement(ById("outer")).FindElements(ByTag("div")).size());
 }
+
+} // namespace test

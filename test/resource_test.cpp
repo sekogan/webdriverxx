@@ -4,6 +4,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+namespace test {
+
 using namespace webdriverxx;
 using namespace webdriverxx::detail;
 
@@ -357,3 +359,5 @@ TEST_F(TestResource, ThrowsOnMissingValue)
 	Resource resource(kTestUrl, http_client);
 	ASSERT_THROW(resource.Get("command"), WebDriverException);
 }
+
+} // namespace test

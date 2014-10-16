@@ -8,7 +8,7 @@ A lightweight C++ client library for [Selenium Webdriver](http://www.seleniumhq.
 #include <webdriverxx.h>
 using namespace webdriverxx;
 
-WebDriver firefox = Firefox().Start();
+WebDriver firefox = Start(Firefox());
 firefox
     .Navigate("http://google.com")
     .FindElement(ByCss("input[name=q]"))
@@ -33,19 +33,45 @@ firefox
 `#include <webdriverxx/webdriver.h>` and `using namespace webdriverxx`
 are assumed in all examples.
 
+### Start browser
+
+```cpp
+#include <webdriverxx/browsers/firefox.h>
+
+WebDriver ff = Start(Firefox());
+```
+
+```cpp
+#include <webdriverxx/browsers/chrome.h>
+
+WebDriver gc = Start(Chrome());
+```
+
+```cpp
+#include <webdriverxx/browsers/ie.h>
+
+WebDriver ie = Start(InternetExplorer());
+```
+
+```cpp
+#include <webdriverxx/browsers/phantom.h>
+
+WebDriver p = Start(Phantom());
+```
+
 ### Use proxy
 
 ```cpp
-WebDriver ie = InternetExplorer().SetProxy(
+WebDriver ie = Start(InternetExplorer().SetProxy(
 	SocksProxy("127.0.0.1:3128")
 		.SetUsername("user")
 		.SetPassword("12345")
 		.SetNoProxyFor("custom.host")
-	).Start();
+	));
 ```
 
 ```cpp
-WebDriver ff = Firefox().SetProxy(DirectConnection()).Start();
+WebDriver ff = Start(Firefox().SetProxy(DirectConnection()));
 ```
 
 ### Navigate browser
@@ -236,6 +262,34 @@ in different threads.
 - The CURL library should be explicitly initialized if several WebDrivers are used from
 multiple threads. Call `curl_global_init(CURL_GLOBAL_ALL);` from `<curl/curl.h>`
 once per process before using this library.
+
+### Use common capabilities for all browsers
+
+```cpp
+Capabilities common;
+common.SetProxy(DirectConnection());
+auto ff = Start(Firefox(common));
+auto ie = Start(InternetExplorer(common));
+auto gc = Start(Chrome(common));
+```
+
+### Use required capabilities
+
+```cpp
+Capabilities required = /* ... */;
+auto ff = Start(Firefox(), required);
+```
+
+### Use custom URL for connecting to WebDriver
+
+```cpp
+const char* url = "http://localhost:4444/wd/hub/";
+
+auto ff = Start(Firefox(), url);
+
+// or
+auto ff = Start(Firefox(), Capabilities() /* required */, url);
+```
 
 ### Transfer objects between C++ and Javascript
 

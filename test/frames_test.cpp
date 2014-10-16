@@ -2,13 +2,15 @@
 #include <webdriverxx/webdriver.h>
 #include <gtest/gtest.h>
 
+namespace test {
+
 using namespace webdriverxx;
 
 class TestFrames : public ::testing::Test {
 protected:
 	TestFrames()
-		: driver(Environment::Instance().GetDriver())
-		, url(Environment::Instance().GetTestPageUrl("frames.html"))
+		: driver(GetDriver())
+		, url(GetTestPageUrl("frames.html"))
 	{}
 
 	void SetUp()
@@ -58,3 +60,5 @@ TEST_F(TestFrames, CanSwitchToParentFrame) {
 		.SetFocusToParentFrame().SetFocusToParentFrame();
 	ASSERT_EQ("top_frame", driver.FindElement(ById("tag")).GetAttribute("value"));
 }
+
+} // namespace test

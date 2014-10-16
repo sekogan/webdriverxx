@@ -2,17 +2,17 @@
 #include <webdriverxx/webdriver.h>
 #include <gtest/gtest.h>
 
+namespace test {
+
 using namespace webdriverxx;
 
 class TestAlerts : public ::testing::Test {
 protected:
 	static void SetUpTestCase() {
-		Environment::Instance().GetDriver().Navigate(
-			Environment::Instance().GetTestPageUrl("alerts.html")
-			);
+		GetDriver().Navigate(GetTestPageUrl("alerts.html"));
 	}
 
-	TestAlerts() : driver(Environment::Instance().GetDriver()) {}
+	TestAlerts() : driver(GetDriver()) {}
 
 	WebDriver driver;
 };
@@ -51,3 +51,5 @@ TEST_F(TestAlerts, DismissesSendedKeys) {
 	driver.DismissAlert();
 	ASSERT_FALSE(driver.Eval<bool>("return result"));
 }
+
+} // namespace test

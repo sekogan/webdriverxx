@@ -1,6 +1,8 @@
 #include <webdriverxx/wait_match.h>
 #include <gtest/gtest.h>
 
+namespace test {
+
 using namespace webdriverxx;
 using namespace webdriverxx::detail;
 
@@ -83,3 +85,5 @@ TEST(WaitForMatch, ExplainsGMockMatcherMismatch) {
 		ASSERT_NE(npos, message.find("imeout"));
 	}
 }
+
+} // namespace test

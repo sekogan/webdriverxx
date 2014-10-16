@@ -1,6 +1,8 @@
 #include <webdriverxx/capabilities.h>
 #include <gtest/gtest.h>
 
+namespace test {
+
 using namespace webdriverxx;
 
 TEST(Capabilities, AllowsToSetAndGetCustomValues) {
@@ -51,3 +53,5 @@ TEST(Capabilities, ConvertsProxyToJson) {
 	ASSERT_EQ("12345", proxy.Get<std::string>("socksPassword"));
 	ASSERT_EQ("custom.host", proxy.Get<std::string>("noProxy"));
 }
+
+} // namespace test

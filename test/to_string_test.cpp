@@ -1,6 +1,8 @@
 #include <webdriverxx/detail/to_string.h>
 #include <gtest/gtest.h>
 
+namespace test {
+
 using namespace webdriverxx;
 using namespace webdriverxx::detail;
 
@@ -81,3 +83,5 @@ TEST(ToString, ConvertsContainersOfStrings) {
 	ASSERT_EQ("[\"abc\", \"def\"]", ToString(ss));
 	ASSERT_EQ("*[\"abc\", \"def\"]", ToString(&ss));
 }
+
+} // namespace test

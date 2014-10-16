@@ -2,12 +2,14 @@
 #include <webdriverxx/client.h>
 #include <gtest/gtest.h>
 
+namespace test {
+
 using namespace webdriverxx;
 
 class TestClient : public ::testing::Test {
 protected:
 	static void SetUpTestCase() {
-		client = new Client(Environment::Instance().GetUrl());
+		client = new Client(GetWebDriverUrl());
 	}
 
 	static void TearDownTestCase() {
@@ -31,6 +33,8 @@ TEST_F(TestClient, GetsSessions) {
 }
 
 TEST_F(TestClient, CreatesSession) {
- 	Parameters params = Environment::Instance().GetParameters();
+ 	Parameters params = GetParameters();
 	client->CreateSession(params.required, params.desired);
 }
+
+} // namespace test

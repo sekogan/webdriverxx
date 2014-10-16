@@ -11,12 +11,12 @@
 
 namespace webdriverxx {
 
-const char *const kDefaultUrl = "http://localhost:4444/wd/hub/";
+const char *const kDefaultWebDriverUrl = "http://localhost:4444/wd/hub/";
 
 // Gives low level access to server's resources. You normally should not use it. 
 class Client { // copyable
 public:
-	explicit Client(const std::string& url = kDefaultUrl);
+	explicit Client(const std::string& url = kDefaultWebDriverUrl);
 	virtual ~Client() {}
 
 	picojson::object GetStatus() const;

@@ -3,17 +3,17 @@
 #include <gtest/gtest.h>
 #include <list>
 
+namespace test {
+
 using namespace webdriverxx;
 
 class TestJsExecutor : public ::testing::Test {
 protected:
 	static void SetUpTestCase() {
-		Environment::Instance().GetDriver().Navigate(
-			Environment::Instance().GetTestPageUrl("js.html")
-			);
+		GetDriver().Navigate(GetTestPageUrl("js.html"));
 	}
 
-	TestJsExecutor() : driver(Environment::Instance().GetDriver()) {}
+	TestJsExecutor() : driver(GetDriver()) {}
 
 	WebDriver driver;
 };
@@ -196,3 +196,5 @@ TEST_F(TestJsExecutor, ReturnsElementFromAsyncScript) {
 	ASSERT_EQ(e, driver.EvalAsync<Element>(AsyncScript(
 		"return document.getElementsByTagName('input')[0]")));
 }
+
+} // namespace test
