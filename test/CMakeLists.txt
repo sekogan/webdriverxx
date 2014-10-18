@@ -28,8 +28,14 @@ add_definitions(-DWEBDRIVERXX_ENABLE_GMOCK_MATCHERS)
 if (MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
-else()
+elseif (
+	"${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR
+	"${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"
+	)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+	if (NOT ${APPLE})
+		set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-fsanitize=address -g -O1 -fno-omit-frame-pointer")
+	endif()
 endif()
 
 # Coverage
