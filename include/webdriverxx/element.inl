@@ -128,6 +128,11 @@ bool Element::operator == (const Element& other) const {
 }
 
 inline
+bool Element::operator < (const Element& other) const {
+	return ref_ < other.ref_;
+}
+
+inline
 picojson::value Element::ToJson() const {
 	detail::ElementRef ref = { ref_ };
 	return ::webdriverxx::ToJson(ref);

@@ -62,6 +62,20 @@ TEST_F(TestElement, IsNotEqualToOtherElement) {
 	ASSERT_TRUE(e != other);
 }
 
+TEST_F(TestElement, HasStrictWeakOrdering) {
+	Element a = driver.FindElement(ById("first_div"));
+	Element b = driver.FindElement(ById("second_div"));
+	Element c = driver.FindElement(ById("third_div"));
+	Element a2 = a;
+	if (c < b) std::swap(b, c);
+	if (b < a) std::swap(a, b);
+	if (c < b) std::swap(b, c);
+	ASSERT_FALSE(a < a2);
+	ASSERT_FALSE(a2 < a);
+	ASSERT_TRUE(a < b && !(b < a));
+	ASSERT_TRUE(a < b && b < c && a < c);
+}
+
 TEST_F(TestElement, GetsIsDisplayed) {
 	ASSERT_TRUE(driver.FindElement(ById("visible")).IsDisplayed());
 	ASSERT_FALSE(driver.FindElement(ById("hidden")).IsDisplayed());

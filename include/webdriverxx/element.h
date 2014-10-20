@@ -56,6 +56,7 @@ public:
 	bool Equals(const Element& other) const;
 	bool operator != (const Element& other) const;
 	bool operator == (const Element& other) const;
+	bool operator < (const Element& other) const;
 
 	picojson::value ToJson() const;
 
