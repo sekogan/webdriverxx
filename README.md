@@ -53,12 +53,6 @@ WebDriver gc = Start(Chrome());
 WebDriver ie = Start(InternetExplorer());
 ```
 
-```cpp
-#include <webdriverxx/browsers/phantom.h>
-
-WebDriver p = Start(Phantom());
-```
-
 ### Use proxy
 
 ```cpp
