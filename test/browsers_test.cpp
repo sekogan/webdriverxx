@@ -32,7 +32,7 @@ TEST(Firefox, HasCapabilitiesProperties) {
 
 TEST(Firefox, ConvertsToJson) {
 	auto ff = Firefox()
-		.SetLogging(firefox::Logging().SetLevel(firefox::log_level::Warning))
+		.SetLoggingPrefs(LoggingPrefs().SetLevel(log_level::Warning))
 		.SetFirefoxBinary("abc");
 	const auto json = ToJson(ff);
 	const auto c = FromJson<Capabilities>(json);

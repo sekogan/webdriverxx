@@ -63,9 +63,6 @@ ConstValue System = "system"; // Use system settings
 	auto Set##name(const type& value) -> decltype(*this) { Set(id, value); return *this; }
 
 struct Proxy : JsonObject { // copyable
-	Proxy() {}
-	explicit Proxy(const picojson::object& object) : JsonObject(object) {}
-
 	WEBDRIVERXX_PROPERTY(ProxyType, "proxyType", proxy_type::Value)
 };
 
@@ -79,6 +76,15 @@ struct AutodetectProxy : Proxy { // copyable
 
 struct SystemProxy : Proxy { // copyable
 	SystemProxy() { SetProxyType(proxy_type::System); }
+};
+
+struct AutomaticProxyFromUrl : Proxy { // copyable
+	explicit AutomaticProxyFromUrl(const std::string& url) {
+		SetProxyType(proxy_type::Pac);
+		SetAutoconfigUrl(url);
+	}
+
+	WEBDRIVERXX_PROPERTY(AutoconfigUrl, "proxyAutoconfigUrl", std::string)
 };
 
 struct ManualProxy : Proxy { // copyable
@@ -113,13 +119,22 @@ struct SocksProxy : ManualProxy { // copyable
 	WEBDRIVERXX_PROPERTY(Password, "socksPassword", std::string)
 };
 
-struct AutomaticProxyFromUrl : Proxy { // copyable
-	explicit AutomaticProxyFromUrl(const std::string& url) {
-		SetProxyType(proxy_type::Pac);
-		SetAutoconfigUrl(url);
-	}
+namespace log_level {
+typedef std::string Value;
+typedef const char* const ConstValue;
+ConstValue Off = "OFF";
+ConstValue Severe = "SEVERE";
+ConstValue Warning = "WARNING";
+ConstValue Info = "INFO";
+ConstValue Config = "CONFIG";
+ConstValue Fine = "FINE";
+ConstValue Finer = "FINER";
+ConstValue Finest = "FINEST";
+ConstValue All = "ALL";
+} // namespace log_level
 
-	WEBDRIVERXX_PROPERTY(AutoconfigUrl, "proxyAutoconfigUrl", std::string)
+struct LoggingPrefs : JsonObject {
+	WEBDRIVERXX_PROPERTY(Level, "driver", log_level::Value)
 };
 
 // List of keys and values indicating features that server can or should provide.
@@ -154,16 +169,6 @@ struct Capabilities : JsonObject { // copyable
 	WEBDRIVERXX_PROPERTY_RONLY(SessionId, "webdriver.remote.sessionid", std::string)
 	WEBDRIVERXX_PROPERTY(QuietExceptions, "webdriver.remote.quietExceptions", bool)
 };
-
-inline
-picojson::value CustomToJson(const Proxy& value) {
-	return static_cast<picojson::value>(value);
-}
-
-inline
-picojson::value CustomToJson(const Capabilities& value) {
-	return static_cast<picojson::value>(value);
-}
 
 inline
 void CustomFromJson(const picojson::value& value, Capabilities& result) {
