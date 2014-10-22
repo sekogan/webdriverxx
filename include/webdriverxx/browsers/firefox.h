@@ -21,9 +21,7 @@ ConstValue All = "ALL";
 } // namespace log_level
 
 struct Logging : JsonObject {
-	WEBDRIVERXX_PROPERTIES_BEGIN(Logging)
 	WEBDRIVERXX_PROPERTY(Level, "driver", log_level::Value)
-	WEBDRIVERXX_PROPERTIES_END()
 };
 
 } // namespace firefox
@@ -36,13 +34,11 @@ struct Firefox : Capabilities { // copyable
 		SetPlatform(platform::Any);
 	}
 
-	WEBDRIVERXX_PROPERTIES_BEGIN(Firefox)
 	// Profile is a profile folder, zipped and base64 encoded.
 	// TODO: add FirefoxProfile 
 	WEBDRIVERXX_PROPERTY(Profile, "firefox_profile", std::string)
 	WEBDRIVERXX_PROPERTY(Logging, "loggingPrefs", firefox::Logging)
 	WEBDRIVERXX_PROPERTY(FirefoxBinary, "firefox_binary", std::string)
-	WEBDRIVERXX_PROPERTIES_END()
 };
 
 namespace firefox {
