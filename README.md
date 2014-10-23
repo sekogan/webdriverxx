@@ -3,6 +3,8 @@
 
 A lightweight C++ client library for [Selenium Webdriver](http://www.seleniumhq.org/).
 
+Version 0.6.0-dev [![Build Status](https://travis-ci.org/sekogan/sandbox.svg?branch=dev)](https://travis-ci.org/sekogan/sandbox)
+
 ## A quick example
 ```cpp
 #include <webdriverxx.h>
