@@ -54,16 +54,21 @@ ConstValue Autodetect = "autodetect"; // Proxy autodetection, probably with WPAD
 ConstValue System = "system"; // Use system settings
 } // namespace proxy_type
 
+#define WEBDRIVERXX_PROPERTIES_BEGIN(this_class)	typedef this_class This;
+#define WEBDRIVERXX_PROPERTIES_END()
+
 #define WEBDRIVERXX_PROPERTY_RONLY(name, id, type) \
 	type Get##name() const { return GetOptional<type>(id); } \
 	bool Has##name() { return Has(id); }
 
 #define WEBDRIVERXX_PROPERTY(name, id, type) \
 	WEBDRIVERXX_PROPERTY_RONLY(name, id, type) \
-	auto Set##name(const type& value) -> decltype(*this) { Set(id, value); return *this; }
+	This& Set##name(const type& value) { Set(id, value); return *this; }
 
 struct Proxy : JsonObject { // copyable
+	WEBDRIVERXX_PROPERTIES_BEGIN(Proxy)
 	WEBDRIVERXX_PROPERTY(ProxyType, "proxyType", proxy_type::Value)
+	WEBDRIVERXX_PROPERTIES_END()
 };
 
 struct DirectConnection : Proxy { // copyable
@@ -84,39 +89,51 @@ struct AutomaticProxyFromUrl : Proxy { // copyable
 		SetAutoconfigUrl(url);
 	}
 
+	WEBDRIVERXX_PROPERTIES_BEGIN(AutomaticProxyFromUrl)
 	WEBDRIVERXX_PROPERTY(AutoconfigUrl, "proxyAutoconfigUrl", std::string)
+	WEBDRIVERXX_PROPERTIES_END()
 };
 
 struct ManualProxy : Proxy { // copyable
 	ManualProxy() { SetProxyType(proxy_type::Manual); }
 
+	WEBDRIVERXX_PROPERTIES_BEGIN(ManualProxy)
 	WEBDRIVERXX_PROPERTY(NoProxyFor, "noProxy", std::string)
+	WEBDRIVERXX_PROPERTIES_END()
 };
 
 struct FtpProxy : ManualProxy { // copyable
 	explicit FtpProxy(const std::string& address) { SetProxyAddress(address); }
 
+	WEBDRIVERXX_PROPERTIES_BEGIN(FtpProxy)
 	WEBDRIVERXX_PROPERTY(ProxyAddress, "ftpProxy", std::string)
+	WEBDRIVERXX_PROPERTIES_END()
 };
 
 struct HttpProxy : ManualProxy { // copyable
 	explicit HttpProxy(const std::string& address) { SetProxyAddress(address); }
 
+	WEBDRIVERXX_PROPERTIES_BEGIN(HttpProxy)
 	WEBDRIVERXX_PROPERTY(ProxyAddress, "httpProxy", std::string)
+	WEBDRIVERXX_PROPERTIES_END()
 };
 
 struct SslProxy : ManualProxy { // copyable
 	explicit SslProxy(const std::string& address) { SetProxyAddress(address); }
 
+	WEBDRIVERXX_PROPERTIES_BEGIN(SslProxy)
 	WEBDRIVERXX_PROPERTY(ProxyAddress, "sslProxy", std::string)
+	WEBDRIVERXX_PROPERTIES_END()
 };
 
 struct SocksProxy : ManualProxy { // copyable
 	explicit SocksProxy(const std::string& address) { SetProxyAddress(address); }
 
+	WEBDRIVERXX_PROPERTIES_BEGIN(SocksProxy)
 	WEBDRIVERXX_PROPERTY(ProxyAddress, "socksProxy", std::string)
 	WEBDRIVERXX_PROPERTY(Username, "socksUsername", std::string)
 	WEBDRIVERXX_PROPERTY(Password, "socksPassword", std::string)
+	WEBDRIVERXX_PROPERTIES_END()
 };
 
 namespace log_level {
@@ -134,7 +151,9 @@ ConstValue All = "ALL";
 } // namespace log_level
 
 struct LoggingPrefs : JsonObject {
+	WEBDRIVERXX_PROPERTIES_BEGIN(LoggingPrefs)
 	WEBDRIVERXX_PROPERTY(Level, "driver", log_level::Value)
+	WEBDRIVERXX_PROPERTIES_END()
 };
 
 // List of keys and values indicating features that server can or should provide.
@@ -145,6 +164,7 @@ struct Capabilities : JsonObject { // copyable
 	// Hardcoded capabilities are here just to add some sugar.
 	// If a capability is not listed below use Get/Set/Has public members.
 
+	WEBDRIVERXX_PROPERTIES_BEGIN(Capabilities)
 	WEBDRIVERXX_PROPERTY(BrowserName, "browserName", browser::Value)
 	WEBDRIVERXX_PROPERTY(Version, "version", std::string)
 	WEBDRIVERXX_PROPERTY(Platform, "platform", platform::Value)
@@ -168,6 +188,7 @@ struct Capabilities : JsonObject { // copyable
 
 	WEBDRIVERXX_PROPERTY_RONLY(SessionId, "webdriver.remote.sessionid", std::string)
 	WEBDRIVERXX_PROPERTY(QuietExceptions, "webdriver.remote.quietExceptions", bool)
+	WEBDRIVERXX_PROPERTIES_END()
 };
 
 inline

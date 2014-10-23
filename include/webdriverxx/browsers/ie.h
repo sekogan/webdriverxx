@@ -27,6 +27,7 @@ struct InternetExplorer : Capabilities { // copyable
 		SetPlatform(platform::Any);
 	}
 
+	WEBDRIVERXX_PROPERTIES_BEGIN(InternetExplorer)
 	WEBDRIVERXX_PROPERTY(SkipProtectedModeCheck, "ignoreProtectedModeSettings", bool)
 	WEBDRIVERXX_PROPERTY(IgnoreZoomSetting, "ignoreZoomSetting", bool)
 	WEBDRIVERXX_PROPERTY(InitialUrl, "initialBrowserUrl", std::string)
@@ -44,6 +45,7 @@ struct InternetExplorer : Capabilities { // copyable
 	WEBDRIVERXX_PROPERTY(ExtractPath, "extractPath", std::string)
 	WEBDRIVERXX_PROPERTY(Silent, "silent", bool)
 	WEBDRIVERXX_PROPERTY(ProxyByServer, "ie.setProxyByServer", bool)
+	WEBDRIVERXX_PROPERTIES_END()
 };
 
 } // namespace webdriverxx
