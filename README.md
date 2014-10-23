@@ -88,7 +88,7 @@ driver
 Element menu = driver.FindElement(ById("menu"));
 
 // Returns empty vector if no such elements
-// The search is performed inside the the menu element
+// The search is performed inside the menu element
 std::vector<Element> items = menu.FindElements(ByClass("item"));
 ```
 
