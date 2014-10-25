@@ -55,7 +55,7 @@ TEST_F(TestFrames, CanSwitchToDeepFrames) {
 }
 
 TEST_F(TestFrames, CanSwitchToParentFrame) {
-	if (driver.GetCapabilities().GetBrowserName() == browser::Phantom) return; // Not supported in PhantomJS 1.9.7
+	if (IsPhantom()) return; // Not supported in PhantomJS 1.9.7
 	driver.SetFocusToFrame(0).SetFocusToFrame(1)
 		.SetFocusToParentFrame().SetFocusToParentFrame();
 	ASSERT_EQ("top_frame", driver.FindElement(ById("tag")).GetAttribute("value"));

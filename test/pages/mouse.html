@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript">
+	function report_click(event) {
+		document.getElementById('click_type').value = event.type;
+		document.getElementById('click_button').value = event.button;
+	}
+
+	function report_updown(event) {
+		document.getElementById('updown_type').value = event.type;
+		document.getElementById('updown_button').value = event.button;
+	}
+
+</script>
+<style type="text/css">
+	* { border: none; padding: 0; margin: 0; }
+	#target { width: 100px; height: 100px; margin: 50px; background-color: red; }
+</style>
+</head>
+<body>
+<div id="target"
+onclick="report_click(event)"
+ondblclick="report_click(event)"
+onmousedown="report_updown(event)"
+onmouseup="report_updown(event)"
+></div>
+<div><input id="click_type"></div>
+<div><input id="click_button"></div>
+<div><input id="updown_type"></div>
+<div><input id="updown_button"></div>
+</body>
+</html>

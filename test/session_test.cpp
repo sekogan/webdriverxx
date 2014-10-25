@@ -70,17 +70,15 @@ TEST_F(TestSession, GetsWindowPosition) {
 }
 
 TEST_F(TestSession, SetsWindowPosition) {
+	if (IsPhantom()) return;
 	Window window = driver.GetCurrentWindow();
 	Point position1;
 	position1.x = 101;
 	position1.y = 102;
 	window.SetPosition(position1);
-	if (driver.GetCapabilities().GetBrowserName() != browser::Phantom)
-	{
-		Point position2 = window.GetPosition();
-		ASSERT_EQ(101, position2.x);
-		ASSERT_EQ(102, position2.y);
-	}
+	Point position2 = window.GetPosition();
+	ASSERT_EQ(101, position2.x);
+	ASSERT_EQ(102, position2.y);
 }
 
 TEST_F(TestSession, MaximizesWindow) {

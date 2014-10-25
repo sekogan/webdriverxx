@@ -79,10 +79,11 @@ public:
 		return Upload(command, upload_data, &IHttpClient::Post, "POST");
 	}
 
+	template<typename T>
 	void Post(
 		const std::string& command,
 		const std::string& arg_name,
-		const std::string& arg_value
+		const T& arg_value
 		) const {
 		Post(command, JsonObject().Set(arg_name, arg_value));
 	}	

@@ -4,22 +4,14 @@
 #include "by.h"
 #include "types.h"
 #include "keys.h"
-#include "conversions.h"
 #include "detail/shared.h"
 #include "detail/keyboard.h"
 #include "detail/resource.h"
 #include "detail/factories.h"
-#include <picojson.h>
 #include <string>
 #include <vector>
 
 namespace webdriverxx {
-namespace detail {
-
-class Resource;
-struct IFinderFactory;
-
-} // namespace detail
 
 // An element from DOM
 class Element { // copyable
@@ -31,6 +23,8 @@ public:
 		const detail::Shared<detail::Resource>& resource,
 		const detail::Shared<detail::IFinderFactory>& factory
 		);
+
+	std::string GetRef() const; // Returns ID that is used by Webdriver to identify elements
 
 	bool IsDisplayed() const;
 	bool IsEnabled() const;
@@ -58,9 +52,8 @@ public:
 	bool operator == (const Element& other) const;
 	bool operator < (const Element& other) const;
 
-	picojson::value ToJson() const;
-
 private:
+	detail::Resource& GetResource() const;
 	detail::Keyboard GetKeyboard() const;
 
 private:

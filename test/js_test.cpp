@@ -173,25 +173,25 @@ std::string AsyncScript(const std::string& script) {
 }
 
 TEST_F(TestJsExecutor, ExecutesSimpleAsyncScript) {
-	if (driver.GetCapabilities().GetBrowserName() == browser::Phantom) return; // Crashes PhantomJS 1.9.7
+	if (IsPhantom()) return; // Crashes PhantomJS 1.9.7
 	driver.ExecuteAsync(AsyncScript("document.title = 'abc'"));
 	ASSERT_EQ("abc", driver.GetTitle());
 }
 
 TEST_F(TestJsExecutor, PassesArgumentsToAsyncScript) {
-	if (driver.GetCapabilities().GetBrowserName() == browser::Phantom) return; // Crashes PhantomJS 1.9.7
+	if (IsPhantom()) return; // Crashes PhantomJS 1.9.7
 	driver.ExecuteAsync(AsyncScript("document.title = JSON.stringify(Array.prototype.slice.call(arguments, 0))"),
 		JsArgs() << std::string("abc") << 123 << true);
 	ASSERT_EQ("[\"abc\",123,true]", driver.GetTitle());
 }
 
 TEST_F(TestJsExecutor, ReturnsValueFromAsyncScript) {
-	if (driver.GetCapabilities().GetBrowserName() == browser::Phantom) return; // Crashes PhantomJS 1.9.7
+	if (IsPhantom()) return; // Crashes PhantomJS 1.9.7
 	ASSERT_EQ(123, driver.EvalAsync<int>(AsyncScript("return 123")));
 }
 
 TEST_F(TestJsExecutor, ReturnsElementFromAsyncScript) {
-	if (driver.GetCapabilities().GetBrowserName() == browser::Phantom) return; // Crashes PhantomJS 1.9.7
+	if (IsPhantom()) return; // Crashes PhantomJS 1.9.7
 	Element e = driver.FindElement(ByTag("input"));
 	ASSERT_EQ(e, driver.EvalAsync<Element>(AsyncScript(
 		"return document.getElementsByTagName('input')[0]")));

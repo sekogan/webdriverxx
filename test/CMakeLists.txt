@@ -12,6 +12,7 @@ set(SOURCE_FILES
 	js_test.cpp
 	keyboard_test.cpp
 	main.cpp
+	mouse_test.cpp
 	resource_test.cpp
 	session_test.cpp
 	shared_test.cpp
