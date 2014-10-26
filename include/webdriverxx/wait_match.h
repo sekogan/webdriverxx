@@ -102,19 +102,25 @@ auto SelectMakeMatcherAdapter(const M& matcher, std::false_type /*no_custom_adap
 // Returns that value or throws exception on timeout.
 // Getter is a function or function-like object that returns some copyable value.
 // Matcher can be a predicate or a Google Mock matcher (if Google Mock matchers are enabled).
-template<typename G, typename M>
+template<typename Getter, typename Matcher>
 inline
 auto WaitForMatch(
-	G getter, M matcher,
-	Duration timeoutMs = 5000, Duration intervalMs = 50
+	Getter getter,
+	Matcher matcher,
+	Duration timeoutMs = 5000,
+	Duration intervalMs = 50
 	) -> decltype(getter()) {
-	typedef decltype(getter()) T;
-	const auto& adapter = detail::SelectMakeMatcherAdapter<T>(matcher, typename std::is_same<void,decltype(MakeMatcherAdapter<T>(matcher))>::type());
-	return WaitForValue([&getter, &adapter]() -> T {
-			const auto value = getter();
-			if (!adapter.Apply(value))
-				throw WebDriverException(adapter.DescribeMismatch(value));
-			return value;
+	typedef decltype(getter()) Value;
+	const auto& adapter = detail::SelectMakeMatcherAdapter<Value>(matcher,
+		typename std::is_same<void,decltype(MakeMatcherAdapter<Value>(matcher))>::type());
+	return detail::Wait([&getter, &adapter](std::string* description) -> std::unique_ptr<Value> {
+			auto value_ptr = detail::TryToCallGetter(getter, description);
+			if (value_ptr && !adapter.Apply(*value_ptr)) {
+				if (description)
+					*description = adapter.DescribeMismatch(*value_ptr);
+				value_ptr.reset();
+			}
+			return value_ptr;
 		}, timeoutMs, intervalMs);
 }
 

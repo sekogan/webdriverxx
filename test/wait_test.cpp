@@ -35,7 +35,7 @@ TEST(WaitForValue, CallsGetterOnce) {
 
 TEST(WaitForValue, ThrowsExceptionOnTimeout) {
 	Duration timeout = 0;
-	ASSERT_THROW(WaitForValue([]{ throw std::exception(); }, timeout), WebDriverException);
+	ASSERT_THROW(WaitForValue([]() -> int { throw std::exception(); }, timeout), WebDriverException);
 }
 
 TEST(WaitForValue, CallsGetterUntilItSucceeds) {
@@ -52,7 +52,7 @@ TEST(WaitForValue, CallsGetterUntilItSucceeds) {
 TEST(WaitForValue, PassesErrorMessageFromGetter) {
 	Duration timeout = 0;
 	try {
-		WaitForValue([]{ throw std::runtime_error("abc"); }, timeout);
+		WaitForValue([]() -> int { throw std::runtime_error("abc"); }, timeout);
 		FAIL();
 	} catch (const WebDriverException& e) {
 		std::string message = e.what();
