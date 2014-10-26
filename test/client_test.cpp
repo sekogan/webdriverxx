@@ -34,7 +34,7 @@ TEST_F(TestClient, GetsSessions) {
 
 TEST_F(TestClient, CreatesSession) {
  	Parameters params = GetParameters();
-	client->CreateSession(params.required, params.desired);
+	client->CreateSession(params.desired, params.required);
 }
 
 } // namespace test
