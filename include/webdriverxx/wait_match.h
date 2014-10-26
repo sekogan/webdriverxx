@@ -70,7 +70,7 @@ public:
 	}
 
 	std::string DescribeMismatch(const T& value) const {
-		return detail::Fmt() << "Value " << value << " does not match predicate";
+		return detail::Fmt() << "Value " << ToString(value) << " does not match predicate";
 	}
 
 private:
@@ -98,9 +98,14 @@ auto SelectMakeMatcherAdapter(const M& matcher, std::false_type /*no_custom_adap
 
 } // detail
 
+// Waits until a value returned by a getter satisfies a supplied matcher.
+// Returns that value or throws exception on timeout.
+// Getter is a function or function-like object that returns some copyable value.
+// Matcher can be a predicate or a Google Mock matcher (if Google Mock matchers are enabled).
 template<typename G, typename M>
 inline
-auto WaitForMatch(const G& getter, const M& matcher,
+auto WaitForMatch(
+	G getter, M matcher,
 	Duration timeoutMs = 5000, Duration intervalMs = 50
 	) -> decltype(getter()) {
 	typedef decltype(getter()) T;
