@@ -113,8 +113,8 @@ auto WaitForMatch(
 	typedef decltype(getter()) Value;
 	const auto& adapter = detail::SelectMakeMatcherAdapter<Value>(matcher,
 		typename std::is_same<void,decltype(MakeMatcherAdapter<Value>(matcher))>::type());
-	return detail::Wait([&getter, &adapter](std::string* description) -> std::unique_ptr<Value> {
-			auto value_ptr = detail::TryToCallGetter(getter, description);
+	return detail::Wait<Value>([&getter, &adapter](std::string* description) -> std::unique_ptr<Value> {
+			auto value_ptr = detail::TryToCallGetter<Value>(getter, description);
 			if (value_ptr && !adapter.Apply(*value_ptr)) {
 				if (description)
 					*description = adapter.DescribeMismatch(*value_ptr);

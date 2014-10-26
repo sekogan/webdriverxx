@@ -6,17 +6,16 @@
 #include "detail/to_string.h"
 #include <string>
 #include <memory>
-#include <type_traits>
 
 namespace webdriverxx {
 namespace detail {
 
-template<typename DescriptiveGetter>
-auto Wait(
+template<typename Value, typename DescriptiveGetter>
+Value Wait(
 	DescriptiveGetter getter,
 	Duration timeoutMs = 5000,
 	Duration intervalMs = 50
-	) -> typename std::decay<decltype(*getter(nullptr))>::type {
+	) {
 	const TimePoint timeout = detail::Now() + timeoutMs;
 	for (;;) {
 		const auto value_ptr = getter(nullptr);
@@ -36,11 +35,8 @@ auto Wait(
 	}
 }
 
-template<typename Getter>
-auto TryToCallGetter(
-	Getter getter, std::string* description
-	) -> std::unique_ptr<decltype(getter())> {
-	typedef decltype(getter()) Value;
+template<typename Value, typename Getter>
+std::unique_ptr<Value> TryToCallGetter(Getter getter, std::string* description) {
 	std::unique_ptr<Value> value_ptr;
 	try {
 		value_ptr.reset(new Value(getter()));
@@ -63,9 +59,10 @@ auto WaitForValue(
 	Duration timeoutMs = 5000,
 	Duration intervalMs = 50
 	) -> decltype(getter()) {
-	return detail::Wait(
+	typedef decltype(getter()) Value;
+	return detail::Wait<Value>(
 		[&getter](std::string* description) {
-			return detail::TryToCallGetter(getter, description);
+			return detail::TryToCallGetter<Value>(getter, description);
 		},
 		timeoutMs, intervalMs);
 }
@@ -81,9 +78,9 @@ auto WaitUntil(
 	Duration intervalMs = 50
 	) -> decltype(getter()) {
 	typedef decltype(getter()) Value;
-	return detail::Wait(
+	return detail::Wait<Value>(
 		[&getter](std::string* description) -> std::unique_ptr<Value> {
-			auto value_ptr = detail::TryToCallGetter(getter, description);
+			auto value_ptr = detail::TryToCallGetter<Value>(getter, description);
 			if (!value_ptr || !!*value_ptr)
 				return value_ptr;
 			if (description)
