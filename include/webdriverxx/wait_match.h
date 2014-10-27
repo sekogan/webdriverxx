@@ -3,7 +3,6 @@
 
 #include "wait.h"
 #include "detail/to_string.h"
-#include "detail/meta.h"
 #include <type_traits>
 
 #ifdef WEBDRIVERXX_ENABLE_GMOCK_MATCHERS

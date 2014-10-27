@@ -1,10 +1,10 @@
 #ifndef WEBDRIVERXX_TO_STRING_H
 #define WEBDRIVERXX_TO_STRING_H
 
-#include "meta.h"
 #include <string>
 #include <sstream>
 #include <type_traits>
+#include <utility>
 
 namespace webdriverxx {
 namespace detail {
@@ -55,7 +55,7 @@ struct ToStringContainerFilter {
 
 private:
 	template<typename T>
-	static std::string Impl(const T& value, decltype(&*std::begin(ValueRef<T>()))) {
+	static std::string Impl(const T& value, decltype(&*std::begin(std::declval<const T&>()))) {
 		auto it = std::begin(value);
 		const auto end = std::end(value);
 		int limit = 20;
