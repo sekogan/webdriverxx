@@ -26,7 +26,8 @@ public:
 		std::ostringstream s;
 		s << "Expected: ";
 		matcher_.DescribeTo(&s);
-		s << ", actual: " << ToString(value);
+		s << ", actual: ";
+		ToStream(value, s);
 		const auto mismatch_details = GetMismatchDetails(value);
 		if (!mismatch_details.empty())
 			 s << ", " << mismatch_details;
