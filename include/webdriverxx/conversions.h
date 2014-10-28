@@ -3,10 +3,10 @@
 
 #include "types.h"
 #include "detail/error_handling.h"
+#include "detail/meta_tools.h"
 #include <picojson.h>
 #include <algorithm>
 #include <iterator>
-#include <utility>
 
 namespace webdriverxx {
 
@@ -73,7 +73,7 @@ struct ToJsonContainerFilter {
 
 private:
 	template<typename T>
-	static picojson::value Impl(const T& value, decltype(&*std::begin(std::declval<const T&>()))) {
+	static picojson::value Impl(const T& value, decltype(&*std::begin(value_ref<T>()))) {
 		typedef typename std::iterator_traits<decltype(std::begin(value))>::value_type Item;
 		picojson::value result = picojson::value(picojson::array());
 		picojson::array& dst = result.get<picojson::array>();
@@ -162,7 +162,7 @@ struct FromJsonContainerFilter {
 
 private:
 	template<typename T>
-	static void Impl(const picojson::value& value, T& result, decltype(&*std::begin(std::declval<const T&>()))) {
+	static void Impl(const picojson::value& value, T& result, decltype(&*std::begin(value_ref<T>()))) {
 		WEBDRIVERXX_CHECK(value.is<picojson::array>(), "Value is not an array");
 		const picojson::array& array = value.get<picojson::array>();
 		typedef typename std::iterator_traits<decltype(std::begin(result))>::value_type Item;

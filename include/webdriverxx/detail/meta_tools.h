@@ -15,13 +15,19 @@ struct type_is { typedef T type; };
 template<class>
 struct to_void : type_is<void> {};
 
-template<class T, class = void>
-struct is_iterable : std::false_type {};
+template<class T>
+T& value_ref(); // MSVC2010 doesn't have std::declval
 
 template<class T>
-struct is_iterable<T, typename to_void<decltype(
-	std::begin(std::declval<const T&>()), std::end(std::declval<const T&>())
-	)>::type> : std::true_type {};
+class is_iterable {
+	template<class U>
+	static std::false_type test(U, ...);
+	template<class U>
+	static std::true_type test(U& value, decltype(std::begin(value),&*std::end(value)));
+
+public:
+	static const bool value = std::is_same<decltype(test(value_ref<T>(), nullptr)), std::true_type>::value;
+};
 
 template<class T>
 struct is_string : std::is_convertible<const T&, std::string> {};
