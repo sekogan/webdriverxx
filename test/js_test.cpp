@@ -85,6 +85,7 @@ TEST_F(TestJsExecutor, CanPassCArray) {
 	ASSERT_EQ("blue, green, red", driver.GetTitle());
 }
 
+namespace {
 namespace custom {
 
 struct Object {
@@ -104,7 +105,8 @@ void CustomFromJson(const picojson::value& value, Object& result) {
 	result.number = FromJson<int>(value.get("number"));
 }
 
-} // custom
+} // namespace custom
+} // namespace
 
 TEST_F(TestJsExecutor, CanPassCustomObject) {
 	custom::Object o = { "abc", 123 };

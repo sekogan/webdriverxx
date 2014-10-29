@@ -2,6 +2,7 @@ set(SOURCE_FILES
 	alerts_test.cpp
 	browsers_test.cpp
 	capabilities_test.cpp
+	conversions_test.cpp
 	client_test.cpp
 	element_test.cpp
 	environment.h
