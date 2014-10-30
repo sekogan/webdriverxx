@@ -23,10 +23,12 @@ class is_iterable {
 	template<class U>
 	static std::false_type test(U, ...);
 	template<class U>
-	static std::true_type test(U& value, decltype(std::begin(value),&*std::end(value)));
+	static std::true_type test(U& value, decltype(std::distance(std::begin(value),std::end(value))));
+
+	typedef decltype(test(value_ref<T>(), 0)) verdict;
 
 public:
-	static const bool value = std::is_same<decltype(test(value_ref<T>(), nullptr)), std::true_type>::value;
+	static const bool value = verdict::value;
 };
 
 template<class T>
