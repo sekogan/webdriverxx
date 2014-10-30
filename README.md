@@ -1,7 +1,7 @@
 
 # Webdriver++
 
-A lightweight C++ client library for [Selenium Webdriver](http://www.seleniumhq.org/).
+A C++ client library for [Selenium Webdriver](http://www.seleniumhq.org/).
 
 Version 0.6.0-dev [![Build Status](https://travis-ci.org/sekogan/webdriverxx.svg?branch=dev)](https://travis-ci.org/sekogan/webdriverxx)
 
