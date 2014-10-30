@@ -203,7 +203,7 @@ void CustomFromJson(const picojson::value& value, JsonObject& result) {
 template<typename T>
 inline
 void CustomFromJson(const picojson::value& value, T& result) {
-	using conversions_detail::ToJsonImpl;
+	using conversions_detail::FromJsonImpl;
 	using conversions_detail::Tag;
 	return FromJsonImpl(value, result, typename Tag<T>::type());
 }
