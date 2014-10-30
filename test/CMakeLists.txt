@@ -1,3 +1,43 @@
+set(HEADER_FILES
+	../include/webdriverxx.h 
+	../include/webdriverxx/by.h 
+	../include/webdriverxx/capabilities.h 
+	../include/webdriverxx/client.h 
+	../include/webdriverxx/client.inl 
+	../include/webdriverxx/conversions.h 
+	../include/webdriverxx/element.h 
+	../include/webdriverxx/element.inl 
+	../include/webdriverxx/errors.h 
+	../include/webdriverxx/js_args.h 
+	../include/webdriverxx/keys.h 
+	../include/webdriverxx/response_status_code.h 
+	../include/webdriverxx/session.h 
+	../include/webdriverxx/session.inl 
+	../include/webdriverxx/types.h 
+	../include/webdriverxx/wait.h 
+	../include/webdriverxx/wait_match.h 
+	../include/webdriverxx/webdriver.h 
+	../include/webdriverxx/window.h 
+	../include/webdriverxx/browsers/chrome.h 
+	../include/webdriverxx/browsers/firefox.h 
+	../include/webdriverxx/browsers/ie.h 
+	../include/webdriverxx/detail/error_handling.h 
+	../include/webdriverxx/detail/factories.h 
+	../include/webdriverxx/detail/factories_impl.h 
+	../include/webdriverxx/detail/finder.h 
+	../include/webdriverxx/detail/finder.inl 
+	../include/webdriverxx/detail/http_client.h 
+	../include/webdriverxx/detail/http_connection.h 
+	../include/webdriverxx/detail/http_request.h 
+	../include/webdriverxx/detail/keyboard.h 
+	../include/webdriverxx/detail/meta_tools.h 
+	../include/webdriverxx/detail/resource.h 
+	../include/webdriverxx/detail/shared.h 
+	../include/webdriverxx/detail/time.h 
+	../include/webdriverxx/detail/to_string.h 
+	../include/webdriverxx/detail/types.h 
+	)
+
 set(SOURCE_FILES
 	alerts_test.cpp
 	browsers_test.cpp
@@ -123,7 +163,7 @@ if (UNIX)
 	list(APPEND LIBS ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
 add_dependencies(${PROJECT_NAME} ${DEPS})
 target_link_libraries(${PROJECT_NAME} ${LIBS})
 add_test(${PROJECT_NAME} ${PROJECT_NAME})
