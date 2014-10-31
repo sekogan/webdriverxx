@@ -12,9 +12,6 @@ namespace detail {
 template<class T>
 struct type_is { typedef T type; };
 
-template<class>
-struct to_void : type_is<void> {};
-
 template<class T>
 T& value_ref(); // MSVC2010 doesn't have std::declval
 
