@@ -69,6 +69,14 @@ public:
 	const Session& SendKeys(const std::string& keys) const;
 	const Session& SendKeys(const Shortcut& shortcut) const;
 
+	const Session& MoveToTopLeftOf(const Element&, const Offset& = Offset()) const;
+	const Session& MoveToCenterOf(const Element&) const;
+	const Session& MoveTo(const Offset&) const;
+	const Session& Click(mouse::Button = mouse::LeftButton) const;
+	const Session& DoubleClick() const;
+	const Session& ButtonDown(mouse::Button = mouse::LeftButton) const;
+	const Session& ButtonUp(mouse::Button = mouse::LeftButton) const;
+
 	const Session& SetTimeoutMs(timeout::Type type, int milliseconds);
 	const Session& SetImplicitTimeoutMs(int milliseconds);
 	const Session& SetAsyncScriptTimeoutMs(int milliseconds);
@@ -93,6 +101,8 @@ private:
 	picojson::value InternalEvalJsonValue(const std::string& command,
 		const std::string& script, const JsArgs& args) const;
 	const Session& InternalSetFocusToFrame(const picojson::value& id) const;
+	const Session& InternalMoveTo(const Element*, const Offset*) const;
+	const Session& InternalMouseButtonCommand(const char* command, mouse::Button button) const;
 
 private:
 	detail::Shared<detail::Resource> resource_;

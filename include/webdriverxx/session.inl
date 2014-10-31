@@ -283,6 +283,64 @@ const Session& Session::SendKeys(const Shortcut& shortcut) const {
 }
 
 inline
+const Session& Session::MoveToTopLeftOf(const Element& element, const Offset& offset) const {
+	return InternalMoveTo(&element, &offset);
+}
+
+inline
+const Session& Session::MoveToCenterOf(const Element& element) const {
+	return InternalMoveTo(&element, nullptr);
+}
+
+inline
+const Session& Session::MoveTo(const Offset& offset) const {
+	return InternalMoveTo(nullptr, &offset);
+}
+
+inline
+const Session& Session::InternalMoveTo(
+	const Element* element,
+	const Offset* offset
+	) const {
+	JsonObject args;
+	if (element)
+		args.Set("element", element->GetRef());
+	if (offset) {
+		args.Set("xoffset", offset->x);
+		args.Set("yoffset", offset->y);
+	}
+	resource_->Post("moveto", args);
+	return *this;
+}
+
+inline
+const Session& Session::Click(mouse::Button button) const {
+	return InternalMouseButtonCommand("click", button);
+}
+
+inline
+const Session& Session::DoubleClick() const {
+	resource_->Post("doubleclick");
+	return *this;
+}
+
+inline
+const Session& Session::ButtonDown(mouse::Button button) const {
+	return InternalMouseButtonCommand("buttondown", button);
+}
+
+inline
+const Session& Session::ButtonUp(mouse::Button button) const {
+	return InternalMouseButtonCommand("buttonup", button);
+}
+
+inline
+const Session& Session::InternalMouseButtonCommand(const char* command, mouse::Button button) const {
+	resource_->Post(command, "button", static_cast<int>(button));
+	return *this;
+}
+
+inline
 Window Session::MakeWindow(const std::string& handle) const {
 	return Window(handle,
 		detail::MakeSubResource(resource_, "window", handle)

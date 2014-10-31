@@ -18,7 +18,10 @@ struct Point {
 	int x;
 	int y;
 	Point() : x(0), y(0) {}
+	Point(int x, int y) : x(x), y(y) {}
 };
+
+typedef Point Offset;
 
 struct Cookie {
 	enum {
@@ -73,6 +76,14 @@ Type const PageLoad = "page load";
 Type const Script = "script";
 
 } // namespace timeout
+
+namespace mouse {
+enum Button {
+	LeftButton = 0,
+	MiddleButton = 1,
+	RightButton = 2
+};
+} // namespace mouse
 
 } // namespace webdriverxx
 

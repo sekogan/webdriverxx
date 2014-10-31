@@ -3,10 +3,9 @@
 
 #include "types.h"
 #include "detail/error_handling.h"
-#include "detail/meta.h"
+#include "detail/meta_tools.h"
 #include <picojson.h>
 #include <algorithm>
-#include <iterator>
 
 namespace webdriverxx {
 
@@ -55,50 +54,47 @@ private:
 	picojson::value value_;
 };
 
-namespace detail {
+namespace conversions_detail {
 
-struct ToJsonDefaultFilter {
-	template<typename T>
-	static picojson::value Apply(const T& value) {
-		return picojson::value(value);
-	}
-};
+struct DefaultTag {};
+struct IterableTag {};
 
-template<typename NextFilter>
-struct ToJsonContainerFilter {
-	template<typename T>
-	static picojson::value Apply(const T& value) {
-		return Impl(value, nullptr);
-	}
+using namespace detail;
 
-private:
-	template<typename T>
-	static picojson::value Impl(const T& value, decltype(&*std::begin(detail::ValueRef<T>()))) {
-		typedef typename std::iterator_traits<decltype(std::begin(value))>::value_type Item;
-		picojson::value result = picojson::value(picojson::array());
-		picojson::array& dst = result.get<picojson::array>();
-		std::transform(std::begin(value), std::end(value), std::back_inserter(dst), [](const Item& item) {
-			return ToJson(item);
-		});
-		return result;
-	}
+template<typename T>
+struct Tag :
+	if_<is_iterable<T>, type_is<IterableTag>,
+	type_is<DefaultTag>
+	> {};
 
-	template<typename T>
-	static picojson::value Impl(const T& value, ...) {
-		return NextFilter::template Apply(value);
-	}
-};
+template<typename T>
+inline
+picojson::value ToJsonImpl(const T& value, DefaultTag) {
+	// Compile error here usually indicates
+	// that compiler doesn't known how to convert the type T
+	// to the picojson::value. Define CustomToJson
+	// function (see examples below) in the T's namespace
+	// to resolve the issue.
+	return picojson::value(value);
+}
 
-} // detail
+template<typename T>
+inline
+picojson::value ToJsonImpl(const T& value, IterableTag) {
+	typedef typename std::iterator_traits<decltype(std::begin(value))>::value_type Item;
+	picojson::value result = picojson::value(picojson::array());
+	picojson::array& dst = result.get<picojson::array>();
+	std::transform(std::begin(value), std::end(value), std::back_inserter(dst), [](const Item& item) {
+		return ToJson(item);
+	});
+	return result;
+}
+
+} // conversions_detail
 
 inline
 picojson::value CustomToJson(const char* value) {
 	return picojson::value(value);
-}
-
-inline
-picojson::value CustomToJson(char* value) {
-	return ToJson(static_cast<const char*>(value));
 }
 
 inline
@@ -129,11 +125,9 @@ picojson::value CustomToJson(int value) {
 template<typename T>
 inline
 picojson::value CustomToJson(const T& value) {
-	namespace detail = ::webdriverxx::detail;
-	return
-		detail::ToJsonContainerFilter<
-		detail::ToJsonDefaultFilter
-		>::template Apply(value);
+	using conversions_detail::ToJsonImpl;
+	using conversions_detail::Tag;
+	return ToJsonImpl(value, typename Tag<T>::type());
 }
 
 template<typename T>
@@ -144,38 +138,28 @@ picojson::value ToJson(const T& value) {
 
 ///////////////////////////////////////////////////////////////////
 
-namespace detail {
+namespace conversions_detail {
 
-struct FromJsonDefaultFilter {
-	template<typename T>
-	static void Apply(const picojson::value& value, T& result) {
-		result = value.get<T>();
-	}
-};
+template<typename T>
+inline
+void FromJsonImpl(const picojson::value& value, T& result, DefaultTag) {
+	// Compile error here usually indicates
+	// that compiler doesn't known how to convert the picojson::value
+	// to the type T. Define CustomFromJson function (see examples below)
+	// in the T's namespace to resolve the issue.
+	result = value.get<T>();
+}
 
-template<typename NextFilter>
-struct FromJsonContainerFilter {
-	template<typename T>
-	static void Apply(const picojson::value& value, T& result) {
-		Impl<T>(value, result, nullptr);
-	}
+template<typename T>
+inline
+void FromJsonImpl(const picojson::value& value, T& result, IterableTag) {
+	WEBDRIVERXX_CHECK(value.is<picojson::array>(), "Value is not an array");
+	const picojson::array& array = value.get<picojson::array>();
+	typedef typename std::iterator_traits<decltype(std::begin(result))>::value_type Item;
+	std::transform(array.begin(), array.end(), std::back_inserter(result), FromJson<Item>);
+}
 
-private:
-	template<typename T>
-	static void Impl(const picojson::value& value, T& result, decltype(&*std::begin(detail::ValueRef<T>()))) {
-		WEBDRIVERXX_CHECK(value.is<picojson::array>(), "Value is not an array");
-		const picojson::array& array = value.get<picojson::array>();
-		typedef typename std::iterator_traits<decltype(std::begin(result))>::value_type Item;
-		std::transform(array.begin(), array.end(), std::back_inserter(result), FromJson<Item>);
-	}
-
-	template<typename T>
-	static void Impl(const picojson::value& value, T& result, ...) {
-		return NextFilter::template Apply(value, result);
-	}
-};
-
-} // detail
+} // conversions_detail
 
 inline
 void CustomFromJson(const picojson::value& value, std::string& result) {
@@ -219,10 +203,9 @@ void CustomFromJson(const picojson::value& value, JsonObject& result) {
 template<typename T>
 inline
 void CustomFromJson(const picojson::value& value, T& result) {
-	namespace detail = ::webdriverxx::detail;
-	detail::FromJsonContainerFilter<
-	detail::FromJsonDefaultFilter
-	>::template Apply(value, result);
+	using conversions_detail::FromJsonImpl;
+	using conversions_detail::Tag;
+	return FromJsonImpl(value, result, typename Tag<T>::type());
 }
 
 template<typename T>

@@ -8,7 +8,13 @@ using namespace webdriverxx::detail;
 
 TEST(ToString, ConvertsIntegralTypes) {
 	ASSERT_EQ("123", ToString(123));
+	int i = 123;
+	ASSERT_EQ("123", ToString(i));
+	ASSERT_EQ("123", ToString(static_cast<const int>(i)));
 	ASSERT_EQ("'z'", ToString('z'));
+	char c = 'z';
+	ASSERT_EQ("'z'", ToString(c));
+	ASSERT_EQ("'z'", ToString(static_cast<const char>(c)));
 }
 
 namespace custom {
@@ -21,8 +27,9 @@ std::ostream& operator << (std::ostream& s, const B&) {
 }
 
 struct C {};
-std::string ToString(const C&) {
-	return "C";
+
+void ToStream(const C&, std::ostream& s) {
+	s << "C";
 }
 
 struct G {};
@@ -41,11 +48,20 @@ TEST(ToString, ConvertsCustomTypes) {
 
 TEST(ToString, ConvertsStrings) {
 	ASSERT_EQ("\"abc\"", ToString("abc"));
-	ASSERT_EQ("\"abc\"", ToString(std::string("abc")));
-	const char* abc = "abc";
-	ASSERT_EQ("\"abc\"", ToString(abc));
 	char a[] = "abc";
 	ASSERT_EQ("\"abc\"", ToString(a));
+	const char ca[] = "abc";
+	ASSERT_EQ("\"abc\"", ToString(ca));
+	char* pc = a;
+	ASSERT_EQ("\"abc\"", ToString(pc));
+	const char* pcc = "abc";
+	ASSERT_EQ("\"abc\"", ToString(pcc));
+
+	ASSERT_EQ("\"abc\"", ToString(std::string("abc")));
+	std::string s("abc");
+	ASSERT_EQ("\"abc\"", ToString(s));
+	const std::string cs("abc");
+	ASSERT_EQ("\"abc\"", ToString(cs));
 }
 
 TEST(ToString, ConvertsPointers) {

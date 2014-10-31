@@ -38,7 +38,7 @@ public:
 	{}
 
 	template<typename T2>
-	explicit Shared(T2* ptr)
+	Shared(T2* ptr)
 		: ptr_(ptr)
 		, ref_(ptr)
 	{

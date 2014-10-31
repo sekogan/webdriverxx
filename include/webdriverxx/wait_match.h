@@ -3,7 +3,6 @@
 
 #include "wait.h"
 #include "detail/to_string.h"
-#include "detail/meta.h"
 #include <type_traits>
 
 #ifdef WEBDRIVERXX_ENABLE_GMOCK_MATCHERS
@@ -27,7 +26,8 @@ public:
 		std::ostringstream s;
 		s << "Expected: ";
 		matcher_.DescribeTo(&s);
-		s << ", actual: " << ToString(value);
+		s << ", actual: ";
+		ToStream(value, s);
 		const auto mismatch_details = GetMismatchDetails(value);
 		if (!mismatch_details.empty())
 			 s << ", " << mismatch_details;
@@ -70,7 +70,7 @@ public:
 	}
 
 	std::string DescribeMismatch(const T& value) const {
-		return detail::Fmt() << "Value " << value << " does not match predicate";
+		return detail::Fmt() << "Value " << ToString(value) << " does not match predicate";
 	}
 
 private:
@@ -98,18 +98,29 @@ auto SelectMakeMatcherAdapter(const M& matcher, std::false_type /*no_custom_adap
 
 } // detail
 
-template<typename G, typename M>
+// Waits until a value returned by a getter satisfies a supplied matcher.
+// Returns that value or throws exception on timeout.
+// Getter is a function or function-like object that returns some copyable value.
+// Matcher can be a predicate or a Google Mock matcher (if Google Mock matchers are enabled).
+template<typename Getter, typename Matcher>
 inline
-auto WaitForMatch(const G& getter, const M& matcher,
-	Duration timeoutMs = 5000, Duration intervalMs = 50
+auto WaitForMatch(
+	Getter getter,
+	Matcher matcher,
+	Duration timeoutMs = 5000,
+	Duration intervalMs = 50
 	) -> decltype(getter()) {
-	typedef decltype(getter()) T;
-	const auto& adapter = detail::SelectMakeMatcherAdapter<T>(matcher, typename std::is_same<void,decltype(MakeMatcherAdapter<T>(matcher))>::type());
-	return WaitForValue([&getter, &adapter]() -> T {
-			const auto value = getter();
-			if (!adapter.Apply(value))
-				throw WebDriverException(adapter.DescribeMismatch(value));
-			return value;
+	typedef decltype(getter()) Value;
+	const auto& adapter = detail::SelectMakeMatcherAdapter<Value>(matcher,
+		typename std::is_same<void,decltype(MakeMatcherAdapter<Value>(matcher))>::type());
+	return detail::Wait<Value>([&getter, &adapter](std::string* description) -> std::unique_ptr<Value> {
+			auto value_ptr = detail::TryToCallGetter<Value>(getter, description);
+			if (value_ptr && !adapter.Apply(*value_ptr)) {
+				if (description)
+					*description = adapter.DescribeMismatch(*value_ptr);
+				value_ptr.reset();
+			}
+			return value_ptr;
 		}, timeoutMs, intervalMs);
 }
 
