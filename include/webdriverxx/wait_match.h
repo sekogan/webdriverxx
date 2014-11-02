@@ -48,7 +48,6 @@ private:
 } // detail
 
 template<class T, class M>
-inline
 detail::GMockMatcherAdapter<T,M> MakeMatcherAdapter(const M& matcher, typename std::enable_if<std::is_convertible<M,::testing::Matcher<T>>::value>::type* = nullptr) {
 	return detail::GMockMatcherAdapter<T,M>(matcher);
 };
@@ -85,13 +84,11 @@ void MakeMatcherAdapter(...);
 namespace detail {
 
 template<typename T, typename M>
-inline
 PredicateMatcherAdapter<T,M> SelectMakeMatcherAdapter(M& matcher, std::true_type /*no_custom_adapters*/) {
 	return PredicateMatcherAdapter<T,M>(matcher);
 }
 
 template<typename T, typename M>
-inline
 auto SelectMakeMatcherAdapter(const M& matcher, std::false_type /*no_custom_adapters*/) -> decltype(MakeMatcherAdapter<T>(matcher)) {
 	return MakeMatcherAdapter<T>(matcher);
 }
@@ -103,7 +100,6 @@ auto SelectMakeMatcherAdapter(const M& matcher, std::false_type /*no_custom_adap
 // Getter is a function or function-like object that returns some copyable value.
 // Matcher can be a predicate or a Google Mock matcher (if Google Mock matchers are enabled).
 template<typename Getter, typename Matcher>
-inline
 auto WaitForMatch(
 	Getter getter,
 	Matcher matcher,
