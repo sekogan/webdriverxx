@@ -70,7 +70,7 @@ struct Tag :
 template<typename T>
 picojson::value ToJsonImpl(const T& value, DefaultTag) {
 	// Compile error here usually indicates
-	// that compiler doesn't known how to convert the type T
+	// that compiler doesn't know how to convert the type T
 	// to the picojson::value. Define CustomToJson
 	// function (see examples below) in the T's namespace
 	// to resolve the issue.
@@ -139,7 +139,7 @@ namespace conversions_detail {
 template<typename T>
 void FromJsonImpl(const picojson::value& value, T& result, DefaultTag) {
 	// Compile error here usually indicates
-	// that compiler doesn't known how to convert the picojson::value
+	// that compiler doesn't know how to convert the picojson::value
 	// to the type T. Define CustomFromJson function (see examples below)
 	// in the T's namespace to resolve the issue.
 	result = value.get<T>();
