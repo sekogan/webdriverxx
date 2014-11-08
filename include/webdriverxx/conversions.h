@@ -68,10 +68,9 @@ struct Tag :
 	> {};
 
 template<typename T>
-inline
 picojson::value ToJsonImpl(const T& value, DefaultTag) {
 	// Compile error here usually indicates
-	// that compiler doesn't known how to convert the type T
+	// that compiler doesn't know how to convert the type T
 	// to the picojson::value. Define CustomToJson
 	// function (see examples below) in the T's namespace
 	// to resolve the issue.
@@ -79,7 +78,6 @@ picojson::value ToJsonImpl(const T& value, DefaultTag) {
 }
 
 template<typename T>
-inline
 picojson::value ToJsonImpl(const T& value, IterableTag) {
 	typedef typename std::iterator_traits<decltype(std::begin(value))>::value_type Item;
 	picojson::value result = picojson::value(picojson::array());
@@ -123,7 +121,6 @@ picojson::value CustomToJson(int value) {
 }
 
 template<typename T>
-inline
 picojson::value CustomToJson(const T& value) {
 	using conversions_detail::ToJsonImpl;
 	using conversions_detail::Tag;
@@ -131,7 +128,6 @@ picojson::value CustomToJson(const T& value) {
 }
 
 template<typename T>
-inline
 picojson::value ToJson(const T& value) {
 	return CustomToJson(value);
 }
@@ -141,17 +137,15 @@ picojson::value ToJson(const T& value) {
 namespace conversions_detail {
 
 template<typename T>
-inline
 void FromJsonImpl(const picojson::value& value, T& result, DefaultTag) {
 	// Compile error here usually indicates
-	// that compiler doesn't known how to convert the picojson::value
+	// that compiler doesn't know how to convert the picojson::value
 	// to the type T. Define CustomFromJson function (see examples below)
 	// in the T's namespace to resolve the issue.
 	result = value.get<T>();
 }
 
 template<typename T>
-inline
 void FromJsonImpl(const picojson::value& value, T& result, IterableTag) {
 	WEBDRIVERXX_CHECK(value.is<picojson::array>(), "Value is not an array");
 	const picojson::array& array = value.get<picojson::array>();
@@ -201,7 +195,6 @@ void CustomFromJson(const picojson::value& value, JsonObject& result) {
 }
 
 template<typename T>
-inline
 void CustomFromJson(const picojson::value& value, T& result) {
 	using conversions_detail::FromJsonImpl;
 	using conversions_detail::Tag;
@@ -209,7 +202,6 @@ void CustomFromJson(const picojson::value& value, T& result) {
 }
 
 template<typename T>
-inline
 T FromJson(const picojson::value& value) {
 	T result;
 	CustomFromJson(value, result);
@@ -217,7 +209,6 @@ T FromJson(const picojson::value& value) {
 }
 
 template<typename T>
-inline
 T OptionalFromJson(const picojson::value& value, const T& default_value = T()) {
 	return value.is<picojson::null>() ? default_value : FromJson<T>(value);
 }

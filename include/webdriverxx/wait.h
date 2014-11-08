@@ -53,7 +53,6 @@ std::unique_ptr<Value> TryToCallGetter(Getter getter, std::string* description) 
 // Returns that value or throws exception on timeout.
 // Getter is a function or function-like object that returns some copyable value.
 template<typename Getter>
-inline
 auto WaitForValue(
 	Getter getter,
 	Duration timeoutMs = 5000,
@@ -71,7 +70,6 @@ auto WaitForValue(
 // Returns that value or throws exception on timeout.
 // Getter is a function or function-like object that returns some copyable value.
 template<typename Getter>
-inline
 auto WaitUntil(
 	Getter getter,
 	Duration timeoutMs = 5000,

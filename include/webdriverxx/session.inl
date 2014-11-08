@@ -55,7 +55,7 @@ inline
 const Session& Session::SetImplicitTimeoutMs(int milliseconds) {
 	resource_->Post("timeouts/implicit_wait",
 		JsonObject().Set("ms", milliseconds));
-	return *this;	
+	return *this;
 }
 
 inline
@@ -114,7 +114,6 @@ const Session& Session::Execute(const std::string& script, const JsArgs& args) c
 }
 
 template<typename T>
-inline
 T Session::Eval(const std::string& script, const JsArgs& args) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	T result = T();
@@ -132,7 +131,6 @@ const Session& Session::ExecuteAsync(const std::string& script, const JsArgs& ar
 }
 
 template<typename T>
-inline
 T Session::EvalAsync(const std::string& script, const JsArgs& args) const {
 	WEBDRIVERXX_FUNCTION_CONTEXT_BEGIN()
 	T result;
@@ -345,7 +343,7 @@ Window Session::MakeWindow(const std::string& handle) const {
 	return Window(handle,
 		detail::MakeSubResource(resource_, "window", handle)
 		);
-}	
+}
 
 inline
 detail::Keyboard Session::GetKeyboard() const
@@ -354,7 +352,6 @@ detail::Keyboard Session::GetKeyboard() const
 }
 
 template<typename T>
-inline
 void Session::InternalEval(const std::string& webdriver_command,
 	const std::string& script, const JsArgs& args,
 	T& result) const {
