@@ -18,11 +18,12 @@ T& value_ref(); // MSVC2010 doesn't have std::declval
 template<class T>
 class is_iterable {
 	template<class U>
-	static std::false_type test(U, ...);
+	static std::false_type test(...);
 	template<class U>
-	static std::true_type test(U& value, decltype(std::distance(std::begin(value),std::end(value))));
+	static decltype(std::begin(value_ref<U>()), std::end(value_ref<U>()),
+		std::true_type()) test(int);
 
-	typedef decltype(test(value_ref<T>(), 0)) verdict;
+	typedef decltype(test<T>(0)) verdict;
 
 public:
 	static const bool value = verdict::value;
