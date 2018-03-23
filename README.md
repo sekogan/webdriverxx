@@ -3,6 +3,8 @@
 
 A C++ client library for [Selenium Webdriver](http://www.seleniumhq.org/).
 
+:japanese_goblin: **BEWARE! This code have never been in production, uses very old dialect of C++ and is not maintained. It could be, theoretically, used as a starting point for a new development, but definitely not as a production-ready library.**
+
 Version 0.7.1 [![Build Status](https://travis-ci.org/sekogan/webdriverxx.svg?branch=master)](https://travis-ci.org/sekogan/webdriverxx)
 
 ## A quick example
